@@ -104,7 +104,7 @@ Software agents can discover, query, interpret, reason over, verify, and invoke 
 
 ## Core Concepts
 
-The initial ESKA conceptual model distinguishes knowledge assets, bounded capabilities, operational services, and agents.
+The ESKA conceptual model distinguishes knowledge assets, executable artifacts, bounded capabilities, executions and results, operational services, and agents.
 
 ### Semantic Model
 
@@ -144,7 +144,29 @@ A **Semantic Capability** is a Capability whose scope, inputs, outputs, applicab
 
 A Semantic Capability is not necessarily a capability *about semantics*. It is a capability that is itself semantically defined.
 
-The first provisional machine-readable subset of this concept is captured in [`model/eska-capability.ttl`](model/eska-capability.ttl). It intentionally formalizes only the terms required by the Pizza Capability examples rather than claiming to be a complete ESKA ontology.
+`Capability`, `SemanticCapability`, their shared semantic contract properties, `SemanticModel`, `ExecutableSemanticKnowledgeArtifact`, and `ApplicabilityCondition` are now part of the provisional cross-mode core in [`model/eska-core.ttl`](model/eska-core.ttl).
+
+### Execution, Result and Verification
+
+An **Execution** is a computational activity that applies executable semantic knowledge under a defined Semantic Capability.
+
+A **Result** is a machine-interpretable entity produced by an Execution, such as an inferred statement or SHACL validation report.
+
+A **Verification** is an activity that checks semantic knowledge, an Execution, or a Result against explicit criteria.
+
+These concepts are also part of the provisional ESKA core because both OWL reasoning and SHACL validation now instantiate the same pattern:
+
+```text
+SemanticCapability
+        ↓
+Execution
+        ↓
+Result
+        ↓
+Verification
+```
+
+ESKA reuses PROV-O rather than defining a parallel provenance model: `Execution` and `Verification` specialize `prov:Activity`, while `Result` specializes `prov:Entity`.
 
 ### Knowledge Service
 
@@ -152,7 +174,7 @@ A **Knowledge Service** is an operational interface through which knowledge can 
 
 A Capability defines **what ability exists**. A Knowledge Service defines **how that ability is operationally accessible**.
 
-The first provisional machine-readable subset of this concept is captured in [`model/eska-service.ttl`](model/eska-service.ttl). The Pizza classification slice implements and verifies a concrete service without moving classification knowledge into the transport layer.
+The provisional service extension is captured in [`model/eska-service.ttl`](model/eska-service.ttl). The Pizza classification slice implements and verifies a concrete service without moving classification knowledge into the transport layer.
 
 ### Knowledge Agent
 
@@ -160,7 +182,44 @@ A **Knowledge Agent** is a software agent that can use machine-interpretable ESK
 
 Agents are consumers and participants in ESKA, not the reason ESKA exists. The architecture remains useful without an LLM.
 
-The first provisional machine-readable subset of this concept is captured in [`model/eska-agent.ttl`](model/eska-agent.ttl). The Pizza reference agent is deliberately deterministic and non-LLM so that discovery and invocation are demonstrated as architectural properties rather than prompt behavior.
+The provisional agent extension is captured in [`model/eska-agent.ttl`](model/eska-agent.ttl). The Pizza reference agent is deliberately deterministic and non-LLM so that discovery and invocation are demonstrated as architectural properties rather than prompt behavior.
+
+## Provisional ESKA Core
+
+The repository now separates a small cross-mode core from architectural extensions:
+
+```text
+eska-core.ttl
+    │
+    ├── SemanticModel
+    ├── ExecutableSemanticKnowledgeArtifact
+    ├── Capability / SemanticCapability
+    ├── ApplicabilityCondition
+    ├── Execution
+    ├── Result
+    └── Verification
+
+        extended by
+        │
+        ├── eska-capability.ttl
+        ├── eska-service.ttl
+        └── eska-agent.ttl
+```
+
+The core contains only concepts that have been demonstrated across more than one executable-semantic mode. Service and Agent semantics remain extensions because they are currently exercised only on the classification path.
+
+The project deliberately continues to use the provisional namespace:
+
+```text
+urn:eska:core:
+```
+
+The concepts should stabilize before a permanent public namespace and publication policy are chosen.
+
+See:
+
+- [ESKA semantic models](model/README.md)
+- [Execution Mode Comparison](docs/execution-mode-comparison.md)
 
 ## Conceptual Architecture
 
@@ -312,6 +371,8 @@ SHACL ValidationReport
 
 The distinction is intentional. ESKA does not define one universal execution mechanism: a semantic artifact is executable according to the operational semantics appropriate to its type.
 
+The two modes also provide the evidence for the current ESKA core. CI verifies both the shared Semantic Capability contract and the shared runtime `Execution → Result → Verification` pattern.
+
 The purpose of both examples is not to build a sophisticated pizza application. It is to make the semantic-to-execution architecture visible in a domain that is easy to understand.
 
 ## Initial Scope
@@ -326,8 +387,9 @@ The project evolves incrementally.
 - [x] Expose the first Semantic Capability through a machine-described and executable Knowledge Service.
 - [x] Demonstrate machine-described discovery and invocation by a deterministic Knowledge Agent.
 - [x] Add semantic validation as a second executable-semantic mode using SHACL.
-- [ ] Generalize stable Capability, Service, and Agent terms as the broader ESKA model is tested through additional examples.
-- [ ] Add richer provenance and deployment-binding concepts.
+- [x] Generalize the first cross-mode ESKA core from concepts stable across reasoning and validation.
+- [ ] Test the provisional core against additional execution modes before promoting further concepts.
+- [ ] Add richer provenance and deployment-binding concepts where concrete use cases require them.
 - [ ] Decide whether and how the validation Capability should be exposed through a Knowledge Service and Agent.
 - [ ] Add additional semantic capabilities and alternative service or agent implementations.
 
@@ -335,7 +397,7 @@ The project intentionally does **not** begin as a general software framework, ag
 
 ## Status
 
-The Pizza reference project now tests ESKA against two different executable-semantic modes.
+The Pizza reference project now tests ESKA against two different executable-semantic modes and uses those modes to define and verify a small provisional ESKA core.
 
 The classification path provides the first complete ESKA chain from formal semantic knowledge to agent-accessible operational knowledge:
 
@@ -355,11 +417,26 @@ The validation path separately demonstrates that the same architectural ideas ap
 SHACL Semantic Model
 → Executable Validation Artifact
 → PizzaValidationCapability
-→ sh:ValidationReport
+→ Execution
+→ SHACL ValidationReport
 → Verification + Provenance
 ```
 
-Each boundary is represented and tested separately. The project remains intentionally small and provisional; the next work is to compare and generalize only the concepts that remain stable across these different execution modes.
+Across both paths, CI now verifies the shared core abstractions at two levels:
+
+```text
+SemanticModel
+→ ExecutableSemanticKnowledgeArtifact
+→ SemanticCapability
+
+and
+
+Execution
+→ Result
+→ Verification
+```
+
+The project remains intentionally small and provisional. The next architectural test should come from another genuinely different execution mode rather than expanding the ontology by speculation.
 
 ## License
 
