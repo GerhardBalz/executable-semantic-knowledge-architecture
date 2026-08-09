@@ -4,10 +4,12 @@ on:
   push:
     paths:
       - "examples/pizza/**"
+      - "model/**"
       - ".github/workflows/pizza-spicy.yml"
   pull_request:
     paths:
       - "examples/pizza/**"
+      - "model/**"
       - ".github/workflows/pizza-spicy.yml"
   workflow_dispatch:
 
