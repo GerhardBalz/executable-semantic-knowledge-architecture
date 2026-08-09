@@ -1,0 +1,43 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix eska: <urn:eska:core:> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix val: <urn:eska:example:pizza:validation:> .
+@prefix pizza: <http://www.co-ode.org/ontologies/pizza/pizza.owl#> .
+
+val:PizzaValidationCapability
+    a eska:SemanticCapability ;
+    dcterms:title "Pizza Validation"@en ;
+    dcterms:description "Validate concrete Pizza RDF data against explicit SHACL constraints and produce a machine-readable SHACL validation report."@en ;
+    skos:scopeNote "The initial capability is bounded to validating Pizza instance data for required base and topping structure. It does not classify Pizza ontology classes or infer new domain knowledge."@en ;
+    eska:subject pizza:Pizza ;
+    eska:inputType val:PizzaDataGraph ;
+    eska:outputType sh:ValidationReport ;
+    eska:producesRelation sh:conforms ;
+    eska:usesSemanticModel val:PizzaShapesGraph ;
+    eska:usesExecutableArtifact val:SHACLValidationArtifact ;
+    eska:requiresCondition val:RDFDataGraphCondition .
+
+val:PizzaDataGraph
+    a owl:Class ;
+    dcterms:description "An RDF data graph containing concrete Pizza instances to be validated."@en .
+
+val:PizzaShapesGraph
+    a eska:SemanticModel, prov:Entity ;
+    dcterms:title "Pizza SHACL shapes graph"@en ;
+    dcterms:identifier "examples/pizza/validation/pizza-shapes.ttl" ;
+    dcterms:description "SHACL constraints defining the initial structural validation contract for Pizza instance data."@en .
+
+val:SHACLValidationArtifact
+    a eska:ExecutableSemanticKnowledgeArtifact, prov:Entity ;
+    dcterms:title "SHACL validation with pySHACL"@en ;
+    dcterms:description "Executable semantic knowledge artifact that evaluates RDF data against the Pizza SHACL shapes graph and produces a SHACL ValidationReport."@en ;
+    eska:inputType val:PizzaDataGraph ;
+    eska:outputType sh:ValidationReport ;
+    eska:producesRelation sh:conforms .
+
+val:RDFDataGraphCondition
+    a eska:ApplicabilityCondition ;
+    dcterms:description "The input must be a parseable RDF graph whose Pizza nodes use the Pizza ontology terms referenced by the SHACL shapes graph."@en .
