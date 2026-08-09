@@ -42,7 +42,7 @@ printf '\n3/4 Explaining the inferred classification...\n'
 "${ROBOT[@]}" explain \
   --input "${HERE}/spicy-pizza.ofn" \
   --reasoner hermit \
-  --axiom "<http://www.co-ode.org/ontologies/pizza/pizza.owl#AmericanHot> SubClassOf <http://www.co-ode.org/ontologies/pizza/pizza.owl#SpicyPizza>" \
+  --axiom "'American Hot' SubClassOf 'Spicy Pizza'" \
   --explanation "${RESULTS_DIR}/explanation.md"
 
 printf '\n4/4 Recording execution provenance...\n'
