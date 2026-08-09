@@ -1,69 +1,14 @@
 @prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix eska: <urn:eska:core:> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 
 <urn:eska:model:capability>
     a owl:Ontology ;
-    dcterms:title "ESKA capability model"@en ;
-    dcterms:description "A deliberately small, provisional semantic model containing only the terms needed to describe and test Semantic Capabilities."@en ;
-    owl:versionInfo "0.1-provisional" .
-
-eska:Capability
-    a owl:Class ;
-    rdfs:label "Capability"@en ;
-    skos:definition "A bounded ability to achieve a defined kind of outcome within a specified scope."@en .
-
-eska:SemanticCapability
-    a owl:Class ;
-    rdfs:subClassOf eska:Capability ;
-    rdfs:label "Semantic Capability"@en ;
-    skos:definition "A Capability whose scope, inputs, outputs, applicability, constraints, and semantics are explicitly represented in machine-interpretable form."@en .
-
-eska:SemanticModel
-    a owl:Class ;
-    rdfs:label "Semantic Model"@en .
-
-eska:ExecutableSemanticKnowledgeArtifact
-    a owl:Class ;
-    rdfs:label "Executable Semantic Knowledge Artifact"@en .
-
-eska:ApplicabilityCondition
-    a owl:Class ;
-    rdfs:label "Applicability Condition"@en .
-
-eska:subject
-    a owl:ObjectProperty ;
-    rdfs:label "subject"@en .
-
-eska:inputType
-    a owl:ObjectProperty ;
-    rdfs:label "input type"@en .
-
-eska:outputType
-    a owl:ObjectProperty ;
-    rdfs:label "output type"@en .
-
-eska:producesRelation
-    a owl:ObjectProperty ;
-    rdfs:label "produces relation"@en .
-
-eska:usesSemanticModel
-    a owl:ObjectProperty ;
-    rdfs:label "uses semantic model"@en ;
-    rdfs:range eska:SemanticModel .
-
-eska:usesExecutableArtifact
-    a owl:ObjectProperty ;
-    rdfs:label "uses executable artifact"@en ;
-    rdfs:range eska:ExecutableSemanticKnowledgeArtifact .
-
-eska:requiresCondition
-    a owl:ObjectProperty ;
-    rdfs:label "requires condition"@en ;
-    rdfs:range eska:ApplicabilityCondition .
+    dcterms:title "ESKA capability extension"@en ;
+    dcterms:description "Provisional capability-specific terms that are useful for examples but have not yet been promoted into the ESKA core model."@en ;
+    dcterms:requires <urn:eska:model:core> ;
+    owl:versionInfo "0.2-provisional" .
 
 eska:exampleInput
     a owl:ObjectProperty ;
