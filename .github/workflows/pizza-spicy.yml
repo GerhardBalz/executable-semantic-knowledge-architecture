@@ -5,11 +5,13 @@ on:
     paths:
       - "examples/pizza/**"
       - "model/**"
+      - "docs/**"
       - ".github/workflows/pizza-spicy.yml"
   pull_request:
     paths:
       - "examples/pizza/**"
       - "model/**"
+      - "docs/**"
       - ".github/workflows/pizza-spicy.yml"
   workflow_dispatch:
 
@@ -32,6 +34,9 @@ jobs:
 
       - name: Run semantic reasoning, Knowledge Service, and Knowledge Agent integration
         run: bash examples/pizza/test-agent.sh
+
+      - name: Verify ESKA core across execution modes
+        run: bash examples/pizza/verify-core.sh
 
       - name: Install SHACL validator
         run: python -m pip install -r examples/pizza/validation/requirements.txt
