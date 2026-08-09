@@ -35,7 +35,7 @@ jobs:
       - name: Run semantic reasoning, Knowledge Service, and Knowledge Agent integration
         run: bash examples/pizza/test-agent.sh
 
-      - name: Verify ESKA core across execution modes
+      - name: Verify ESKA core Capability abstraction
         run: bash examples/pizza/verify-core.sh
 
       - name: Install SHACL validator
@@ -43,3 +43,6 @@ jobs:
 
       - name: Run semantic validation example
         run: python examples/pizza/validation/validate.py
+
+      - name: Verify ESKA core execution pattern
+        run: bash examples/pizza/verify-core-executions.sh
