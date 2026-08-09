@@ -1,0 +1,26 @@
+PREFIX eska: <urn:eska:core:>
+PREFIX cap: <urn:eska:example:pizza:capability:>
+PREFIX svc: <urn:eska:example:pizza:service:>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+# ROBOT verify treats returned rows as violations.
+# Return one row if any required part of the Knowledge Service contract is absent.
+SELECT ?service
+WHERE {
+  BIND(svc:PizzaClassificationService AS ?service)
+  FILTER NOT EXISTS {
+    ?service a eska:KnowledgeService ;
+             eska:exposesCapability cap:PizzaClassificationCapability ;
+             eska:hasOperation svc:ClassifyPizzaClassOperation .
+
+    svc:ClassifyPizzaClassOperation
+        a eska:ServiceOperation ;
+        eska:httpMethod "POST" ;
+        eska:path "/classify" ;
+        eska:mediaType "application/json" ;
+        eska:inputType owl:Class ;
+        eska:outputType owl:Class ;
+        eska:producesRelation rdfs:subClassOf .
+  }
+}
