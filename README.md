@@ -144,7 +144,7 @@ A **Semantic Capability** is a Capability whose scope, inputs, outputs, applicab
 
 A Semantic Capability is not necessarily a capability *about semantics*. It is a capability that is itself semantically defined.
 
-The first provisional machine-readable subset of this concept is captured in [`model/eska-capability.ttl`](model/eska-capability.ttl). It intentionally formalizes only the terms required by the Pizza Capability example rather than claiming to be a complete ESKA ontology.
+The first provisional machine-readable subset of this concept is captured in [`model/eska-capability.ttl`](model/eska-capability.ttl). It intentionally formalizes only the terms required by the Pizza Capability examples rather than claiming to be a complete ESKA ontology.
 
 ### Knowledge Service
 
@@ -152,7 +152,7 @@ A **Knowledge Service** is an operational interface through which knowledge can 
 
 A Capability defines **what ability exists**. A Knowledge Service defines **how that ability is operationally accessible**.
 
-The first provisional machine-readable subset of this concept is captured in [`model/eska-service.ttl`](model/eska-service.ttl). The Pizza reference slice implements and verifies a concrete service without moving classification knowledge into the transport layer.
+The first provisional machine-readable subset of this concept is captured in [`model/eska-service.ttl`](model/eska-service.ttl). The Pizza classification slice implements and verifies a concrete service without moving classification knowledge into the transport layer.
 
 ### Knowledge Agent
 
@@ -264,7 +264,7 @@ The executable example is implemented in [`examples/pizza`](examples/pizza) and 
 
 > **Can `AmericanHot` be inferred to be a `SpicyPizza`, and can that result remain semantically connected as it is bounded, exposed, discovered, and invoked?**
 
-The first end-to-end slice now spans:
+The first end-to-end slice spans:
 
 ```text
 Pizza Semantic Model
@@ -290,7 +290,29 @@ This demonstrates a core ESKA claim:
 
 > **Agent accessibility can be a property of the architecture rather than a property of a prompt.**
 
-The purpose is not to build a sophisticated pizza application. It is to demonstrate the semantic-to-execution-to-agent chain with the smallest domain that makes the architecture visible.
+### Second execution mode: Pizza Validation
+
+The second executable example is implemented in [`examples/pizza/validation`](examples/pizza/validation) and asks a different question:
+
+> **Does a concrete Pizza RDF data graph conform to an explicit semantic validation contract?**
+
+It introduces `PizzaValidationCapability` and a SHACL shapes graph with explicit structural constraints. A conforming Pizza graph produces `sh:conforms true`; a deliberately invalid Pizza with two `hasBase` values produces `sh:conforms false` and the expected `sh:MaxCountConstraintComponent` validation result.
+
+This establishes two distinct forms of Executable Semantic Knowledge:
+
+```text
+OWL ontology
+    ↓ reason
+inferred axioms
+
+SHACL shapes graph
+    ↓ validate
+SHACL ValidationReport
+```
+
+The distinction is intentional. ESKA does not define one universal execution mechanism: a semantic artifact is executable according to the operational semantics appropriate to its type.
+
+The purpose of both examples is not to build a sophisticated pizza application. It is to make the semantic-to-execution architecture visible in a domain that is easy to understand.
 
 ## Initial Scope
 
@@ -303,16 +325,19 @@ The project evolves incrementally.
 - [x] Define and verify the first bounded Semantic Capability around executable semantic knowledge.
 - [x] Expose the first Semantic Capability through a machine-described and executable Knowledge Service.
 - [x] Demonstrate machine-described discovery and invocation by a deterministic Knowledge Agent.
-- [ ] Add explicit semantic validation examples in addition to inference verification.
+- [x] Add semantic validation as a second executable-semantic mode using SHACL.
 - [ ] Generalize stable Capability, Service, and Agent terms as the broader ESKA model is tested through additional examples.
 - [ ] Add richer provenance and deployment-binding concepts.
-- [ ] Add additional semantic capabilities and alternative service/agent implementations.
+- [ ] Decide whether and how the validation Capability should be exposed through a Knowledge Service and Agent.
+- [ ] Add additional semantic capabilities and alternative service or agent implementations.
 
 The project intentionally does **not** begin as a general software framework, agent platform, or large meta-ontology.
 
 ## Status
 
-The Pizza reference slice now provides the first complete ESKA path from formal semantic knowledge to agent-accessible operational knowledge:
+The Pizza reference project now tests ESKA against two different executable-semantic modes.
+
+The classification path provides the first complete ESKA chain from formal semantic knowledge to agent-accessible operational knowledge:
 
 ```text
 Semantic Model
@@ -324,9 +349,17 @@ Semantic Model
 → Semantic Result
 ```
 
-Each boundary is represented and tested separately. The OWL reasoner remains the source of classification behavior; the Service exposes that result without reimplementing the domain rule; and the Agent discovers how to invoke the Capability from machine-readable contracts rather than from hard-coded Pizza-specific service behavior.
+The validation path separately demonstrates that the same architectural ideas apply when execution means constraint evaluation rather than inference:
 
-The project remains intentionally small and provisional. The next work is to test these concepts against additional execution modes—especially semantic validation—and only then generalize the ESKA vocabulary further.
+```text
+SHACL Semantic Model
+→ Executable Validation Artifact
+→ PizzaValidationCapability
+→ sh:ValidationReport
+→ Verification + Provenance
+```
+
+Each boundary is represented and tested separately. The project remains intentionally small and provisional; the next work is to compare and generalize only the concepts that remain stable across these different execution modes.
 
 ## License
 
