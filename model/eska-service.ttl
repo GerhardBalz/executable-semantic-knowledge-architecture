@@ -8,7 +8,7 @@
     a owl:Ontology ;
     dcterms:title "ESKA service model"@en ;
     dcterms:description "A deliberately small, provisional semantic model containing only the terms needed to describe and test Knowledge Services and their operations."@en ;
-    owl:versionInfo "0.1-provisional" .
+    owl:versionInfo "0.2-provisional" .
 
 eska:KnowledgeService
     a owl:Class ;
@@ -43,3 +43,23 @@ eska:path
 eska:mediaType
     a owl:DatatypeProperty ;
     rdfs:label "media type"@en .
+
+eska:requestField
+    a owl:DatatypeProperty ;
+    rdfs:label "request field"@en ;
+    skos:definition "Representation field that carries the semantically typed service input."@en .
+
+eska:resultField
+    a owl:DatatypeProperty ;
+    rdfs:label "result field"@en ;
+    skos:definition "Representation field that carries the semantically typed service result."@en .
+
+eska:relationField
+    a owl:DatatypeProperty ;
+    rdfs:label "relation field"@en ;
+    skos:definition "Representation field that identifies the semantic relation expressed by a result."@en .
+
+eska:capabilityField
+    a owl:DatatypeProperty ;
+    rdfs:label "capability field"@en ;
+    skos:definition "Representation field that identifies the Semantic Capability under which the result was produced."@en .
