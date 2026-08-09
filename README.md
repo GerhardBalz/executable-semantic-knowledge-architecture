@@ -152,6 +152,8 @@ A **Knowledge Service** is an operational interface through which knowledge can 
 
 A Capability defines **what ability exists**. A Knowledge Service defines **how that ability is operationally accessible**.
 
+The first provisional machine-readable subset of this concept is captured in [`model/eska-service.ttl`](model/eska-service.ttl). The Pizza reference slice implements and verifies a concrete service without moving classification knowledge into the transport layer.
+
 ### Knowledge Agent
 
 A **Knowledge Agent** is a software agent that can discover, interpret, query, reason over, invoke, and potentially extend Semantic Knowledge and Executable Semantic Knowledge through ESKA capabilities and services.
@@ -256,9 +258,9 @@ ESKA should not require changing the Pizza ontology merely to make it executable
 
 The first executable example is implemented in [`examples/pizza`](examples/pizza) and answers a deliberately small question:
 
-> **Can `AmericanHot` be inferred to be a `SpicyPizza`, and can that inference be verified, explained, and traced to its semantic source?**
+> **Can `AmericanHot` be inferred to be a `SpicyPizza`, and can that inference be verified, explained, traced, and exposed without duplicating the semantic logic?**
 
-The slice now continues from semantic execution into an explicitly bounded Semantic Capability while still stopping before service or agent exposure:
+The slice now continues from semantic execution through a bounded Semantic Capability into an operational Knowledge Service:
 
 ```text
 Pizza Semantic Model
@@ -272,11 +274,15 @@ Verified Result
 Explanation + PROV-O Provenance
         ↓ bounded and machine-described as
 PizzaClassificationCapability
+        ↓ exposed through
+PizzaClassificationService
+        ↓ HTTP
+POST /classify
 ```
 
-This is the first concrete demonstration of both **Executable Semantic Knowledge** and a machine-described **Semantic Capability**. The capability contract makes its subject, input, output, produced relation, semantic model, executable artifact, applicability condition, and example outcome explicit and verifiable.
+This demonstrates **Executable Semantic Knowledge**, a machine-described **Semantic Capability**, and a machine-described and executable **Knowledge Service**. The service remains deliberately thin: it exposes classifications from the reasoned semantic artifact rather than implementing a second Pizza classification rule.
 
-Later increments will expose this capability through a Knowledge Service and make it directly discoverable and invokable by a Knowledge Agent.
+The next architectural layer is Knowledge Agent discovery and invocation.
 
 The purpose is not to build a sophisticated pizza application. It is to demonstrate the semantic-to-execution chain with the smallest domain that makes the architecture visible.
 
@@ -289,18 +295,18 @@ The project evolves incrementally.
 - [x] Implement the first Pizza semantic reasoning slice.
 - [x] Verify the inferred classification and add explanation and execution provenance.
 - [x] Define and verify the first bounded Semantic Capability around executable semantic knowledge.
+- [x] Expose the first Semantic Capability through a machine-described and executable Knowledge Service.
 - [ ] Add explicit semantic validation examples in addition to inference verification.
-- [ ] Generalize stable capability terms as the broader ESKA model is tested through additional examples.
-- [ ] Expose capabilities through Knowledge Services.
+- [ ] Generalize stable capability and service terms as the broader ESKA model is tested through additional examples.
 - [ ] Demonstrate direct discovery and invocation by a Knowledge Agent.
 
 The project intentionally does **not** begin as a general software framework, agent platform, or large meta-ontology.
 
 ## Status
 
-This repository remains at an early reference-architecture stage, but it now contains both its first executable semantic example and its first machine-described Semantic Capability in [`examples/pizza`](examples/pizza).
+This repository remains at an early reference-architecture stage, but the Pizza reference slice now spans formal semantic knowledge, executable OWL reasoning, verification, explanation, provenance, a bounded Semantic Capability, and an operational Knowledge Service.
 
-The example establishes a path from formal semantic knowledge through OWL reasoning to a verified inference, reasoner explanation, provenance record, and bounded Capability contract. The next architectural layers—Knowledge Service and Knowledge Agent—remain to be implemented incrementally.
+The Knowledge Service is verified both as a machine-readable contract and through an end-to-end HTTP test. The next architectural layer is a Knowledge Agent that discovers and invokes the Capability through the Service rather than relying on hard-coded domain behavior.
 
 ## License
 
