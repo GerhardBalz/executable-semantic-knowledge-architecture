@@ -1,0 +1,19 @@
+@prefix agent: <urn:eska:example:pizza:agent:> .
+@prefix cap: <urn:eska:example:pizza:capability:> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix eska: <urn:eska:core:> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+
+agent:PizzaKnowledgeAgent
+    a eska:KnowledgeAgent, prov:SoftwareAgent ;
+    dcterms:title "Pizza Knowledge Agent"@en ;
+    dcterms:description "A deterministic reference agent that targets PizzaClassificationCapability, discovers an operational Knowledge Service from machine-readable ESKA contracts, invokes it, and validates the returned semantic relation."@en ;
+    dcterms:identifier "examples/pizza/agent.py" ;
+    eska:targetsCapability cap:PizzaClassificationCapability ;
+    eska:usesDiscoveryArtifact agent:PizzaClassificationServiceDiscovery .
+
+agent:PizzaClassificationServiceDiscovery
+    a eska:DiscoveryArtifact ;
+    dcterms:title "Pizza Classification service discovery query"@en ;
+    dcterms:identifier "examples/pizza/discover-service.sparql" ;
+    dcterms:description "SPARQL query used to discover the Knowledge Service operation that exposes PizzaClassificationCapability."@en .
