@@ -1,0 +1,31 @@
+PREFIX eska: <urn:eska:core:>
+PREFIX cap: <urn:eska:example:pizza:capability:>
+PREFIX run: <urn:eska:example:pizza:>
+PREFIX val: <urn:eska:example:pizza:validation:>
+
+# ROBOT verify treats returned rows as violations.
+# Runtime executions from different semantic modes must share the same core pattern.
+SELECT ?mode ?execution
+WHERE {
+  VALUES (?mode ?execution ?capability ?result ?verification) {
+    ("reasoning" run:spicy-pizza-reasoning cap:PizzaClassificationCapability run:american-hot-spicy-inference run:spicy-pizza-verification)
+    ("validation-conform" val:valid-pizza-validation val:PizzaValidationCapability val:ValidPizzaValidationReport val:valid-pizza-validation-verification)
+    ("validation-nonconform" val:invalid-pizza-validation val:PizzaValidationCapability val:InvalidPizzaValidationReport val:invalid-pizza-validation-verification)
+  }
+
+  FILTER NOT EXISTS {
+    ?execution
+        a eska:Execution ;
+        eska:executesCapability ?capability ;
+        eska:usesSemanticModel ?semanticModel ;
+        eska:usesExecutableArtifact ?executableArtifact ;
+        eska:generatesResult ?result .
+
+    ?result a eska:Result .
+
+    ?verification
+        a eska:Verification ;
+        eska:verifiesExecution ?execution ;
+        eska:verifiesResult ?result .
+  }
+}
