@@ -1,4 +1,4 @@
-name: Pizza semantic reasoning
+name: Pizza ESKA reference
 
 on:
   push:
@@ -17,7 +17,7 @@ permissions:
   contents: read
 
 jobs:
-  spicy-pizza:
+  pizza-eska:
     runs-on: ubuntu-latest
 
     steps:
@@ -32,3 +32,9 @@ jobs:
 
       - name: Run semantic reasoning, Knowledge Service, and Knowledge Agent integration
         run: bash examples/pizza/test-agent.sh
+
+      - name: Install SHACL validator
+        run: python -m pip install -r examples/pizza/validation/requirements.txt
+
+      - name: Run semantic validation example
+        run: python examples/pizza/validation/validate.py
