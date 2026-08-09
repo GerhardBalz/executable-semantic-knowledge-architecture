@@ -1,0 +1,61 @@
+Prefix(owl:=<http://www.w3.org/2002/07/owl#>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+Prefix(dcterms:=<http://purl.org/dc/terms/>)
+Prefix(pizza:=<http://www.co-ode.org/ontologies/pizza/pizza.owl#>)
+
+Ontology(<https://github.com/GerhardBalz/executable-semantic-knowledge-architecture/examples/pizza/spicy-pizza>
+
+Annotation(dcterms:title "ESKA Pizza SpicyPizza reasoning slice"@en)
+Annotation(dcterms:description "A minimal coherent slice derived from the classic Pizza ontology for demonstrating the inferred classification AmericanHot SubClassOf SpicyPizza."@en)
+Annotation(dcterms:source <https://github.com/GerhardBalz/pizza-ontology/blob/main/src/ontology/pizza-edit.owl>)
+Annotation(dcterms:license <https://creativecommons.org/licenses/by/3.0/>)
+
+Declaration(Class(pizza:Pizza))
+Declaration(Class(pizza:NamedPizza))
+Declaration(Class(pizza:PizzaTopping))
+Declaration(Class(pizza:PepperTopping))
+Declaration(Class(pizza:JalapenoPepperTopping))
+Declaration(Class(pizza:Hot))
+Declaration(Class(pizza:SpicyTopping))
+Declaration(Class(pizza:SpicyPizza))
+Declaration(Class(pizza:AmericanHot))
+Declaration(ObjectProperty(pizza:hasTopping))
+Declaration(ObjectProperty(pizza:hasSpiciness))
+
+AnnotationAssertion(rdfs:label pizza:Pizza "Pizza"@en)
+AnnotationAssertion(rdfs:label pizza:NamedPizza "Named Pizza"@en)
+AnnotationAssertion(rdfs:label pizza:PizzaTopping "Pizza Topping"@en)
+AnnotationAssertion(rdfs:label pizza:PepperTopping "Pepper Topping"@en)
+AnnotationAssertion(rdfs:label pizza:JalapenoPepperTopping "Jalapeno Pepper"@en)
+AnnotationAssertion(rdfs:label pizza:Hot "Hot"@en)
+AnnotationAssertion(rdfs:label pizza:SpicyTopping "Spicy Topping"@en)
+AnnotationAssertion(rdfs:label pizza:SpicyPizza "Spicy Pizza"@en)
+AnnotationAssertion(rdfs:label pizza:AmericanHot "American Hot"@en)
+AnnotationAssertion(rdfs:label pizza:hasTopping "has topping"@en)
+AnnotationAssertion(rdfs:label pizza:hasSpiciness "has spiciness"@en)
+
+SubClassOf(pizza:NamedPizza pizza:Pizza)
+SubClassOf(pizza:PepperTopping pizza:PizzaTopping)
+SubClassOf(pizza:JalapenoPepperTopping pizza:PepperTopping)
+SubClassOf(pizza:JalapenoPepperTopping ObjectSomeValuesFrom(pizza:hasSpiciness pizza:Hot))
+
+SubClassOf(pizza:AmericanHot pizza:NamedPizza)
+SubClassOf(pizza:AmericanHot ObjectSomeValuesFrom(pizza:hasTopping pizza:JalapenoPepperTopping))
+
+EquivalentClasses(
+  pizza:SpicyTopping
+  ObjectIntersectionOf(
+    pizza:PizzaTopping
+    ObjectSomeValuesFrom(pizza:hasSpiciness pizza:Hot)
+  )
+)
+
+EquivalentClasses(
+  pizza:SpicyPizza
+  ObjectIntersectionOf(
+    pizza:Pizza
+    ObjectSomeValuesFrom(pizza:hasTopping pizza:SpicyTopping)
+  )
+)
+
+)

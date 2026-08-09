@@ -248,58 +248,53 @@ Executable Semantic Knowledge
 ESKA
 ```
 
-ESKA should not require changing the Pizza ontology merely to make it executable. Instead, the reference implementation will demonstrate how architecture can be built around and through an existing semantic model.
+ESKA should not require changing the Pizza ontology merely to make it executable. Instead, the reference implementation demonstrates how architecture can be built around and through an existing semantic model.
 
 ### First vertical slice: Pizza Classification
 
-The first executable example will answer a deliberately small question:
+The first executable example is implemented in [`examples/pizza`](examples/pizza) and answers a deliberately small question:
 
-> **Is a particular pizza a `SpicyPizza`, and why?**
+> **Can `AmericanHot` be inferred to be a `SpicyPizza`, and can that inference be verified, explained, and traced to its semantic source?**
 
-The example will connect:
+The first slice intentionally stops before service or agent exposure:
 
 ```text
 Pizza Semantic Model
-        ↓ defines meaning
-Pizza Knowledge
-        ↓ provides assertions
-Semantic Reasoning
-        ↓ derives classification
-Pizza Classification Capability
-        ↓ exposed through
-Knowledge Service
-        ↓ invoked by
-Knowledge Agent
-        ↓ returns
-Classification + Explanation + Provenance
+        ↓ selected semantic knowledge
+Coherent Reasoning Slice
+        ↓ execute OWL semantics with HermiT
+Inferred Classification
+        ↓ verify expected semantic result
+Verified Result
+        ↓ trace through
+Explanation + PROV-O Provenance
 ```
 
-The purpose is not to build a sophisticated pizza application. It is to demonstrate the complete semantic-to-execution chain with the smallest domain that makes the architecture visible.
+This is the first concrete demonstration of **Executable Semantic Knowledge**. Later increments will package such behavior as bounded Semantic Capabilities, expose those capabilities through Knowledge Services, and make them directly discoverable and invokable by Knowledge Agents.
+
+The purpose is not to build a sophisticated pizza application. It is to demonstrate the semantic-to-execution chain with the smallest domain that makes the architecture visible.
 
 ## Initial Scope
 
-The project will evolve incrementally.
+The project evolves incrementally.
 
-The first stages are:
-
-1. establish the ESKA terminology and conceptual model;
-2. establish the distinction between Semantic Knowledge, Executable Semantic Knowledge, and ESKA;
-3. formalize the core architectural concepts only after the prose model is sufficiently stable;
-4. implement one Pizza classification vertical slice;
-5. add verification and validation examples;
-6. add provenance for knowledge, inference, and execution;
-7. expose bounded Semantic Capabilities through Knowledge Services;
-8. demonstrate direct discovery and invocation by a Knowledge Agent.
+- [x] Establish the ESKA terminology and conceptual model.
+- [x] Establish the distinction between Semantic Knowledge, Executable Semantic Knowledge, and ESKA.
+- [x] Implement the first Pizza semantic reasoning slice.
+- [x] Verify the inferred classification and add explanation and execution provenance.
+- [ ] Formalize the core architectural concepts after the prose model has been tested further.
+- [ ] Add explicit semantic validation examples in addition to inference verification.
+- [ ] Define bounded Semantic Capabilities around executable semantic knowledge.
+- [ ] Expose capabilities through Knowledge Services.
+- [ ] Demonstrate direct discovery and invocation by a Knowledge Agent.
 
 The project intentionally does **not** begin as a general software framework, agent platform, or large meta-ontology.
 
 ## Status
 
-This repository is at an early conceptual and reference-architecture stage. Definitions and boundaries are expected to evolve as they are tested against executable examples.
+This repository remains at an early reference-architecture stage, but it now contains its first executable semantic example in [`examples/pizza`](examples/pizza).
 
-The initial goal is therefore deliberately narrow:
-
-> **Define the concept clearly, then prove it with one end-to-end executable semantic example.**
+The example establishes a small but complete path from formal semantic knowledge through OWL reasoning to a verified inference, reasoner explanation, and provenance record. The broader ESKA architecture—particularly Semantic Capabilities, Knowledge Services, and Knowledge Agents—remains to be implemented incrementally.
 
 ## License
 
