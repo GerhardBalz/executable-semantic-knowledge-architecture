@@ -1,0 +1,25 @@
+@prefix cap: <urn:eska:example:pizza:capability:> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix eska: <urn:eska:core:> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix svc: <urn:eska:example:pizza:service:> .
+
+svc:PizzaClassificationService
+    a eska:KnowledgeService ;
+    dcterms:title "Pizza Classification Knowledge Service"@en ;
+    dcterms:description "HTTP access to the bounded PizzaClassificationCapability. The service exposes classifications already produced by OWL semantic reasoning; it does not encode an independent classification rule."@en ;
+    dcterms:identifier "examples/pizza/service.py" ;
+    eska:exposesCapability cap:PizzaClassificationCapability ;
+    eska:hasOperation svc:ClassifyPizzaClassOperation .
+
+svc:ClassifyPizzaClassOperation
+    a eska:ServiceOperation ;
+    dcterms:title "Classify Pizza class"@en ;
+    dcterms:description "Return semantically entailed superclass classifications for an OWL Pizza class from the reasoned semantic artifact."@en ;
+    eska:httpMethod "POST" ;
+    eska:path "/classify" ;
+    eska:mediaType "application/json" ;
+    eska:inputType owl:Class ;
+    eska:outputType owl:Class ;
+    eska:producesRelation rdfs:subClassOf .
