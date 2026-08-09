@@ -1,0 +1,113 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix eska: <urn:eska:core:> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+<urn:eska:model:core>
+    a owl:Ontology ;
+    dcterms:title "ESKA core model"@en ;
+    dcterms:description "A deliberately small, provisional core model containing concepts demonstrated across more than one executable-semantic mode."@en ;
+    owl:versionInfo "0.1-provisional" .
+
+eska:SemanticModel
+    a owl:Class ;
+    rdfs:label "Semantic Model"@en ;
+    skos:definition "A formal representation that gives knowledge explicit machine-interpretable meaning through concepts, relationships, constraints, axioms, or equivalent semantic structures."@en .
+
+eska:ExecutableSemanticKnowledgeArtifact
+    a owl:Class ;
+    rdfs:label "Executable Semantic Knowledge Artifact"@en ;
+    skos:definition "A machine-executable artifact whose computational behavior remains explicitly connected to machine-interpretable semantic knowledge."@en .
+
+eska:Capability
+    a owl:Class ;
+    rdfs:label "Capability"@en ;
+    skos:definition "A bounded ability to achieve a defined kind of outcome within a specified scope."@en .
+
+eska:SemanticCapability
+    a owl:Class ;
+    rdfs:subClassOf eska:Capability ;
+    rdfs:label "Semantic Capability"@en ;
+    skos:definition "A Capability whose scope, inputs, outputs, applicability, constraints, and semantics are explicitly represented in machine-interpretable form."@en .
+
+eska:ApplicabilityCondition
+    a owl:Class ;
+    rdfs:label "Applicability Condition"@en ;
+    skos:definition "A machine-identifiable condition that must hold for a semantic capability or executable semantic artifact to be applied as intended."@en .
+
+eska:Execution
+    a owl:Class ;
+    rdfs:subClassOf prov:Activity ;
+    rdfs:label "Execution"@en ;
+    skos:definition "A computational activity that applies executable semantic knowledge under a defined semantic capability and produces a machine-interpretable result."@en .
+
+eska:Result
+    a owl:Class ;
+    rdfs:subClassOf prov:Entity ;
+    rdfs:label "Result"@en ;
+    skos:definition "A machine-interpretable entity produced by an ESKA execution, such as an inferred statement, validation report, decision, calculation, transformation, or action description."@en .
+
+eska:Verification
+    a owl:Class ;
+    rdfs:subClassOf prov:Activity ;
+    rdfs:label "Verification"@en ;
+    skos:definition "An activity that checks semantic knowledge, an execution, or a result against explicit criteria."@en .
+
+eska:subject
+    a owl:ObjectProperty ;
+    rdfs:label "subject"@en .
+
+eska:inputType
+    a owl:ObjectProperty ;
+    rdfs:label "input type"@en .
+
+eska:outputType
+    a owl:ObjectProperty ;
+    rdfs:label "output type"@en .
+
+eska:producesRelation
+    a owl:ObjectProperty ;
+    rdfs:label "produces relation"@en ;
+    skos:definition "Identifies the semantic relation through which the primary result of an executable artifact or capability is expressed."@en .
+
+eska:usesSemanticModel
+    a owl:ObjectProperty ;
+    rdfs:label "uses semantic model"@en ;
+    rdfs:range eska:SemanticModel .
+
+eska:usesExecutableArtifact
+    a owl:ObjectProperty ;
+    rdfs:label "uses executable artifact"@en ;
+    rdfs:range eska:ExecutableSemanticKnowledgeArtifact .
+
+eska:requiresCondition
+    a owl:ObjectProperty ;
+    rdfs:label "requires condition"@en ;
+    rdfs:range eska:ApplicabilityCondition .
+
+eska:executesCapability
+    a owl:ObjectProperty ;
+    rdfs:label "executes capability"@en ;
+    rdfs:domain eska:Execution ;
+    rdfs:range eska:SemanticCapability .
+
+eska:generatesResult
+    a owl:ObjectProperty ;
+    rdfs:subPropertyOf prov:generated ;
+    rdfs:label "generates result"@en ;
+    rdfs:domain eska:Execution ;
+    rdfs:range eska:Result .
+
+eska:verifiesExecution
+    a owl:ObjectProperty ;
+    rdfs:label "verifies execution"@en ;
+    rdfs:domain eska:Verification ;
+    rdfs:range eska:Execution .
+
+eska:verifiesResult
+    a owl:ObjectProperty ;
+    rdfs:label "verifies result"@en ;
+    rdfs:domain eska:Verification ;
+    rdfs:range eska:Result .

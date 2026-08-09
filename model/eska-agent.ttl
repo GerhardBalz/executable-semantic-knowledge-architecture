@@ -7,8 +7,9 @@
 <urn:eska:model:agent>
     a owl:Ontology ;
     dcterms:title "ESKA agent model"@en ;
-    dcterms:description "A deliberately small, provisional semantic model containing only the terms needed to describe and test Knowledge Agents and semantic service discovery."@en ;
-    owl:versionInfo "0.1-provisional" .
+    dcterms:description "A deliberately small, provisional extension containing terms needed to describe and test Knowledge Agents and semantic service discovery."@en ;
+    dcterms:requires <urn:eska:model:core> ;
+    owl:versionInfo "0.2-provisional" .
 
 eska:KnowledgeAgent
     a owl:Class ;
