@@ -1,0 +1,20 @@
+PREFIX eska: <urn:eska:core:>
+PREFIX val: <urn:eska:example:pizza:validation:>
+PREFIX pizza: <http://www.co-ode.org/ontologies/pizza/pizza.owl#>
+PREFIX sh: <http://www.w3.org/ns/shacl#>
+
+# Return one row when any required part of the PizzaValidationCapability contract is absent.
+SELECT ?capability
+WHERE {
+  BIND(val:PizzaValidationCapability AS ?capability)
+  FILTER NOT EXISTS {
+    ?capability a eska:SemanticCapability ;
+                eska:subject pizza:Pizza ;
+                eska:inputType val:PizzaDataGraph ;
+                eska:outputType sh:ValidationReport ;
+                eska:producesRelation sh:conforms ;
+                eska:usesSemanticModel val:PizzaShapesGraph ;
+                eska:usesExecutableArtifact val:SHACLValidationArtifact ;
+                eska:requiresCondition val:RDFDataGraphCondition .
+  }
+}
