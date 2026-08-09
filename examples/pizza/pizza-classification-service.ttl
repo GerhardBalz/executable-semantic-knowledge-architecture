@@ -20,6 +20,10 @@ svc:ClassifyPizzaClassOperation
     eska:httpMethod "POST" ;
     eska:path "/classify" ;
     eska:mediaType "application/json" ;
+    eska:requestField "class" ;
+    eska:resultField "classifications" ;
+    eska:relationField "relation" ;
+    eska:capabilityField "capability" ;
     eska:inputType owl:Class ;
     eska:outputType owl:Class ;
     eska:producesRelation rdfs:subClassOf .

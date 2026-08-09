@@ -156,9 +156,11 @@ The first provisional machine-readable subset of this concept is captured in [`m
 
 ### Knowledge Agent
 
-A **Knowledge Agent** is a software agent that can discover, interpret, query, reason over, invoke, and potentially extend Semantic Knowledge and Executable Semantic Knowledge through ESKA capabilities and services.
+A **Knowledge Agent** is a software agent that can use machine-interpretable ESKA contracts to discover, interpret, query, reason over, verify, and invoke semantic capabilities and services.
 
 Agents are consumers and participants in ESKA, not the reason ESKA exists. The architecture remains useful without an LLM.
+
+The first provisional machine-readable subset of this concept is captured in [`model/eska-agent.ttl`](model/eska-agent.ttl). The Pizza reference agent is deliberately deterministic and non-LLM so that discovery and invocation are demonstrated as architectural properties rather than prompt behavior.
 
 ## Conceptual Architecture
 
@@ -179,7 +181,7 @@ Agents are consumers and participants in ESKA, not the reason ESKA exists. The a
                                  ▼          ▼
                         Knowledge Assets  Knowledge Service
                                  │          │
-             ┌───────────────────┼───────┐  │ invoked by
+             ┌───────────────────┼───────┐  │ discovered / invoked by
              ▼                   ▼       ▼  ▼
        Semantic Model   Semantic Knowledge  Knowledge Agent
                            Graph       │          │
@@ -205,7 +207,7 @@ Capability
   ↓
 Service
   ↓
-Execution
+Agent Invocation
   ↓
 Result
 ```
@@ -215,8 +217,10 @@ and:
 ```text
 Result
   ↓ why?
-Execution
+Agent Invocation
   ↓ used?
+Service / Capability
+  ↓ realized by?
 Executable Knowledge
   ↓ defined by?
 Semantic Knowledge
@@ -256,11 +260,11 @@ ESKA should not require changing the Pizza ontology merely to make it executable
 
 ### First vertical slice: Pizza Classification
 
-The first executable example is implemented in [`examples/pizza`](examples/pizza) and answers a deliberately small question:
+The executable example is implemented in [`examples/pizza`](examples/pizza) and answers a deliberately small question:
 
-> **Can `AmericanHot` be inferred to be a `SpicyPizza`, and can that inference be verified, explained, traced, and exposed without duplicating the semantic logic?**
+> **Can `AmericanHot` be inferred to be a `SpicyPizza`, and can that result remain semantically connected as it is bounded, exposed, discovered, and invoked?**
 
-The slice now continues from semantic execution through a bounded Semantic Capability into an operational Knowledge Service:
+The first end-to-end slice now spans:
 
 ```text
 Pizza Semantic Model
@@ -268,23 +272,25 @@ Pizza Semantic Model
 Coherent Reasoning Slice
         ↓ execute OWL semantics with HermiT
 Inferred Classification
-        ↓ verify expected semantic result
-Verified Result
-        ↓ trace through
-Explanation + PROV-O Provenance
+        ↓ verify / explain / trace
+Executable Semantic Knowledge
         ↓ bounded and machine-described as
 PizzaClassificationCapability
         ↓ exposed through
 PizzaClassificationService
-        ↓ HTTP
-POST /classify
+        ↓ discovered from machine-readable contracts
+PizzaKnowledgeAgent
+        ↓ invokes service
+Semantic Result
 ```
 
-This demonstrates **Executable Semantic Knowledge**, a machine-described **Semantic Capability**, and a machine-described and executable **Knowledge Service**. The service remains deliberately thin: it exposes classifications from the reasoned semantic artifact rather than implementing a second Pizza classification rule.
+The Knowledge Agent knows the Capability it wants but does not hard-code the service, HTTP path, result relation, representation field names, or `SpicyPizza` as the answer. It discovers the service operation from the merged ESKA architecture model and combines that contract with a separate runtime deployment location.
 
-The next architectural layer is Knowledge Agent discovery and invocation.
+This demonstrates a core ESKA claim:
 
-The purpose is not to build a sophisticated pizza application. It is to demonstrate the semantic-to-execution chain with the smallest domain that makes the architecture visible.
+> **Agent accessibility can be a property of the architecture rather than a property of a prompt.**
+
+The purpose is not to build a sophisticated pizza application. It is to demonstrate the semantic-to-execution-to-agent chain with the smallest domain that makes the architecture visible.
 
 ## Initial Scope
 
@@ -296,17 +302,31 @@ The project evolves incrementally.
 - [x] Verify the inferred classification and add explanation and execution provenance.
 - [x] Define and verify the first bounded Semantic Capability around executable semantic knowledge.
 - [x] Expose the first Semantic Capability through a machine-described and executable Knowledge Service.
+- [x] Demonstrate machine-described discovery and invocation by a deterministic Knowledge Agent.
 - [ ] Add explicit semantic validation examples in addition to inference verification.
-- [ ] Generalize stable capability and service terms as the broader ESKA model is tested through additional examples.
-- [ ] Demonstrate direct discovery and invocation by a Knowledge Agent.
+- [ ] Generalize stable Capability, Service, and Agent terms as the broader ESKA model is tested through additional examples.
+- [ ] Add richer provenance and deployment-binding concepts.
+- [ ] Add additional semantic capabilities and alternative service/agent implementations.
 
 The project intentionally does **not** begin as a general software framework, agent platform, or large meta-ontology.
 
 ## Status
 
-This repository remains at an early reference-architecture stage, but the Pizza reference slice now spans formal semantic knowledge, executable OWL reasoning, verification, explanation, provenance, a bounded Semantic Capability, and an operational Knowledge Service.
+The Pizza reference slice now provides the first complete ESKA path from formal semantic knowledge to agent-accessible operational knowledge:
 
-The Knowledge Service is verified both as a machine-readable contract and through an end-to-end HTTP test. The next architectural layer is a Knowledge Agent that discovers and invokes the Capability through the Service rather than relying on hard-coded domain behavior.
+```text
+Semantic Model
+→ Semantic Knowledge
+→ Executable Semantic Knowledge
+→ Semantic Capability
+→ Knowledge Service
+→ Knowledge Agent
+→ Semantic Result
+```
+
+Each boundary is represented and tested separately. The OWL reasoner remains the source of classification behavior; the Service exposes that result without reimplementing the domain rule; and the Agent discovers how to invoke the Capability from machine-readable contracts rather than from hard-coded Pizza-specific service behavior.
+
+The project remains intentionally small and provisional. The next work is to test these concepts against additional execution modes—especially semantic validation—and only then generalize the ESKA vocabulary further.
 
 ## License
 

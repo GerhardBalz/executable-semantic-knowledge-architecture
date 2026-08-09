@@ -1,0 +1,33 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix eska: <urn:eska:core:> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+<urn:eska:model:agent>
+    a owl:Ontology ;
+    dcterms:title "ESKA agent model"@en ;
+    dcterms:description "A deliberately small, provisional semantic model containing only the terms needed to describe and test Knowledge Agents and semantic service discovery."@en ;
+    owl:versionInfo "0.1-provisional" .
+
+eska:KnowledgeAgent
+    a owl:Class ;
+    rdfs:label "Knowledge Agent"@en ;
+    skos:definition "A software agent that can use machine-interpretable ESKA contracts to discover and invoke knowledge capabilities and interpret their semantic results."@en .
+
+eska:DiscoveryArtifact
+    a owl:Class ;
+    rdfs:label "Discovery Artifact"@en ;
+    skos:definition "An executable or queryable artifact used by an agent to discover an operational realization of a semantic capability."@en .
+
+eska:targetsCapability
+    a owl:ObjectProperty ;
+    rdfs:label "targets capability"@en ;
+    rdfs:domain eska:KnowledgeAgent ;
+    rdfs:range eska:SemanticCapability .
+
+eska:usesDiscoveryArtifact
+    a owl:ObjectProperty ;
+    rdfs:label "uses discovery artifact"@en ;
+    rdfs:domain eska:KnowledgeAgent ;
+    rdfs:range eska:DiscoveryArtifact .

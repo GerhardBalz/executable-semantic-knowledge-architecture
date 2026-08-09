@@ -1,12 +1,12 @@
-# Pizza: executable semantic knowledge, capability, and service slice
+# Pizza: executable semantic knowledge to Knowledge Agent
 
 This example is the first executable vertical slice of **Executable Semantic Knowledge Architecture (ESKA)**.
 
 It starts with one small semantic question:
 
-> **Can `AmericanHot` be inferred to be a `SpicyPizza`, and can that inference be verified, explained, traced, and exposed without duplicating the semantic logic?**
+> **Can `AmericanHot` be inferred to be a `SpicyPizza`, and can that inference remain machine-traceable as it is exposed and invoked?**
 
-The example now separates three architectural concerns:
+The example now separates four architectural concerns:
 
 ```text
 Executable Semantic Knowledge
@@ -18,10 +18,13 @@ Semantic Capability
 Knowledge Service
         │ exposes that ability operationally
         ▼
-HTTP client
+Knowledge Agent
+        │ discovers and invokes the service
+        ▼
+Semantic Result
 ```
 
-Knowledge Agent discovery and invocation remain deferred to a later increment.
+The agent is deliberately deterministic and non-LLM. The purpose is to show that **agent accessibility can follow from machine-readable architecture rather than prompt engineering**.
 
 ## Why a derived slice?
 
@@ -35,11 +38,9 @@ This is an architectural boundary, not a new Pizza model:
 
 ```text
 Pizza ontology
-    │
     │ selected semantic knowledge
     ▼
 coherent reasoning slice
-    │
     │ executable with OWL semantics
     ▼
 HermiT reasoner
@@ -47,15 +48,16 @@ HermiT reasoner
     ├── inferred classification
     ├── verification
     ├── explanation
-    └── execution provenance
-    │
+    └── provenance
     │ bounded and described as
     ▼
 PizzaClassificationCapability
-    │
     │ exposed by
     ▼
 PizzaClassificationService
+    │ discovered and invoked by
+    ▼
+PizzaKnowledgeAgent
 ```
 
 ## Semantic knowledge
@@ -94,7 +96,7 @@ AmericanHot SubClassOf SpicyPizza
 
 That relationship is the result we ask the reasoner to derive.
 
-## Executable semantic knowledge
+## Executable Semantic Knowledge
 
 Running the example turns the formal semantic definitions into computational behavior:
 
@@ -120,9 +122,7 @@ This is **Executable Semantic Knowledge**: the classification follows from machi
 
 ## Semantic Capability
 
-A Capability is useful only when its boundary is sufficiently explicit. The example therefore describes `PizzaClassificationCapability` in [`pizza-classification-capability.ttl`](pizza-classification-capability.ttl).
-
-The contract states, in machine-readable form:
+[`pizza-classification-capability.ttl`](pizza-classification-capability.ttl) describes the bounded ability in machine-readable form.
 
 ```text
 Capability
@@ -148,35 +148,25 @@ Executable artifact
 
 Applicability
     coherent OWL model
-
-Example input
-    AmericanHot
-
-Example output
-    SpicyPizza
 ```
 
-The human-readable scope note narrows the initial capability further: it covers **class-level OWL classification for Pizza concepts** and excludes recommendation, ordering, preparation, pricing, and instance-data validation.
-
-This is the practical meaning of a bounded Capability in ESKA:
+The scope is intentionally narrow: **class-level OWL classification for Pizza concepts**. Recommendation, ordering, preparation, pricing, and instance-data validation are outside this capability.
 
 > **Capability = ability + explicit boundary + defined outcome**
 
-The current vocabulary for describing this contract is deliberately small and provisional. [`../../model/eska-capability.ttl`](../../model/eska-capability.ttl) contains only the ESKA terms needed for this example. It uses the provisional `urn:eska:core:` namespace rather than claiming a permanent public ESKA namespace prematurely.
+The provisional capability vocabulary is in [`../../model/eska-capability.ttl`](../../model/eska-capability.ttl).
 
 ## Knowledge Service
 
-A **Knowledge Service** provides operational access to a Capability without redefining what that Capability means.
+A **Knowledge Service** provides operational access to a Capability without redefining what the Capability means.
 
-The example describes `PizzaClassificationService` in [`pizza-classification-service.ttl`](pizza-classification-service.ttl) and implements it in [`service.py`](service.py).
-
-Its initial access contract is deliberately small:
+[`pizza-classification-service.ttl`](pizza-classification-service.ttl) describes `PizzaClassificationService`; [`service.py`](service.py) implements it.
 
 ```text
 Service
     Pizza Classification Knowledge Service
 
-Exposes Capability
+Exposes
     PizzaClassificationCapability
 
 Operation
@@ -185,11 +175,8 @@ Operation
 HTTP
     POST /classify
 
-Input
-    OWL Pizza class IRI
-
-Output
-    entailed OWL superclass IRIs
+Input / output type
+    owl:Class → owl:Class
 
 Semantic relation
     rdfs:subClassOf
@@ -198,25 +185,11 @@ Representation
     application/json
 ```
 
-For example:
-
-```json
-{
-  "class": "http://www.co-ode.org/ontologies/pizza/pizza.owl#AmericanHot"
-}
-```
-
-returns classifications containing:
-
-```text
-http://www.co-ode.org/ontologies/pizza/pizza.owl#SpicyPizza
-```
+The service contract also describes the JSON fields used to carry the semantic input, result, relation, and Capability IRI. This makes the representation discoverable by a client rather than being implicit in client code.
 
 ### The service is intentionally thin
 
-`service.py` does **not** contain a rule saying that `AmericanHot` is spicy. It reads the superclass relationships from `results/reasoned.owl`, the semantic artifact produced by HermiT.
-
-Therefore:
+`service.py` does **not** contain a rule saying that `AmericanHot` is spicy. It reads superclass relationships from `results/reasoned.owl`, the artifact produced by HermiT.
 
 ```text
 Capability
@@ -226,16 +199,75 @@ Knowledge Service
     defines how the ability is accessed
 
 OWL reasoner
-    remains the source of the classification behavior
+    remains the source of classification behavior
 ```
 
-This is another concrete application of the ESKA principle:
+The provisional service vocabulary is in [`../../model/eska-service.ttl`](../../model/eska-service.ttl).
 
-> **Execution must not sever semantics.**
+## Knowledge Agent
 
-The transport layer must not silently become a second, disconnected source of domain knowledge.
+[`pizza-knowledge-agent.ttl`](pizza-knowledge-agent.ttl) describes the first `PizzaKnowledgeAgent`; [`agent.py`](agent.py) implements it.
 
-The provisional service vocabulary is in [`../../model/eska-service.ttl`](../../model/eska-service.ttl). As with the Capability model, it formalizes only the concepts required by the current executable example.
+The agent knows the **Semantic Capability it wants**:
+
+```text
+PizzaClassificationCapability
+```
+
+It does **not** hard-code:
+
+- `PizzaClassificationService` as the service to call;
+- `/classify` as the path;
+- `POST` as the HTTP method;
+- `rdfs:subClassOf` as the returned semantic relation;
+- the JSON request/result field names;
+- `SpicyPizza` as the expected semantic answer.
+
+Instead, [`discover-service.sparql`](discover-service.sparql) queries `results/architecture-model.owl` for a Knowledge Service operation that exposes the target Capability.
+
+The discovery path is:
+
+```text
+PizzaKnowledgeAgent
+        │ targets
+        ▼
+PizzaClassificationCapability
+        │ machine-readable architecture query
+        ▼
+PizzaClassificationService
+        │ has operation
+        ▼
+ClassifyPizzaClassOperation
+        │ describes
+        ├── HTTP method
+        ├── path
+        ├── media type
+        ├── payload fields
+        ├── input/output semantic types
+        └── semantic result relation
+```
+
+The agent then invokes the discovered operation and checks that the service response still identifies the target Capability and the discovered semantic relation.
+
+### Semantic discovery vs deployment binding
+
+The architecture describes **what the service is and how its operation behaves**. It does not claim that a service always runs at a particular host or port.
+
+The agent therefore receives a runtime deployment binding separately, for example:
+
+```text
+http://127.0.0.1:18081
+```
+
+and combines it with the discovered semantic path:
+
+```text
+runtime base URL + discovered /classify
+```
+
+This keeps **architectural meaning** separate from **deployment location**.
+
+The provisional agent vocabulary is in [`../../model/eska-agent.ttl`](../../model/eska-agent.ttl).
 
 ## Execute
 
@@ -245,138 +277,110 @@ Requirements:
 - Python 3
 - `curl`
 
-### Semantic execution and contract verification
-
-Run:
+### Build and verify the semantic architecture
 
 ```bash
 bash examples/pizza/run.sh
 ```
 
-The script downloads the pinned ROBOT release on first execution and then performs six steps:
+The script performs seven steps:
 
-1. classify `spicy-pizza.ofn` with the HermiT OWL reasoner;
-2. verify that `AmericanHot rdfs:subClassOf SpicyPizza` is present in the reasoned ontology;
-3. generate a ROBOT explanation for that inferred axiom;
-4. merge and verify the ESKA Capability model and `PizzaClassificationCapability` contract;
-5. merge and verify the ESKA Service model and `PizzaClassificationService` contract;
-6. write a PROV-O execution record connected to the Capability.
+1. classify `spicy-pizza.ofn` with HermiT;
+2. verify the expected `AmericanHot → SpicyPizza` inference;
+3. generate a reasoner explanation;
+4. verify the Semantic Capability contract;
+5. verify the Knowledge Service contract;
+6. build and verify the merged Knowledge Agent architecture model;
+7. write PROV-O reasoning provenance.
 
-Generated files are written below `examples/pizza/results/` and are intentionally not committed.
+Generated artifacts are written below `examples/pizza/results/` and are intentionally not committed.
 
-### End-to-end Knowledge Service test
-
-Run:
+### Run the complete Knowledge Agent path
 
 ```bash
-bash examples/pizza/test-service.sh
+bash examples/pizza/test-agent.sh
 ```
 
-This runs the semantic execution, starts the HTTP service, retrieves the runtime service contract, calls `POST /classify`, and verifies that the response:
+This:
 
-- identifies `PizzaClassificationService`;
-- identifies `PizzaClassificationCapability`;
-- preserves the `rdfs:subClassOf` semantic relation;
-- accepts `AmericanHot` as the input class;
-- contains `SpicyPizza` among the classifications.
+1. builds and verifies the semantic architecture;
+2. starts `PizzaClassificationService`;
+3. runs `PizzaKnowledgeAgent` with `AmericanHot` as input;
+4. discovers the service operation through SPARQL;
+5. invokes the discovered HTTP operation;
+6. validates semantic continuity in the response;
+7. verifies that the semantic result contains `SpicyPizza`;
+8. writes agent invocation provenance.
 
 GitHub Actions runs this same end-to-end path.
 
 ## Verification
 
-There are now three model-level regression checks plus the runtime service test.
+The example now verifies four model-level contracts plus runtime behavior.
 
-### Inference verification
+### Inference
 
-`verify-spicy.sparql` fails if semantic execution no longer produces:
+`verify-spicy.sparql` fails if OWL reasoning no longer derives:
 
 ```text
 AmericanHot SubClassOf SpicyPizza
 ```
 
-### Capability verification
+### Semantic Capability
 
-`verify-capability.sparql` fails if required facts such as the subject, input/output type, produced relation, semantic model, executable artifact, applicability condition, or example outcome disappear.
+`verify-capability.sparql` fails if the bounded ability loses required semantic contract elements.
 
-### Knowledge Service verification
+### Knowledge Service
 
-`verify-service.sparql` fails if the service no longer:
+`verify-service.sparql` fails if the service no longer exposes the intended Capability, semantic types, relation, HTTP operation, or representation fields.
 
-- has type `KnowledgeService`;
-- exposes `PizzaClassificationCapability`;
-- provides `ClassifyPizzaClassOperation`;
-- declares `POST /classify`;
-- accepts and returns OWL classes;
-- preserves `rdfs:subClassOf` as the result relation.
+### Knowledge Agent
 
-The end-to-end test then checks that the running service honors that contract.
+`verify-agent.sparql` fails if the agent no longer targets the intended Capability or loses its machine-described discovery artifact.
 
-The project therefore verifies increasingly different architectural invariants:
+### Runtime integration
+
+`test-agent.sh` verifies that a running agent can discover and invoke the service while preserving the same Capability and semantic relation through the complete path.
+
+So the regression questions now become:
 
 ```text
 Does semantic reasoning produce the correct result?
 
 Is the bounded ability explicitly described?
 
-Is the operational service contract explicitly described?
+Is the service contract explicit and semantically connected?
 
-Does the running service expose the same Capability and semantic result?
+Can an agent discover how to access that Capability?
+
+Does runtime invocation preserve the semantic contract and result?
 ```
 
-## Explanation
+## Explanation and provenance
 
-ROBOT's explanation step asks the reasoner why this entailment holds:
+ROBOT generates `results/explanation.md` for the inferred subclass axiom.
 
-```text
-AmericanHot SubClassOf SpicyPizza
-```
+`results/provenance.ttl` records the OWL reasoning activity and connects it to the Pizza semantic source and `PizzaClassificationCapability`.
 
-The generated `results/explanation.md` contains a minimal set of semantic axioms sufficient to justify the inference.
-
-This is a concrete form of the ESKA principle that a result should remain traversable back toward the knowledge that gives it meaning.
-
-## Provenance
-
-`results/provenance.ttl` records the reasoning execution using PROV-O concepts and states that the reasoning activity conforms to `PizzaClassificationCapability`.
-
-```text
-Pizza semantic slice
-        │ prov:used
-        ▼
-Reasoning activity
-        │ dcterms:conformsTo
-        ├──────────────────────► PizzaClassificationCapability
-        │
-        │ prov:generated
-        ▼
-Inferred statement
-        │ prov:wasDerivedFrom
-        ▼
-Pizza source ontology
-```
-
-The service returns the Capability IRI and the reasoned semantic artifact used for its result. Service-invocation provenance is intentionally left for a later increment rather than being conflated with reasoning provenance.
+`results/agent-provenance.ttl` separately records the Knowledge Agent discovery/invocation activity. Keeping these records separate avoids conflating **knowledge derivation** with **agent/service invocation**.
 
 ## ESKA concepts demonstrated
 
 | ESKA concept | Pizza realization |
 | --- | --- |
 | Semantic Model | Pizza OWL classes, properties, and class expressions |
-| Semantic Knowledge | The selected Pizza axioms in `spicy-pizza.ofn` |
+| Semantic Knowledge | Selected Pizza axioms in `spicy-pizza.ofn` |
 | Executable Semantic Knowledge | OWL classification performed by HermiT |
-| Executable Semantic Knowledge Artifact | OWL classification with HermiT, identified in the Capability contract |
+| Executable Semantic Knowledge Artifact | OWL classification artifact identified by the Capability contract |
 | Capability | Bounded Pizza Classification ability |
 | Semantic Capability | Machine-readable `PizzaClassificationCapability` |
 | Knowledge Service | Machine-readable and executable `PizzaClassificationService` |
-| Verification | SPARQL verification of inference, Capability, and Service contracts plus HTTP integration test |
+| Knowledge Agent | Deterministic `PizzaKnowledgeAgent` with semantic service discovery |
+| Verification | SPARQL contract checks plus end-to-end runtime integration |
 | Explanation | Reasoner explanation for the inferred subclass axiom |
-| Provenance | PROV-O record connecting execution, Capability, source, and result |
+| Provenance | Separate PROV-O records for reasoning and agent invocation |
 
-Not yet demonstrated:
-
-- Knowledge Agent discovery and invocation.
-
-That is the next architectural layer after the service boundary has been tested.
+This completes the first end-to-end reference path from formal semantic knowledge to agent-accessible operational knowledge. It is still deliberately small: later increments can add semantic validation, richer provenance, generalized ESKA vocabulary, additional capabilities, and alternative service or agent implementations.
 
 ## Source and license
 

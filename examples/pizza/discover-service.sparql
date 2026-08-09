@@ -1,0 +1,24 @@
+PREFIX eska: <urn:eska:core:>
+PREFIX cap: <urn:eska:example:pizza:capability:>
+
+# Discover the operational contract for the target Semantic Capability.
+# The agent knows the capability it wants, but not the service operation that exposes it.
+SELECT ?service ?operation ?method ?path ?mediaType ?inputType ?outputType ?relation
+       ?requestField ?resultField ?relationField ?capabilityField
+WHERE {
+  ?service a eska:KnowledgeService ;
+           eska:exposesCapability cap:PizzaClassificationCapability ;
+           eska:hasOperation ?operation .
+
+  ?operation a eska:ServiceOperation ;
+             eska:httpMethod ?method ;
+             eska:path ?path ;
+             eska:mediaType ?mediaType ;
+             eska:inputType ?inputType ;
+             eska:outputType ?outputType ;
+             eska:producesRelation ?relation ;
+             eska:requestField ?requestField ;
+             eska:resultField ?resultField ;
+             eska:relationField ?relationField ;
+             eska:capabilityField ?capabilityField .
+}

@@ -20,7 +20,10 @@ rm -f \
   "${RESULTS_DIR}/explanation.md" \
   "${RESULTS_DIR}/capability-model.owl" \
   "${RESULTS_DIR}/service-model.owl" \
-  "${RESULTS_DIR}/provenance.ttl"
+  "${RESULTS_DIR}/architecture-model.owl" \
+  "${RESULTS_DIR}/provenance.ttl" \
+  "${RESULTS_DIR}/agent-result.json" \
+  "${RESULTS_DIR}/agent-provenance.ttl"
 rm -f "${VERIFY_DIR}"/* 2>/dev/null || true
 
 if [[ ! -f "${ROBOT_JAR}" ]]; then
@@ -30,7 +33,7 @@ fi
 
 ROBOT=(java -jar "${ROBOT_JAR}")
 
-printf '\n1/6 Reasoning with HermiT...\n'
+printf '\n1/7 Reasoning with HermiT...\n'
 "${ROBOT[@]}" reason \
   --input "${HERE}/spicy-pizza.ofn" \
   --reasoner hermit \
@@ -38,20 +41,20 @@ printf '\n1/6 Reasoning with HermiT...\n'
   --annotate-inferred-axioms true \
   --output "${RESULTS_DIR}/reasoned.owl"
 
-printf '\n2/6 Verifying expected inference...\n'
+printf '\n2/7 Verifying expected inference...\n'
 "${ROBOT[@]}" verify \
   --input "${RESULTS_DIR}/reasoned.owl" \
   --queries "${HERE}/verify-spicy.sparql" \
   --output-dir "${VERIFY_DIR}"
 
-printf '\n3/6 Explaining the inferred classification...\n'
+printf '\n3/7 Explaining the inferred classification...\n'
 "${ROBOT[@]}" explain \
   --input "${HERE}/spicy-pizza.ofn" \
   --reasoner hermit \
   --axiom "'American Hot' SubClassOf 'Spicy Pizza'" \
   --explanation "${RESULTS_DIR}/explanation.md"
 
-printf '\n4/6 Verifying the Semantic Capability contract...\n'
+printf '\n4/7 Verifying the Semantic Capability contract...\n'
 "${ROBOT[@]}" merge \
   --input "${ROOT_DIR}/model/eska-capability.ttl" \
   --input "${HERE}/pizza-classification-capability.ttl" \
@@ -62,7 +65,7 @@ printf '\n4/6 Verifying the Semantic Capability contract...\n'
   --queries "${HERE}/verify-capability.sparql" \
   --output-dir "${VERIFY_DIR}"
 
-printf '\n5/6 Verifying the Knowledge Service contract...\n'
+printf '\n5/7 Verifying the Knowledge Service contract...\n'
 "${ROBOT[@]}" merge \
   --input "${ROOT_DIR}/model/eska-capability.ttl" \
   --input "${ROOT_DIR}/model/eska-service.ttl" \
@@ -75,7 +78,22 @@ printf '\n5/6 Verifying the Knowledge Service contract...\n'
   --queries "${HERE}/verify-service.sparql" \
   --output-dir "${VERIFY_DIR}"
 
-printf '\n6/6 Recording execution provenance...\n'
+printf '\n6/7 Building and verifying the Knowledge Agent architecture...\n'
+"${ROBOT[@]}" merge \
+  --input "${ROOT_DIR}/model/eska-capability.ttl" \
+  --input "${ROOT_DIR}/model/eska-service.ttl" \
+  --input "${ROOT_DIR}/model/eska-agent.ttl" \
+  --input "${HERE}/pizza-classification-capability.ttl" \
+  --input "${HERE}/pizza-classification-service.ttl" \
+  --input "${HERE}/pizza-knowledge-agent.ttl" \
+  --output "${RESULTS_DIR}/architecture-model.owl"
+
+"${ROBOT[@]}" verify \
+  --input "${RESULTS_DIR}/architecture-model.owl" \
+  --queries "${HERE}/verify-agent.sparql" \
+  --output-dir "${VERIFY_DIR}"
+
+printf '\n7/7 Recording semantic reasoning provenance...\n'
 EXECUTED_AT="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
 cat > "${RESULTS_DIR}/provenance.ttl" <<EOF
 @prefix cap: <urn:eska:example:pizza:capability:> .
@@ -112,9 +130,11 @@ run:american-hot-spicy-inference a prov:Entity, rdf:Statement ;
     prov:wasDerivedFrom run:spicy-pizza-slice .
 EOF
 
-printf '\nSUCCESS: semantic reasoning, Capability, and Knowledge Service contracts are verified.\n'
-printf 'Inference:   AmericanHot SubClassOf SpicyPizza\n'
-printf 'Explanation: %s\n' "${RESULTS_DIR}/explanation.md"
-printf 'Capability:  %s\n' "${HERE}/pizza-classification-capability.ttl"
-printf 'Service:     %s\n' "${HERE}/pizza-classification-service.ttl"
-printf 'Provenance:  %s\n' "${RESULTS_DIR}/provenance.ttl"
+printf '\nSUCCESS: semantic reasoning, Capability, Knowledge Service, and Knowledge Agent contracts are verified.\n'
+printf 'Inference:    AmericanHot SubClassOf SpicyPizza\n'
+printf 'Explanation:  %s\n' "${RESULTS_DIR}/explanation.md"
+printf 'Capability:   %s\n' "${HERE}/pizza-classification-capability.ttl"
+printf 'Service:      %s\n' "${HERE}/pizza-classification-service.ttl"
+printf 'Agent:        %s\n' "${HERE}/pizza-knowledge-agent.ttl"
+printf 'Architecture: %s\n' "${RESULTS_DIR}/architecture-model.owl"
+printf 'Provenance:   %s\n' "${RESULTS_DIR}/provenance.ttl"
