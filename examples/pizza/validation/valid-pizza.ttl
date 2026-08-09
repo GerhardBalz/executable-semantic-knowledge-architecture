@@ -1,0 +1,11 @@
+@prefix ex: <urn:eska:example:pizza:data:> .
+@prefix pizza: <http://www.co-ode.org/ontologies/pizza/pizza.owl#> .
+
+ex:validPizza
+    a pizza:Pizza ;
+    pizza:hasBase ex:thinBase ;
+    pizza:hasTopping ex:mozzarella, ex:tomato .
+
+ex:thinBase a pizza:PizzaBase .
+ex:mozzarella a pizza:PizzaTopping .
+ex:tomato a pizza:PizzaTopping .
