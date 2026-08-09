@@ -13,6 +13,7 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
 RESULTS = HERE / "results"
 
+ESKA = Namespace("urn:eska:core:")
 SH = Namespace("http://www.w3.org/ns/shacl#")
 PROV = Namespace("http://www.w3.org/ns/prov#")
 DCTERMS = Namespace("http://purl.org/dc/terms/")
@@ -27,6 +28,7 @@ def require(condition: bool, message: str) -> None:
 
 def verify_capability_contract() -> None:
     architecture = Graph()
+    architecture.parse(ROOT / "model" / "eska-core.ttl", format="turtle")
     architecture.parse(ROOT / "model" / "eska-capability.ttl", format="turtle")
     architecture.parse(HERE / "pizza-validation-capability.ttl", format="turtle")
 
@@ -93,6 +95,7 @@ def write_provenance() -> None:
 
     provenance = Graph()
     provenance.bind("dcterms", DCTERMS)
+    provenance.bind("eska", ESKA)
     provenance.bind("prov", PROV)
     provenance.bind("sh", SH)
     provenance.bind("val", VAL)
@@ -105,15 +108,31 @@ def write_provenance() -> None:
         ("invalid-pizza-validation", VAL.InvalidPizzaDataGraph, VAL.InvalidPizzaValidationReport, False),
     ):
         activity = VAL[name]
+        verification = VAL[f"{name}-verification"]
+
+        provenance.add((activity, RDF.type, ESKA.Execution))
         provenance.add((activity, RDF.type, PROV.Activity))
+        provenance.add((activity, ESKA.executesCapability, VAL.PizzaValidationCapability))
+        provenance.add((activity, ESKA.usesSemanticModel, VAL.PizzaShapesGraph))
+        provenance.add((activity, ESKA.usesExecutableArtifact, VAL.SHACLValidationArtifact))
+        provenance.add((activity, ESKA.generatesResult, report_entity))
         provenance.add((activity, PROV.used, VAL.PizzaShapesGraph))
         provenance.add((activity, PROV.used, data_entity))
         provenance.add((activity, PROV.wasAssociatedWith, VAL.pyshacl))
         provenance.add((activity, PROV.generated, report_entity))
         provenance.add((activity, PROV.endedAtTime, Literal(executed_at)))
+
+        provenance.add((report_entity, RDF.type, ESKA.Result))
+        provenance.add((report_entity, RDF.type, PROV.Entity))
         provenance.add((report_entity, RDF.type, SH.ValidationReport))
         provenance.add((report_entity, SH.conforms, Literal(conforms)))
         provenance.add((report_entity, PROV.wasGeneratedBy, activity))
+
+        provenance.add((verification, RDF.type, ESKA.Verification))
+        provenance.add((verification, RDF.type, PROV.Activity))
+        provenance.add((verification, ESKA.verifiesExecution, activity))
+        provenance.add((verification, ESKA.verifiesResult, report_entity))
+        provenance.add((verification, PROV.endedAtTime, Literal(executed_at)))
 
     provenance.serialize(destination=RESULTS / "provenance.ttl", format="turtle")
 
