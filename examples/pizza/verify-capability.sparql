@@ -1,0 +1,29 @@
+PREFIX cap: <urn:eska:example:pizza:capability:>
+PREFIX eska: <urn:eska:core:>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX pizza: <http://www.co-ode.org/ontologies/pizza/pizza.owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+# ROBOT verify treats returned rows as violations.
+# Each VALUES row is therefore a required machine-readable part of the
+# PizzaClassificationCapability contract.
+SELECT ?subject ?predicate ?object
+WHERE {
+  VALUES (?subject ?predicate ?object) {
+    (eska:SemanticCapability rdfs:subClassOf eska:Capability)
+    (cap:PizzaClassificationCapability rdf:type eska:SemanticCapability)
+    (cap:PizzaClassificationCapability eska:subject pizza:Pizza)
+    (cap:PizzaClassificationCapability eska:inputType owl:Class)
+    (cap:PizzaClassificationCapability eska:outputType owl:Class)
+    (cap:PizzaClassificationCapability eska:producesRelation rdfs:subClassOf)
+    (cap:PizzaClassificationCapability eska:usesSemanticModel cap:SpicyPizzaSemanticModel)
+    (cap:PizzaClassificationCapability eska:usesExecutableArtifact cap:OWLClassificationArtifact)
+    (cap:PizzaClassificationCapability eska:requiresCondition cap:CoherentOntologyCondition)
+    (cap:PizzaClassificationCapability eska:exampleInput pizza:AmericanHot)
+    (cap:PizzaClassificationCapability eska:exampleOutput pizza:SpicyPizza)
+  }
+  FILTER NOT EXISTS {
+    ?subject ?predicate ?object .
+  }
+}

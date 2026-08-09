@@ -144,6 +144,8 @@ A **Semantic Capability** is a Capability whose scope, inputs, outputs, applicab
 
 A Semantic Capability is not necessarily a capability *about semantics*. It is a capability that is itself semantically defined.
 
+The first provisional machine-readable subset of this concept is captured in [`model/eska-capability.ttl`](model/eska-capability.ttl). It intentionally formalizes only the terms required by the Pizza Capability example rather than claiming to be a complete ESKA ontology.
+
 ### Knowledge Service
 
 A **Knowledge Service** is an operational interface through which knowledge can be discovered, queried, reasoned over, validated, evaluated, transformed, explained, or acted upon.
@@ -256,7 +258,7 @@ The first executable example is implemented in [`examples/pizza`](examples/pizza
 
 > **Can `AmericanHot` be inferred to be a `SpicyPizza`, and can that inference be verified, explained, and traced to its semantic source?**
 
-The first slice intentionally stops before service or agent exposure:
+The slice now continues from semantic execution into an explicitly bounded Semantic Capability while still stopping before service or agent exposure:
 
 ```text
 Pizza Semantic Model
@@ -268,9 +270,13 @@ Inferred Classification
 Verified Result
         ↓ trace through
 Explanation + PROV-O Provenance
+        ↓ bounded and machine-described as
+PizzaClassificationCapability
 ```
 
-This is the first concrete demonstration of **Executable Semantic Knowledge**. Later increments will package such behavior as bounded Semantic Capabilities, expose those capabilities through Knowledge Services, and make them directly discoverable and invokable by Knowledge Agents.
+This is the first concrete demonstration of both **Executable Semantic Knowledge** and a machine-described **Semantic Capability**. The capability contract makes its subject, input, output, produced relation, semantic model, executable artifact, applicability condition, and example outcome explicit and verifiable.
+
+Later increments will expose this capability through a Knowledge Service and make it directly discoverable and invokable by a Knowledge Agent.
 
 The purpose is not to build a sophisticated pizza application. It is to demonstrate the semantic-to-execution chain with the smallest domain that makes the architecture visible.
 
@@ -282,9 +288,9 @@ The project evolves incrementally.
 - [x] Establish the distinction between Semantic Knowledge, Executable Semantic Knowledge, and ESKA.
 - [x] Implement the first Pizza semantic reasoning slice.
 - [x] Verify the inferred classification and add explanation and execution provenance.
-- [ ] Formalize the core architectural concepts after the prose model has been tested further.
+- [x] Define and verify the first bounded Semantic Capability around executable semantic knowledge.
 - [ ] Add explicit semantic validation examples in addition to inference verification.
-- [ ] Define bounded Semantic Capabilities around executable semantic knowledge.
+- [ ] Generalize stable capability terms as the broader ESKA model is tested through additional examples.
 - [ ] Expose capabilities through Knowledge Services.
 - [ ] Demonstrate direct discovery and invocation by a Knowledge Agent.
 
@@ -292,9 +298,9 @@ The project intentionally does **not** begin as a general software framework, ag
 
 ## Status
 
-This repository remains at an early reference-architecture stage, but it now contains its first executable semantic example in [`examples/pizza`](examples/pizza).
+This repository remains at an early reference-architecture stage, but it now contains both its first executable semantic example and its first machine-described Semantic Capability in [`examples/pizza`](examples/pizza).
 
-The example establishes a small but complete path from formal semantic knowledge through OWL reasoning to a verified inference, reasoner explanation, and provenance record. The broader ESKA architecture—particularly Semantic Capabilities, Knowledge Services, and Knowledge Agents—remains to be implemented incrementally.
+The example establishes a path from formal semantic knowledge through OWL reasoning to a verified inference, reasoner explanation, provenance record, and bounded Capability contract. The next architectural layers—Knowledge Service and Knowledge Agent—remain to be implemented incrementally.
 
 ## License
 

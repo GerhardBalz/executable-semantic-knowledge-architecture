@@ -1,0 +1,42 @@
+@prefix cap: <urn:eska:example:pizza:capability:> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix eska: <urn:eska:core:> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix pizza: <http://www.co-ode.org/ontologies/pizza/pizza.owl#> .
+
+cap:PizzaClassificationCapability
+    a eska:SemanticCapability ;
+    dcterms:title "Pizza Classification"@en ;
+    dcterms:description "Determine semantically entailed class-level classifications for Pizza classes using the Pizza semantic model."@en ;
+    skos:scopeNote "The initial capability is intentionally bounded to OWL class classification for Pizza concepts. It does not cover recommendation, ordering, preparation, pricing, or instance-data validation."@en ;
+    eska:subject pizza:Pizza ;
+    eska:inputType owl:Class ;
+    eska:outputType owl:Class ;
+    eska:producesRelation rdfs:subClassOf ;
+    eska:usesSemanticModel cap:SpicyPizzaSemanticModel ;
+    eska:usesExecutableArtifact cap:OWLClassificationArtifact ;
+    eska:requiresCondition cap:CoherentOntologyCondition ;
+    eska:exampleInput pizza:AmericanHot ;
+    eska:exampleOutput pizza:SpicyPizza .
+
+cap:SpicyPizzaSemanticModel
+    a eska:SemanticModel, prov:Entity ;
+    dcterms:title "Spicy Pizza semantic model slice"@en ;
+    dcterms:identifier "examples/pizza/spicy-pizza.ofn" ;
+    dcterms:description "Coherent OWL slice containing the Pizza axioms required for the SpicyPizza classification example."@en ;
+    prov:wasDerivedFrom <https://github.com/GerhardBalz/pizza-ontology/blob/main/src/ontology/pizza-edit.owl> .
+
+cap:OWLClassificationArtifact
+    a eska:ExecutableSemanticKnowledgeArtifact, prov:Entity ;
+    dcterms:title "OWL classification with HermiT"@en ;
+    dcterms:description "Executable semantic knowledge artifact that applies OWL entailment using HermiT through ROBOT."@en ;
+    eska:inputType owl:Ontology ;
+    eska:outputType owl:Ontology ;
+    eska:producesRelation rdfs:subClassOf .
+
+cap:CoherentOntologyCondition
+    a eska:ApplicabilityCondition ;
+    dcterms:description "The OWL model supplied for classification must be logically coherent for the selected reasoning operation."@en .

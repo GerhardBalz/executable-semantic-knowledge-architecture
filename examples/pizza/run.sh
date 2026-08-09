@@ -2,6 +2,7 @@
 set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="$(cd "${HERE}/../.." && pwd)"
 WORK_DIR="${HERE}/.work"
 RESULTS_DIR="${HERE}/results"
 VERIFY_DIR="${RESULTS_DIR}/verification"
@@ -14,7 +15,11 @@ PIZZA_SOURCE="https://github.com/GerhardBalz/pizza-ontology/blob/main/src/ontolo
 PIZZA_SOURCE_BLOB="397492e484de5560f8a7e048ce8999b707d94388"
 
 mkdir -p "${WORK_DIR}" "${RESULTS_DIR}" "${VERIFY_DIR}"
-rm -f "${RESULTS_DIR}/reasoned.owl" "${RESULTS_DIR}/explanation.md" "${RESULTS_DIR}/provenance.ttl"
+rm -f \
+  "${RESULTS_DIR}/reasoned.owl" \
+  "${RESULTS_DIR}/explanation.md" \
+  "${RESULTS_DIR}/capability-model.owl" \
+  "${RESULTS_DIR}/provenance.ttl"
 rm -f "${VERIFY_DIR}"/* 2>/dev/null || true
 
 if [[ ! -f "${ROBOT_JAR}" ]]; then
@@ -24,7 +29,7 @@ fi
 
 ROBOT=(java -jar "${ROBOT_JAR}")
 
-printf '\n1/4 Reasoning with HermiT...\n'
+printf '\n1/5 Reasoning with HermiT...\n'
 "${ROBOT[@]}" reason \
   --input "${HERE}/spicy-pizza.ofn" \
   --reasoner hermit \
@@ -32,22 +37,34 @@ printf '\n1/4 Reasoning with HermiT...\n'
   --annotate-inferred-axioms true \
   --output "${RESULTS_DIR}/reasoned.owl"
 
-printf '\n2/4 Verifying expected inference...\n'
+printf '\n2/5 Verifying expected inference...\n'
 "${ROBOT[@]}" verify \
   --input "${RESULTS_DIR}/reasoned.owl" \
   --queries "${HERE}/verify-spicy.sparql" \
   --output-dir "${VERIFY_DIR}"
 
-printf '\n3/4 Explaining the inferred classification...\n'
+printf '\n3/5 Explaining the inferred classification...\n'
 "${ROBOT[@]}" explain \
   --input "${HERE}/spicy-pizza.ofn" \
   --reasoner hermit \
   --axiom "'American Hot' SubClassOf 'Spicy Pizza'" \
   --explanation "${RESULTS_DIR}/explanation.md"
 
-printf '\n4/4 Recording execution provenance...\n'
+printf '\n4/5 Verifying the Semantic Capability contract...\n'
+"${ROBOT[@]}" merge \
+  --input "${ROOT_DIR}/model/eska-capability.ttl" \
+  --input "${HERE}/pizza-classification-capability.ttl" \
+  --output "${RESULTS_DIR}/capability-model.owl"
+
+"${ROBOT[@]}" verify \
+  --input "${RESULTS_DIR}/capability-model.owl" \
+  --queries "${HERE}/verify-capability.sparql" \
+  --output-dir "${VERIFY_DIR}"
+
+printf '\n5/5 Recording execution provenance...\n'
 EXECUTED_AT="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
 cat > "${RESULTS_DIR}/provenance.ttl" <<EOF
+@prefix cap: <urn:eska:example:pizza:capability:> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix prov: <http://www.w3.org/ns/prov#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
@@ -58,6 +75,7 @@ cat > "${RESULTS_DIR}/provenance.ttl" <<EOF
 
 run:spicy-pizza-reasoning a prov:Activity ;
     dcterms:description "OWL reasoning execution for the ESKA Pizza SpicyPizza example"@en ;
+    dcterms:conformsTo cap:PizzaClassificationCapability ;
     prov:used run:spicy-pizza-slice ;
     prov:wasAssociatedWith run:robot-hermit ;
     prov:endedAtTime "${EXECUTED_AT}"^^xsd:dateTime ;
@@ -80,6 +98,8 @@ run:american-hot-spicy-inference a prov:Entity, rdf:Statement ;
     prov:wasDerivedFrom run:spicy-pizza-slice .
 EOF
 
-printf '\nSUCCESS: inferred and verified AmericanHot SubClassOf SpicyPizza\n'
+printf '\nSUCCESS: PizzaClassificationCapability is machine-described and verified.\n'
+printf 'Inference:   AmericanHot SubClassOf SpicyPizza\n'
 printf 'Explanation: %s\n' "${RESULTS_DIR}/explanation.md"
+printf 'Capability:  %s\n' "${HERE}/pizza-classification-capability.ttl"
 printf 'Provenance:  %s\n' "${RESULTS_DIR}/provenance.ttl"
