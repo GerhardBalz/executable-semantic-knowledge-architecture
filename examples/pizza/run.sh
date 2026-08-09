@@ -56,6 +56,7 @@ printf '\n3/7 Explaining the inferred classification...\n'
 
 printf '\n4/7 Verifying the Semantic Capability contract...\n'
 "${ROBOT[@]}" merge \
+  --input "${ROOT_DIR}/model/eska-core.ttl" \
   --input "${ROOT_DIR}/model/eska-capability.ttl" \
   --input "${HERE}/pizza-classification-capability.ttl" \
   --output "${RESULTS_DIR}/capability-model.owl"
@@ -67,6 +68,7 @@ printf '\n4/7 Verifying the Semantic Capability contract...\n'
 
 printf '\n5/7 Verifying the Knowledge Service contract...\n'
 "${ROBOT[@]}" merge \
+  --input "${ROOT_DIR}/model/eska-core.ttl" \
   --input "${ROOT_DIR}/model/eska-capability.ttl" \
   --input "${ROOT_DIR}/model/eska-service.ttl" \
   --input "${HERE}/pizza-classification-capability.ttl" \
@@ -80,6 +82,7 @@ printf '\n5/7 Verifying the Knowledge Service contract...\n'
 
 printf '\n6/7 Building and verifying the Knowledge Agent architecture...\n'
 "${ROBOT[@]}" merge \
+  --input "${ROOT_DIR}/model/eska-core.ttl" \
   --input "${ROOT_DIR}/model/eska-capability.ttl" \
   --input "${ROOT_DIR}/model/eska-service.ttl" \
   --input "${ROOT_DIR}/model/eska-agent.ttl" \
@@ -98,6 +101,7 @@ EXECUTED_AT="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
 cat > "${RESULTS_DIR}/provenance.ttl" <<EOF
 @prefix cap: <urn:eska:example:pizza:capability:> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix eska: <urn:eska:core:> .
 @prefix prov: <http://www.w3.org/ns/prov#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
@@ -105,13 +109,27 @@ cat > "${RESULTS_DIR}/provenance.ttl" <<EOF
 @prefix pizza: <http://www.co-ode.org/ontologies/pizza/pizza.owl#> .
 @prefix run: <urn:eska:example:pizza:> .
 
-run:spicy-pizza-reasoning a prov:Activity ;
+run:spicy-pizza-reasoning a eska:Execution, prov:Activity ;
     dcterms:description "OWL reasoning execution for the ESKA Pizza SpicyPizza example"@en ;
     dcterms:conformsTo cap:PizzaClassificationCapability ;
+    eska:executesCapability cap:PizzaClassificationCapability ;
+    eska:usesSemanticModel cap:SpicyPizzaSemanticModel ;
+    eska:usesExecutableArtifact cap:OWLClassificationArtifact ;
+    eska:generatesResult run:american-hot-spicy-inference ;
     prov:used run:spicy-pizza-slice ;
     prov:wasAssociatedWith run:robot-hermit ;
     prov:endedAtTime "${EXECUTED_AT}"^^xsd:dateTime ;
     prov:generated run:american-hot-spicy-inference .
+
+run:spicy-pizza-verification a eska:Verification, prov:Activity ;
+    dcterms:description "Verification that OWL reasoning produced the expected AmericanHot to SpicyPizza semantic result."@en ;
+    eska:verifiesExecution run:spicy-pizza-reasoning ;
+    eska:verifiesResult run:american-hot-spicy-inference ;
+    prov:used run:spicy-pizza-verification-query ;
+    prov:endedAtTime "${EXECUTED_AT}"^^xsd:dateTime .
+
+run:spicy-pizza-verification-query a prov:Entity ;
+    dcterms:identifier "examples/pizza/verify-spicy.sparql" .
 
 run:robot-hermit a prov:SoftwareAgent ;
     rdfs:label "ROBOT ${ROBOT_VERSION} with HermiT"@en .
@@ -121,7 +139,7 @@ run:spicy-pizza-slice a prov:Entity ;
     dcterms:identifier "git-blob:${PIZZA_SOURCE_BLOB}" ;
     prov:wasDerivedFrom <${PIZZA_SOURCE}> .
 
-run:american-hot-spicy-inference a prov:Entity, rdf:Statement ;
+run:american-hot-spicy-inference a eska:Result, prov:Entity, rdf:Statement ;
     rdf:subject pizza:AmericanHot ;
     rdf:predicate rdfs:subClassOf ;
     rdf:object pizza:SpicyPizza ;
