@@ -1,0 +1,13 @@
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX pizza: <http://www.co-ode.org/ontologies/pizza/pizza.owl#>
+
+# ROBOT verify treats returned rows as violations.
+# This query therefore returns one row only when the expected inference is absent.
+SELECT ?subject ?expectedClass
+WHERE {
+  BIND(pizza:AmericanHot AS ?subject)
+  BIND(pizza:SpicyPizza AS ?expectedClass)
+  FILTER NOT EXISTS {
+    ?subject rdfs:subClassOf ?expectedClass .
+  }
+}
