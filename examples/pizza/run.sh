@@ -19,6 +19,7 @@ rm -f \
   "${RESULTS_DIR}/reasoned.owl" \
   "${RESULTS_DIR}/explanation.md" \
   "${RESULTS_DIR}/capability-model.owl" \
+  "${RESULTS_DIR}/service-model.owl" \
   "${RESULTS_DIR}/provenance.ttl"
 rm -f "${VERIFY_DIR}"/* 2>/dev/null || true
 
@@ -29,7 +30,7 @@ fi
 
 ROBOT=(java -jar "${ROBOT_JAR}")
 
-printf '\n1/5 Reasoning with HermiT...\n'
+printf '\n1/6 Reasoning with HermiT...\n'
 "${ROBOT[@]}" reason \
   --input "${HERE}/spicy-pizza.ofn" \
   --reasoner hermit \
@@ -37,20 +38,20 @@ printf '\n1/5 Reasoning with HermiT...\n'
   --annotate-inferred-axioms true \
   --output "${RESULTS_DIR}/reasoned.owl"
 
-printf '\n2/5 Verifying expected inference...\n'
+printf '\n2/6 Verifying expected inference...\n'
 "${ROBOT[@]}" verify \
   --input "${RESULTS_DIR}/reasoned.owl" \
   --queries "${HERE}/verify-spicy.sparql" \
   --output-dir "${VERIFY_DIR}"
 
-printf '\n3/5 Explaining the inferred classification...\n'
+printf '\n3/6 Explaining the inferred classification...\n'
 "${ROBOT[@]}" explain \
   --input "${HERE}/spicy-pizza.ofn" \
   --reasoner hermit \
   --axiom "'American Hot' SubClassOf 'Spicy Pizza'" \
   --explanation "${RESULTS_DIR}/explanation.md"
 
-printf '\n4/5 Verifying the Semantic Capability contract...\n'
+printf '\n4/6 Verifying the Semantic Capability contract...\n'
 "${ROBOT[@]}" merge \
   --input "${ROOT_DIR}/model/eska-capability.ttl" \
   --input "${HERE}/pizza-classification-capability.ttl" \
@@ -61,7 +62,20 @@ printf '\n4/5 Verifying the Semantic Capability contract...\n'
   --queries "${HERE}/verify-capability.sparql" \
   --output-dir "${VERIFY_DIR}"
 
-printf '\n5/5 Recording execution provenance...\n'
+printf '\n5/6 Verifying the Knowledge Service contract...\n'
+"${ROBOT[@]}" merge \
+  --input "${ROOT_DIR}/model/eska-capability.ttl" \
+  --input "${ROOT_DIR}/model/eska-service.ttl" \
+  --input "${HERE}/pizza-classification-capability.ttl" \
+  --input "${HERE}/pizza-classification-service.ttl" \
+  --output "${RESULTS_DIR}/service-model.owl"
+
+"${ROBOT[@]}" verify \
+  --input "${RESULTS_DIR}/service-model.owl" \
+  --queries "${HERE}/verify-service.sparql" \
+  --output-dir "${VERIFY_DIR}"
+
+printf '\n6/6 Recording execution provenance...\n'
 EXECUTED_AT="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
 cat > "${RESULTS_DIR}/provenance.ttl" <<EOF
 @prefix cap: <urn:eska:example:pizza:capability:> .
@@ -98,8 +112,9 @@ run:american-hot-spicy-inference a prov:Entity, rdf:Statement ;
     prov:wasDerivedFrom run:spicy-pizza-slice .
 EOF
 
-printf '\nSUCCESS: PizzaClassificationCapability is machine-described and verified.\n'
+printf '\nSUCCESS: semantic reasoning, Capability, and Knowledge Service contracts are verified.\n'
 printf 'Inference:   AmericanHot SubClassOf SpicyPizza\n'
 printf 'Explanation: %s\n' "${RESULTS_DIR}/explanation.md"
 printf 'Capability:  %s\n' "${HERE}/pizza-classification-capability.ttl"
+printf 'Service:     %s\n' "${HERE}/pizza-classification-service.ttl"
 printf 'Provenance:  %s\n' "${RESULTS_DIR}/provenance.ttl"
