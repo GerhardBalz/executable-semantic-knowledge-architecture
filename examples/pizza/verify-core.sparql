@@ -1,0 +1,32 @@
+PREFIX eska: <urn:eska:core:>
+PREFIX cap: <urn:eska:example:pizza:capability:>
+PREFIX val: <urn:eska:example:pizza:validation:>
+PREFIX pizza: <http://www.co-ode.org/ontologies/pizza/pizza.owl#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX sh: <http://www.w3.org/ns/shacl#>
+
+# ROBOT verify treats returned rows as violations.
+# Each execution mode must satisfy the same ESKA core Capability contract.
+SELECT ?mode ?capability
+WHERE {
+  VALUES (?mode ?capability ?model ?artifact ?relation) {
+    ("reasoning" cap:PizzaClassificationCapability cap:SpicyPizzaSemanticModel cap:OWLClassificationArtifact rdfs:subClassOf)
+    ("validation" val:PizzaValidationCapability val:PizzaShapesGraph val:SHACLValidationArtifact sh:conforms)
+  }
+
+  FILTER NOT EXISTS {
+    ?capability
+        a eska:SemanticCapability ;
+        eska:subject pizza:Pizza ;
+        eska:inputType ?inputType ;
+        eska:outputType ?outputType ;
+        eska:producesRelation ?relation ;
+        eska:usesSemanticModel ?model ;
+        eska:usesExecutableArtifact ?artifact ;
+        eska:requiresCondition ?condition .
+
+    ?model a eska:SemanticModel .
+    ?artifact a eska:ExecutableSemanticKnowledgeArtifact .
+    ?condition a eska:ApplicabilityCondition .
+  }
+}
