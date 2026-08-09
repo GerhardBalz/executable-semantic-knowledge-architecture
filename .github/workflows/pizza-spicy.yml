@@ -3,12 +3,14 @@ name: Pizza ESKA reference
 on:
   push:
     paths:
+      - "README.md"
       - "examples/pizza/**"
       - "model/**"
       - "docs/**"
       - ".github/workflows/pizza-spicy.yml"
   pull_request:
     paths:
+      - "README.md"
       - "examples/pizza/**"
       - "model/**"
       - "docs/**"
