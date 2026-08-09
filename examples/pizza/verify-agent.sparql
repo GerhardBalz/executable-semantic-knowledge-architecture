@@ -1,0 +1,22 @@
+PREFIX agent: <urn:eska:example:pizza:agent:>
+PREFIX cap: <urn:eska:example:pizza:capability:>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX eska: <urn:eska:core:>
+PREFIX prov: <http://www.w3.org/ns/prov#>
+
+# ROBOT verify treats returned rows as violations.
+# Return one row if the first Knowledge Agent contract is incomplete.
+SELECT ?agent
+WHERE {
+  BIND(agent:PizzaKnowledgeAgent AS ?agent)
+  FILTER NOT EXISTS {
+    ?agent a eska:KnowledgeAgent, prov:SoftwareAgent ;
+           dcterms:identifier "examples/pizza/agent.py" ;
+           eska:targetsCapability cap:PizzaClassificationCapability ;
+           eska:usesDiscoveryArtifact agent:PizzaClassificationServiceDiscovery .
+
+    agent:PizzaClassificationServiceDiscovery
+        a eska:DiscoveryArtifact ;
+        dcterms:identifier "examples/pizza/discover-service.sparql" .
+  }
+}
