@@ -1,0 +1,79 @@
+{
+  "contractVersion": "1.0",
+  "status": "provisional-publication-strategy",
+  "repository": "GerhardBalz/executable-semantic-knowledge-architecture",
+  "termNamespace": {
+    "current": "urn:eska:core:",
+    "target": "https://w3id.org/eska#",
+    "activationStatus": "planned-not-active",
+    "activationPrerequisites": [
+      "The W3ID redirect namespace has been accepted and resolves successfully.",
+      "Human-readable and RDF publication targets are deployed and verified.",
+      "A one-to-one predecessor mapping from every provisional ESKA term to its permanent IRI has been generated and verified.",
+      "The complete ESKA reference workflow is green at the migration commit."
+    ]
+  },
+  "publicationRoutes": {
+    "vocabulary": "https://w3id.org/eska",
+    "combinedRdf": "https://w3id.org/eska/dist/eska.ttl",
+    "combinedDocumentation": "https://w3id.org/eska/docs",
+    "modulePattern": "https://w3id.org/eska/model/{module}",
+    "moduleVersionPattern": "https://w3id.org/eska/model/{module}/{version}",
+    "moduleDistributionPattern": "https://w3id.org/eska/dist/{version}/eska-{module}.ttl"
+  },
+  "releaseVersioning": {
+    "repositoryTagPattern": "eska-v{version}",
+    "initialRepositoryVersion": "0.1.0",
+    "semanticModuleVersionsIndependent": true,
+    "repositoryReleaseMeaning": "A governed repository snapshot and publication bundle. It is not a semantic version assertion for every contained ontology module."
+  },
+  "compatibility": {
+    "moduleVersioning": "semver",
+    "patch": "Documentation, annotations, metadata, or corrections that do not change the intended machine-interpretable contract.",
+    "minor": "Backward-compatible additive semantic changes, including new terms or axioms that preserve existing intended use.",
+    "major": "Breaking semantic contract changes. Materially incompatible term meaning should be deprecated and replaced rather than silently redefined.",
+    "termIrisUnversioned": true
+  },
+  "modules": [
+    {
+      "name": "core",
+      "path": "model/eska-core.ttl",
+      "currentOntologyIri": "urn:eska:model:core",
+      "currentVersion": "0.1-provisional",
+      "targetOntologyIri": "https://w3id.org/eska/model/core",
+      "firstPublishedVersion": "0.1.0"
+    },
+    {
+      "name": "capability",
+      "path": "model/eska-capability.ttl",
+      "currentOntologyIri": "urn:eska:model:capability",
+      "currentVersion": "0.2-provisional",
+      "targetOntologyIri": "https://w3id.org/eska/model/capability",
+      "firstPublishedVersion": "0.2.0"
+    },
+    {
+      "name": "service",
+      "path": "model/eska-service.ttl",
+      "currentOntologyIri": "urn:eska:model:service",
+      "currentVersion": "0.4-provisional",
+      "targetOntologyIri": "https://w3id.org/eska/model/service",
+      "firstPublishedVersion": "0.4.0"
+    },
+    {
+      "name": "agent",
+      "path": "model/eska-agent.ttl",
+      "currentOntologyIri": "urn:eska:model:agent",
+      "currentVersion": "0.3-provisional",
+      "targetOntologyIri": "https://w3id.org/eska/model/agent",
+      "firstPublishedVersion": "0.3.0"
+    },
+    {
+      "name": "deployment",
+      "path": "model/eska-deployment.ttl",
+      "currentOntologyIri": "urn:eska:model:deployment",
+      "currentVersion": "0.1-provisional",
+      "targetOntologyIri": "https://w3id.org/eska/model/deployment",
+      "firstPublishedVersion": "0.1.0"
+    }
+  ]
+}
