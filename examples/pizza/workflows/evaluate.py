@@ -10,6 +10,7 @@ import subprocess
 import sys
 import xml.etree.ElementTree as ET
 
+import pyshacl
 from pyshacl import validate
 import rdflib
 from rdflib import Graph, Literal, Namespace, RDF, URIRef
@@ -139,6 +140,10 @@ def source_url(source: dict[str, object], role: str) -> URIRef:
     return URIRef(f"https://github.com/{repository}/blob/{commit}/{artifact_paths[role]}")
 
 
+def source_path_url(source: dict[str, object], source_path: str) -> URIRef:
+    return URIRef(f"https://github.com/{source['repository']}/blob/{source['commit']}/{source_path}")
+
+
 def capability_models_and_artifact(architecture: Graph, capability: URIRef) -> tuple[list[URIRef], URIRef]:
     models = [m for m in architecture.objects(capability, ESKA.usesSemanticModel) if isinstance(m, URIRef)]
     artifacts = [a for a in architecture.objects(capability, ESKA.usesExecutableArtifact) if isinstance(a, URIRef)]
@@ -154,6 +159,8 @@ def add_execution_contract(graph: Graph, architecture: Graph, execution: URIRef,
     graph.add((execution, ESKA.executesCapability, capability))
     graph.add((execution, ESKA.usesExecutableArtifact, artifact))
     graph.add((execution, ESKA.generatesResult, result))
+    graph.add((execution, PROV.generated, result))
+    graph.add((execution, PROV.wasAssociatedWith, WF.workflowEvaluator))
     for model in models:
         graph.add((execution, ESKA.usesSemanticModel, model))
 
@@ -178,6 +185,7 @@ def run_workflow_case(
     ended_at = Literal(datetime.now(timezone.utc).replace(microsecond=0), datatype=XSD.dateTime)
 
     input_path = local_path_for_source_path(source, str(case["input"]))
+    input_url = source_path_url(source, str(case["input"]))
     input_graph = Graph().parse(input_path, format="turtle")
     shapes = Graph().parse(DOMAIN / "shapes.ttl", format="turtle")
     mapping_query = (DOMAIN / "mapping.rq").read_text(encoding="utf-8")
@@ -186,7 +194,7 @@ def run_workflow_case(
     provenance.add((overall_execution, PROV.used, source_url(source, "workflowModel")))
     provenance.add((overall_execution, PROV.used, source_url(source, "workflowVocabulary")))
     provenance.add((overall_execution, PROV.used, source_url(source, "workflowCases")))
-    provenance.add((overall_execution, PROV.used, URIRef(f"https://github.com/{source['repository']}/blob/{source['commit']}/{case['input']}")))
+    provenance.add((overall_execution, PROV.used, input_url))
 
     current = "Start"
     state: dict[str, object] = {}
@@ -210,6 +218,7 @@ def run_workflow_case(
                 provenance.add((step_execution, PROV.wasInformedBy, prior_step_execution))
 
             if operation == WF_SOURCE.ValidatePizzaData:
+                shapes_url = source_url(source, "shapes")
                 conforms, _, _ = validate(data_graph=input_graph, shacl_graph=shapes, inference="none", abort_on_first=False)
                 state["validationConforms"] = bool(conforms)
                 provenance.add((step_result, RDF.type, ESKA.Result))
@@ -219,13 +228,19 @@ def run_workflow_case(
                 provenance.add((step_result, RDF.predicate, SH.conforms))
                 provenance.add((step_result, RDF.object, Literal(bool(conforms))))
                 provenance.add((step_result, PROV.wasGeneratedBy, step_execution))
-                provenance.add((step_execution, PROV.used, source_url(source, "shapes")))
+                provenance.add((step_result, PROV.wasDerivedFrom, input_url))
+                provenance.add((step_result, PROV.wasDerivedFrom, shapes_url))
+                provenance.add((step_execution, PROV.used, input_url))
+                provenance.add((step_execution, PROV.used, shapes_url))
             elif operation == WF_SOURCE.TransformPizzaToMenu:
                 require(state.get("validationConforms") is True, f"{identifier}: mapping executed without conforming validation")
+                mapping_url = source_url(source, "mappingQuery")
+                target_model_url = source_url(source, "mappingTargetVocabulary")
                 query_result = input_graph.query(mapping_query)
                 transformed = query_result.graph
                 require(transformed is not None, f"{identifier}: mapping did not produce a graph")
                 expected_path = local_path_for_source_path(source, str(case["expectedTarget"]))
+                expected_url = source_path_url(source, str(case["expectedTarget"]))
                 expected = Graph().parse(expected_path, format="turtle")
                 require(isomorphic(transformed, expected), f"{identifier}: workflow target graph differs from expected")
                 provenance.add((step_result, RDF.type, ESKA.Result))
@@ -233,8 +248,12 @@ def run_workflow_case(
                 provenance.add((step_result, RDF.type, MAP.MenuProjectionGraph))
                 provenance.add((step_result, DCTERMS.conformsTo, MAP.MenuTargetSemanticModel))
                 provenance.add((step_result, PROV.wasGeneratedBy, step_execution))
-                provenance.add((step_execution, PROV.used, source_url(source, "mappingQuery")))
-                provenance.add((step_execution, PROV.used, source_url(source, "mappingTargetVocabulary")))
+                provenance.add((step_result, PROV.wasDerivedFrom, input_url))
+                provenance.add((step_result, PROV.wasDerivedFrom, mapping_url))
+                provenance.add((step_execution, PROV.used, input_url))
+                provenance.add((step_execution, PROV.used, mapping_url))
+                provenance.add((step_execution, PROV.used, target_model_url))
+                provenance.add((step_verification, PROV.used, expected_url))
             else:
                 raise AssertionError(f"unsupported workflow operation: {operation}")
 
@@ -275,7 +294,6 @@ def run_workflow_case(
     provenance.add((overall_result, PROV.wasGeneratedBy, overall_execution))
     for step_result in step_results:
         provenance.add((overall_result, PROV.wasDerivedFrom, step_result))
-    provenance.add((overall_execution, PROV.generated, overall_result))
     provenance.add((overall_execution, PROV.endedAtTime, ended_at))
     add_verification(provenance, overall_verification, overall_execution, overall_result, ended_at)
 
@@ -320,6 +338,15 @@ def main() -> None:
     provenance.bind("val", VAL)
     provenance.bind("wf", WF)
     provenance.bind("pizzaWf", WF_SOURCE)
+
+    provenance.add((WF.workflowEvaluator, RDF.type, PROV.SoftwareAgent))
+    provenance.add((
+        WF.workflowEvaluator,
+        DCTERMS.title,
+        Literal(
+            f"ESKA BPMN workflow evaluator / pySHACL {getattr(pyshacl, '__version__', 'unknown')} / RDFLib {rdflib.__version__}"
+        ),
+    ))
 
     results = [run_workflow_case(source, architecture, model, operation_capabilities, case, provenance) for case in cases]
 

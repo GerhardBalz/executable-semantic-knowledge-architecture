@@ -19,10 +19,15 @@ for required in \
   "${HERE}/decisions/results/provenance.ttl" \
   "${HERE}/calculations/results/provenance.ttl" \
   "${HERE}/mappings/results/provenance.ttl" \
-  "${HERE}/workflows/results/provenance.ttl"
+  "${HERE}/workflows/results/provenance.ttl" \
+  "${RESULTS_DIR}/general-agent-classification-blue-provenance.ttl" \
+  "${RESULTS_DIR}/general-agent-classification-green-provenance.ttl" \
+  "${RESULTS_DIR}/general-agent-validation-valid-blue-provenance.ttl" \
+  "${RESULTS_DIR}/general-agent-validation-valid-green-provenance.ttl" \
+  "${RESULTS_DIR}/general-agent-validation-invalid-green-provenance.ttl"
 do
   if [[ ! -f "${required}" ]]; then
-    echo "Required execution provenance not found: ${required}" >&2
+    echo "Required execution/invocation provenance not found: ${required}" >&2
     exit 1
   fi
 done
@@ -47,3 +52,6 @@ ROBOT=(java -jar "${ROBOT_JAR}")
   --output-dir "${VERIFY_DIR}"
 
 echo "SUCCESS: reasoning, validation, rule evaluation, decision evaluation, calculation, mapping, and workflow share the ESKA Execution → Result → Verification core pattern across 16 concrete executions."
+
+printf '\nVerifying provenance, evidence, and Result lineage profiles...\n'
+python3 "${HERE}/verify-provenance-lineage.py"

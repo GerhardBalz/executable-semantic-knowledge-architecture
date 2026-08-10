@@ -17,6 +17,7 @@ from __future__ import annotations
 import argparse
 import csv
 from datetime import datetime, timezone
+import hashlib
 import json
 from pathlib import Path
 import subprocess
@@ -299,6 +300,27 @@ def interpret_result(
     raise RuntimeError(f"Unsupported invocation adapter: {adapter_key}")
 
 
+def invocation_identity(
+    contract: dict[str, str], deployment: dict[str, str], raw_input: str
+) -> tuple[str, str]:
+    """Return a readable mode slug and deterministic invocation key.
+
+    Provenance IRIs must remain unique when blue/green and multiple inputs are
+    combined into one graph. The key therefore includes semantic Capability,
+    concrete deployment, and invocation input identity.
+    """
+
+    slug = (
+        "classification"
+        if contract["adapterKey"] == IRI_LIST_ADAPTER
+        else "validation"
+    )
+    material = "\n".join(
+        (contract["capability"], deployment["deployment"], raw_input)
+    ).encode("utf-8")
+    return slug, hashlib.sha256(material).hexdigest()[:16]
+
+
 def write_provenance(
     path: Path,
     contract: dict[str, str],
@@ -309,12 +331,8 @@ def write_provenance(
     semantic_result: dict[str, object],
 ) -> None:
     timestamp = datetime.now(timezone.utc).replace(microsecond=0)
-    slug = (
-        "classification"
-        if contract["adapterKey"] == IRI_LIST_ADAPTER
-        else "validation"
-    )
-    base = f"urn:eska:example:pizza:general-agent-run:{slug}:"
+    slug, invocation_key = invocation_identity(contract, deployment, raw_input)
+    base = f"urn:eska:example:pizza:general-agent-run:{slug}:{invocation_key}:"
     execution = URIRef(base + "execution")
     result = URIRef(base + "result")
     verification = URIRef(base + "verification")
@@ -329,6 +347,9 @@ def write_provenance(
     graph.bind("sh", SH)
 
     graph.add((URIRef(AGENT_IRI), RDF.type, PROV.SoftwareAgent))
+    graph.add((URIRef(AGENT_IRI), DCTERMS.title, Literal("ESKA generalized deterministic Pizza Knowledge Agent")))
+    graph.add((URIRef(AGENT_IRI), DCTERMS.identifier, Literal("examples/pizza/knowledge_agent.py")))
+
     graph.add((execution, RDF.type, ESKA.Execution))
     graph.add((execution, RDF.type, PROV.Activity))
     graph.add((execution, ESKA.executesCapability, URIRef(contract["capability"])))
@@ -349,6 +370,7 @@ def write_provenance(
     graph.add((result, RDF.type, PROV.Entity))
     graph.add((result, DCTERMS.relation, URIRef(contract["relation"])))
     graph.add((result, PROV.wasGeneratedBy, execution))
+    graph.add((result, PROV.wasDerivedFrom, input_entity))
     if contract["adapterKey"] == SHACL_REPORT_ADAPTER:
         graph.add((result, RDF.type, SH.ValidationReport))
         graph.add(
