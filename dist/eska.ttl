@@ -1,0 +1,288 @@
+# GENERATED PUBLICATION DISTRIBUTION — DO NOT EDIT AS A SEMANTIC SOURCE.
+# Source of truth: model/eska-core.ttl, eska-capability.ttl, eska-service.ttl,
+# eska-agent.ttl, and eska-deployment.ttl.
+# This pre-activation distribution intentionally preserves the current URN namespace.
+
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix eska: <urn:eska:core:> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+<urn:eska:model:core>
+    a owl:Ontology ;
+    dcterms:title "ESKA core model"@en ;
+    dcterms:description "A deliberately small, provisional core model containing concepts demonstrated across more than one executable-semantic mode."@en ;
+    owl:versionInfo "0.1-provisional" .
+
+eska:SemanticModel
+    a owl:Class ;
+    rdfs:label "Semantic Model"@en ;
+    skos:definition "A formal representation that gives knowledge explicit machine-interpretable meaning through concepts, relationships, constraints, axioms, or equivalent semantic structures."@en .
+
+eska:ExecutableSemanticKnowledgeArtifact
+    a owl:Class ;
+    rdfs:label "Executable Semantic Knowledge Artifact"@en ;
+    skos:definition "A machine-executable artifact whose computational behavior remains explicitly connected to machine-interpretable semantic knowledge."@en .
+
+eska:Capability
+    a owl:Class ;
+    rdfs:label "Capability"@en ;
+    skos:definition "A bounded ability to achieve a defined kind of outcome within a specified scope."@en .
+
+eska:SemanticCapability
+    a owl:Class ;
+    rdfs:subClassOf eska:Capability ;
+    rdfs:label "Semantic Capability"@en ;
+    skos:definition "A Capability whose scope, inputs, outputs, applicability, constraints, and semantics are explicitly represented in machine-interpretable form."@en .
+
+eska:ApplicabilityCondition
+    a owl:Class ;
+    rdfs:label "Applicability Condition"@en ;
+    skos:definition "A machine-identifiable condition that must hold for a semantic capability or executable semantic artifact to be applied as intended."@en .
+
+eska:Execution
+    a owl:Class ;
+    rdfs:subClassOf prov:Activity ;
+    rdfs:label "Execution"@en ;
+    skos:definition "A computational activity that applies executable semantic knowledge under a defined semantic capability and produces a machine-interpretable result."@en .
+
+eska:Result
+    a owl:Class ;
+    rdfs:subClassOf prov:Entity ;
+    rdfs:label "Result"@en ;
+    skos:definition "A machine-interpretable entity produced by an ESKA execution, such as an inferred statement, validation report, decision, calculation, transformation, or action description."@en .
+
+eska:Verification
+    a owl:Class ;
+    rdfs:subClassOf prov:Activity ;
+    rdfs:label "Verification"@en ;
+    skos:definition "An activity that checks semantic knowledge, an execution, or a result against explicit criteria."@en .
+
+eska:subject a owl:ObjectProperty ; rdfs:label "subject"@en .
+eska:inputType a owl:ObjectProperty ; rdfs:label "input type"@en .
+eska:outputType a owl:ObjectProperty ; rdfs:label "output type"@en .
+
+eska:producesRelation
+    a owl:ObjectProperty ;
+    rdfs:label "produces relation"@en ;
+    skos:definition "Identifies the semantic relation through which the primary result of an executable artifact or capability is expressed."@en .
+
+eska:usesSemanticModel
+    a owl:ObjectProperty ;
+    rdfs:label "uses semantic model"@en ;
+    rdfs:range eska:SemanticModel .
+
+eska:usesExecutableArtifact
+    a owl:ObjectProperty ;
+    rdfs:label "uses executable artifact"@en ;
+    rdfs:range eska:ExecutableSemanticKnowledgeArtifact .
+
+eska:requiresCondition
+    a owl:ObjectProperty ;
+    rdfs:label "requires condition"@en ;
+    rdfs:range eska:ApplicabilityCondition .
+
+eska:executesCapability
+    a owl:ObjectProperty ;
+    rdfs:label "executes capability"@en ;
+    rdfs:domain eska:Execution ;
+    rdfs:range eska:SemanticCapability .
+
+eska:generatesResult
+    a owl:ObjectProperty ;
+    rdfs:subPropertyOf prov:generated ;
+    rdfs:label "generates result"@en ;
+    rdfs:domain eska:Execution ;
+    rdfs:range eska:Result .
+
+eska:verifiesExecution
+    a owl:ObjectProperty ;
+    rdfs:label "verifies execution"@en ;
+    rdfs:domain eska:Verification ;
+    rdfs:range eska:Execution .
+
+eska:verifiesResult
+    a owl:ObjectProperty ;
+    rdfs:label "verifies result"@en ;
+    rdfs:domain eska:Verification ;
+    rdfs:range eska:Result .
+
+# capability extension
+
+<urn:eska:model:capability>
+    a owl:Ontology ;
+    dcterms:title "ESKA capability extension"@en ;
+    dcterms:description "Provisional capability-specific terms that are useful for examples but have not yet been promoted into the ESKA core model."@en ;
+    dcterms:requires <urn:eska:model:core> ;
+    owl:versionInfo "0.2-provisional" .
+
+eska:exampleInput a owl:ObjectProperty ; rdfs:label "example input"@en .
+eska:exampleOutput a owl:ObjectProperty ; rdfs:label "example output"@en .
+
+# service extension
+
+<urn:eska:model:service>
+    a owl:Ontology ;
+    dcterms:title "ESKA service model"@en ;
+    dcterms:description "A deliberately small, provisional extension containing stable Knowledge Service semantics plus separate access-binding terms."@en ;
+    dcterms:requires <urn:eska:model:core> ;
+    owl:versionInfo "0.4-provisional" .
+
+eska:KnowledgeService
+    a owl:Class ;
+    rdfs:label "Knowledge Service"@en ;
+    skos:definition "An operational interface through which one or more Semantic Capabilities can be exposed for discovery and invocation."@en .
+
+eska:ServiceOperation
+    a owl:Class ;
+    rdfs:label "Service Operation"@en ;
+    skos:definition "An operational realization of one Semantic Capability exposed by a Knowledge Service. Its semantic input, output, relation, and applicability are defined by the Capability; concrete access details are supplied through an Access Binding."@en .
+
+eska:AccessBinding
+    a owl:Class ;
+    rdfs:label "Access Binding"@en ;
+    skos:definition "A concrete transport or representation binding through which a Service Operation can be invoked."@en .
+
+eska:HTTPAccessBinding
+    a owl:Class ;
+    rdfs:subClassOf eska:AccessBinding ;
+    rdfs:label "HTTP Access Binding"@en ;
+    skos:definition "An Access Binding that identifies an HTTP operation contract independently of a particular runtime deployment location."@en .
+
+eska:exposesCapability
+    a owl:ObjectProperty ; rdfs:label "exposes capability"@en ;
+    rdfs:domain eska:KnowledgeService ; rdfs:range eska:SemanticCapability .
+
+eska:hasOperation
+    a owl:ObjectProperty ; rdfs:label "has operation"@en ;
+    rdfs:domain eska:KnowledgeService ; rdfs:range eska:ServiceOperation .
+
+eska:realizesCapability
+    a owl:ObjectProperty ; rdfs:label "realizes capability"@en ;
+    skos:definition "Identifies the Semantic Capability operationally realized by a Service Operation."@en ;
+    rdfs:domain eska:ServiceOperation ; rdfs:range eska:SemanticCapability .
+
+eska:hasAccessBinding
+    a owl:ObjectProperty ; rdfs:label "has access binding"@en ;
+    skos:definition "Associates a Service Operation with a concrete access contract without making that transport contract part of the Semantic Capability."@en ;
+    rdfs:domain eska:ServiceOperation ; rdfs:range eska:AccessBinding .
+
+eska:httpMethod a owl:DatatypeProperty ; rdfs:label "HTTP method"@en ; rdfs:domain eska:HTTPAccessBinding .
+
+eska:path
+    a owl:DatatypeProperty ; rdfs:label "path"@en ; rdfs:domain eska:HTTPAccessBinding ;
+    skos:definition "Contract-relative HTTP path. Runtime scheme, host, and port are deployment bindings and remain separate."@en .
+
+eska:mediaType
+    a owl:DatatypeProperty ; rdfs:label "media type"@en ; rdfs:domain eska:AccessBinding ;
+    skos:definition "Media type of the access representation envelope. It does not replace the Semantic Capability output type or determine how the semantic result must be interpreted."@en .
+
+eska:requestField
+    a owl:DatatypeProperty ; rdfs:label "request field"@en ; rdfs:domain eska:AccessBinding ;
+    skos:definition "Representation field that carries the semantically typed service input."@en .
+
+eska:resultField
+    a owl:DatatypeProperty ; rdfs:label "result field"@en ; rdfs:domain eska:AccessBinding ;
+    skos:definition "Representation field that carries the semantically typed service result. The field location is an access concern; result meaning comes from the Capability output type and produced relation."@en .
+
+eska:relationField
+    a owl:DatatypeProperty ; rdfs:label "relation field"@en ; rdfs:domain eska:AccessBinding ;
+    skos:definition "Representation field that identifies the semantic relation expressed by the result."@en .
+
+eska:capabilityField
+    a owl:DatatypeProperty ; rdfs:label "capability field"@en ; rdfs:domain eska:AccessBinding ;
+    skos:definition "Representation field that identifies the Semantic Capability under which the result was produced."@en .
+
+# agent extension
+
+<urn:eska:model:agent>
+    a owl:Ontology ;
+    dcterms:title "ESKA agent model"@en ;
+    dcterms:description "A deliberately small, provisional extension containing terms needed to describe and test Knowledge Agents, semantic service discovery, and semantically typed invocation adaptation."@en ;
+    dcterms:requires <urn:eska:model:core> ;
+    owl:versionInfo "0.3-provisional" .
+
+eska:KnowledgeAgent
+    a owl:Class ; rdfs:label "Knowledge Agent"@en ;
+    skos:definition "A software agent that can use machine-interpretable ESKA contracts to discover and invoke knowledge capabilities and interpret their semantic results."@en .
+
+eska:DiscoveryArtifact
+    a owl:Class ; rdfs:label "Discovery Artifact"@en ;
+    skos:definition "An executable or queryable artifact used by an agent to discover an operational realization of a semantic capability."@en .
+
+eska:SemanticInvocationAdapter
+    a owl:Class ; rdfs:label "Semantic Invocation Adapter"@en ;
+    skos:definition "An agent-side executable adapter that encodes a semantically typed input for a discovered access contract and interprets the returned result according to the discovered Capability output type and relation."@en .
+
+eska:targetsCapability
+    a owl:ObjectProperty ; rdfs:label "targets capability"@en ;
+    rdfs:domain eska:KnowledgeAgent ; rdfs:range eska:SemanticCapability .
+
+eska:usesDiscoveryArtifact
+    a owl:ObjectProperty ; rdfs:label "uses discovery artifact"@en ;
+    rdfs:domain eska:KnowledgeAgent ; rdfs:range eska:DiscoveryArtifact .
+
+eska:usesInvocationAdapter
+    a owl:ObjectProperty ; rdfs:label "uses invocation adapter"@en ;
+    rdfs:domain eska:KnowledgeAgent ; rdfs:range eska:SemanticInvocationAdapter .
+
+eska:supportsInputType
+    a owl:ObjectProperty ; rdfs:label "supports input type"@en ; rdfs:domain eska:SemanticInvocationAdapter ;
+    skos:definition "Identifies a semantic input type that an invocation adapter can encode for service access."@en .
+
+eska:supportsOutputType
+    a owl:ObjectProperty ; rdfs:label "supports output type"@en ; rdfs:domain eska:SemanticInvocationAdapter ;
+    skos:definition "Identifies a semantic output type that an invocation adapter can interpret from a service result."@en .
+
+eska:supportsRelation
+    a owl:ObjectProperty ; rdfs:label "supports relation"@en ; rdfs:domain eska:SemanticInvocationAdapter ;
+    skos:definition "Identifies a semantic result relation that an invocation adapter can preserve and interpret."@en .
+
+# deployment extension
+
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<urn:eska:model:deployment>
+    a owl:Ontology ;
+    dcterms:title "ESKA deployment binding model"@en ;
+    dcterms:description "A deliberately small, provisional extension for binding a stable Knowledge Service contract to concrete runtime deployments without embedding environment-specific locations in semantic Service or Capability contracts."@en ;
+    dcterms:requires <urn:eska:model:service> ;
+    owl:versionInfo "0.1-provisional" .
+
+eska:ServiceDeployment
+    a owl:Class ; rdfs:subClassOf prov:Entity ; rdfs:label "Service Deployment"@en ;
+    skos:definition "A concrete runtime deployment of a Knowledge Service in a particular deployment environment. The deployment is distinct from the stable semantic Service contract it realizes."@en .
+
+eska:DeploymentEnvironment
+    a owl:Class ; rdfs:label "Deployment Environment"@en ;
+    skos:definition "A named runtime environment in which one or more Service Deployments are available, such as a local, test, staging, or production environment."@en .
+
+eska:DeploymentBinding
+    a owl:Class ; rdfs:label "Deployment Binding"@en ;
+    skos:definition "A runtime location binding used to reach a concrete Service Deployment. It complements, but does not replace, a Service Operation Access Binding."@en .
+
+eska:HTTPDeploymentBinding
+    a owl:Class ; rdfs:subClassOf eska:DeploymentBinding ; rdfs:label "HTTP Deployment Binding"@en ;
+    skos:definition "A Deployment Binding that supplies the runtime HTTP base URL which is combined with a contract-relative path from an HTTP Access Binding."@en .
+
+eska:deploysService
+    a owl:ObjectProperty ; rdfs:label "deploys service"@en ;
+    skos:definition "Identifies the stable Knowledge Service contract realized by a concrete Service Deployment."@en ;
+    rdfs:domain eska:ServiceDeployment ; rdfs:range eska:KnowledgeService .
+
+eska:inEnvironment
+    a owl:ObjectProperty ; rdfs:label "in environment"@en ;
+    skos:definition "Identifies the Deployment Environment in which a Service Deployment is available."@en ;
+    rdfs:domain eska:ServiceDeployment ; rdfs:range eska:DeploymentEnvironment .
+
+eska:hasDeploymentBinding
+    a owl:ObjectProperty ; rdfs:label "has deployment binding"@en ;
+    skos:definition "Associates a Service Deployment with the runtime location binding used to reach it."@en ;
+    rdfs:domain eska:ServiceDeployment ; rdfs:range eska:DeploymentBinding .
+
+eska:baseURL
+    a owl:DatatypeProperty ; rdfs:label "base URL"@en ;
+    skos:definition "Runtime HTTP base URL for a concrete deployment. Contract-relative operation paths remain in the HTTP Access Binding."@en ;
+    rdfs:domain eska:HTTPDeploymentBinding ; rdfs:range xsd:anyURI .
