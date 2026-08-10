@@ -58,3 +58,6 @@ python3 "${HERE}/verify-provenance-lineage.py"
 
 printf '\nVerifying namespace, publication, and versioning governance contract...\n'
 python3 "${ROOT_DIR}/model/verify-publication-contract.py"
+
+printf '\nVerifying prepared publication backend targets and W3ID payload...\n'
+python3 "${ROOT_DIR}/model/verify-publication-targets.py"
