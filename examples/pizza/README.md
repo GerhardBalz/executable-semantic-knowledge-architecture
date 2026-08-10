@@ -80,7 +80,7 @@ source-owned BPMN process + workflow vocabulary
 composite Published / Rejected result
 ```
 
-The OWL path is developed end-to-end through Capability, Service, and Agent. Validation, Rule, Decision, Calculation, Mapping, and Workflow remain at the Semantic Capability / Execution / Result / Verification level so operational exposure concepts are not promoted by symmetry.
+Classification and Validation are now both developed through Capability, Knowledge Service, and deterministic Knowledge Agent. Rule, Decision, Calculation, Mapping, and Workflow remain at the Semantic Capability / Execution / Result / Verification level so operational exposure concepts are generalized from evidence rather than promoted by symmetry.
 
 ## 1. OWL Classification — reason
 
@@ -123,6 +123,44 @@ See [`validation/README.md`](validation/README.md).
 `PizzaValidationCapability` consumes a Pizza RDF graph, uses the commit-pinned SHACL profile, and produces a `sh:ValidationReport` through `sh:conforms`.
 
 The source-owned non-conforming fixture deliberately produces both a missing-base violation and a wrongly typed topping violation.
+
+The validation path is now also exposed end-to-end:
+
+```text
+PizzaValidationCapability
+        ↓
+PizzaValidationService
+        ↓ discovered by
+PizzaValidationAgent
+        ↓
+JSON-LD sh:ValidationReport
+```
+
+The Service executes the source-owned SHACL profile through pySHACL and returns the actual report graph serialized as JSON-LD. The deterministic Agent discovers the Service operation from ESKA contracts, invokes both conforming and non-conforming RDF cases, parses the returned RDF, interprets `sh:conforms` / `sh:ValidationResult`, and records `Execution → Result → Verification` provenance.
+
+### Cross-mode Service / Agent evidence
+
+Classification and Validation satisfy the same provisional structural pattern:
+
+```text
+SemanticCapability
+    → KnowledgeService / ServiceOperation
+    → KnowledgeAgent / DiscoveryArtifact
+```
+
+Neither `model/eska-service.ttl` nor `model/eska-agent.ttl` changed for Validation.
+
+The result semantics are intentionally different:
+
+```text
+Classification
+    result field → list of owl:Class IRIs
+
+Validation
+    result field → sh:ValidationReport RDF graph
+```
+
+This is evidence that a generic Service contract can identify a semantically typed result without defining one universal JSON result shape, and that generic Agent behavior must interpret results according to semantic output type and relation.
 
 ## 3. SPARQL Rule Evaluation — evaluate
 
@@ -286,13 +324,7 @@ Requirements:
 - network access to retrieve the commit-pinned public Pizza artifacts;
 - `curl` for the pinned ROBOT download.
 
-OWL architecture:
-
-```bash
-bash examples/pizza/run.sh
-```
-
-Complete Knowledge Agent path:
+OWL classification Service + Agent:
 
 ```bash
 bash examples/pizza/test-agent.sh
@@ -303,6 +335,13 @@ SHACL validation:
 ```bash
 python -m pip install -r examples/pizza/validation/requirements.txt
 python examples/pizza/validation/validate.py
+```
+
+SHACL validation Service + Agent:
+
+```bash
+python -m pip install -r examples/pizza/validation/requirements.txt
+bash examples/pizza/validation/test-agent.sh
 ```
 
 SPARQL rule evaluation:
@@ -397,6 +436,10 @@ Does the classification Capability remain Service- and Agent-accessible?
 
 Does SHACL distinguish conforming and non-conforming data?
 
+Does the validation Capability remain Service- and Agent-accessible with a semantic SHACL report result?
+
+Do classification and validation fit the same provisional Service/Agent extension pattern?
+
 Does the SPARQL rule produce the expected derived statement and preserve its control case?
 
 Does DMN select exactly one expected semantic outcome per context?
@@ -437,8 +480,8 @@ GerhardBalz/executable-semantic-knowledge-architecture
 ├── Execution / Result / Verification
 ├── mode-specific semantic refinements where required
 ├── composite execution using established part/dependency relations
-├── Knowledge Service         classification only
-├── Knowledge Agent           classification only
+├── Knowledge Service         classification + validation
+├── Knowledge Agent           classification + validation
 └── execution provenance
 ```
 

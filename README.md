@@ -121,13 +121,37 @@ A **Knowledge Service** is an operational interface through which knowledge can 
 
 The provisional Service extension is in [`model/eska-service.ttl`](model/eska-service.ttl).
 
+Service exposure is now executable for two semantic modes:
+
+```text
+PizzaClassificationCapability
+    → PizzaClassificationService
+
+PizzaValidationCapability
+    → PizzaValidationService
+```
+
+Both use the same `KnowledgeService` / `ServiceOperation` structure without changing `model/eska-service.ttl`. Their semantic result representations differ: classification returns class IRIs, while validation returns a JSON-LD `sh:ValidationReport`. The generic service contract identifies semantic input/output types, result relation, and envelope fields without requiring one universal JSON result shape.
+
 ### Knowledge Agent
 
 A **Knowledge Agent** can use machine-interpretable ESKA contracts to discover, interpret, verify, and invoke semantic capabilities and services.
 
-The provisional Agent extension is in [`model/eska-agent.ttl`](model/eska-agent.ttl). The Pizza Agent is deliberately deterministic and non-LLM so agent accessibility is demonstrated as an architectural property.
+The provisional Agent extension is in [`model/eska-agent.ttl`](model/eska-agent.ttl). The reference Agents are deliberately deterministic and non-LLM so agent accessibility is demonstrated as an architectural property.
 
-Service and Agent remain outside the core because they are currently demonstrated only on the classification path.
+Agent discovery/invocation is now executable for classification and validation:
+
+```text
+PizzaKnowledgeAgent
+    targets PizzaClassificationCapability
+
+PizzaValidationAgent
+    targets PizzaValidationCapability
+```
+
+Both discover a Service operation from machine-readable ESKA contracts and combine the semantic contract with a runtime deployment binding. `model/eska-agent.ttl` required no change, but the executable Agents interpret results according to semantic output type: classification consumes `owl:Class` IRIs; validation parses a `sh:ValidationReport` RDF graph and reads `sh:conforms` / `sh:ValidationResult` semantics.
+
+Service and Agent remain outside core because they are optional operational layers and are currently demonstrated on two of seven execution modes. Issues #13 and #14 now have concrete cross-mode evidence for further generalization.
 
 ## Seven Executable-Semantic Modes
 
@@ -329,8 +353,6 @@ PizzaClassificationService
 PizzaKnowledgeAgent
 ```
 
-This is currently the only mode exposed through both Service and Agent.
-
 ### 2. SHACL Validation — validate
 
 ```text
@@ -340,8 +362,14 @@ SHACL ValidationReport
         ↓
 PizzaValidationCapability
         ↓
-Execution → Result → Verification
+PizzaValidationService
+        ↓ discovered by
+PizzaValidationAgent
 ```
+
+The validation service returns the actual SHACL report graph serialized as JSON-LD. The deterministic Agent discovers `/validate`, invokes both conforming and non-conforming cases, parses the returned RDF, and preserves `Execution → Result → Verification` lineage.
+
+Classification and validation therefore provide the first cross-mode Service/Agent evidence: the structural extension pattern is shared, while semantic result interpretation remains mode-specific.
 
 ### 3. SPARQL Rule Evaluation — evaluate
 
@@ -432,8 +460,9 @@ Mapping and Workflow also demonstrate how additional semantic precision can live
 - [x] Add OpenMath Calculation → calculate and re-test the core.
 - [x] Add Mapping → transform and demonstrate semantic-model role refinement.
 - [x] Add BPMN Workflow → execute and demonstrate composite execution across seven Capabilities / sixteen Executions.
-- [ ] Generalize Knowledge Service semantics beyond classification using cross-mode evidence.
-- [ ] Generalize deterministic Knowledge Agent discovery/invocation beyond classification.
+- [x] Expose Validation through a Knowledge Service and deterministic Knowledge Agent.
+- [ ] Generalize Knowledge Service semantics from classification + validation evidence.
+- [ ] Generalize deterministic Knowledge Agent discovery/invocation from classification + validation evidence.
 - [ ] Add richer provenance/evidence concepts only where executable use cases require them.
 - [ ] Formalize deployment binding separately from semantic service contracts.
 - [ ] Decide on a permanent ESKA namespace and publication strategy after further stabilization.
@@ -442,9 +471,9 @@ The project intentionally does **not** begin as a general software framework, ag
 
 ## Status
 
-The executable reference now demonstrates seven distinct semantic operations with one shared provisional core Capability abstraction and one shared runtime `Execution → Result → Verification` pattern, including the first composite/conditional workflow.
+The executable reference demonstrates seven distinct semantic operations with one shared provisional core Capability abstraction and one shared runtime `Execution → Result → Verification` pattern, including composite/conditional Workflow execution.
 
-After seven distinct execution modes, the next strongest test is no longer simply adding an eighth mode. The existing backlog now has enough execution evidence to test whether the **Knowledge Service and Knowledge Agent extensions generalize across modes**, starting with Validation.
+Service and deterministic Agent exposure now work across **two different semantic modes**—classification and validation—without changing the provisional Service or Agent vocabularies. The next architectural work should therefore use those two concrete paths to generalize #13 and #14, especially around representation semantics, result interpretation, and the boundary between semantic service contracts and runtime deployment bindings.
 
 ## License
 
