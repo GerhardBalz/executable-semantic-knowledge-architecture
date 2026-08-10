@@ -6,9 +6,11 @@ PREFIX rul: <urn:eska:example:pizza:rule:>
 PREFIX dec: <urn:eska:example:pizza:decision:>
 PREFIX cal: <urn:eska:example:pizza:calculation:>
 PREFIX map: <urn:eska:example:pizza:mapping:>
+PREFIX wf: <urn:eska:example:pizza:workflow:>
 
 # ROBOT verify treats returned rows as violations.
-# Runtime executions from different semantic modes must share the same core pattern.
+# Runtime executions from different semantic modes, including nested workflow steps,
+# must share the same core pattern.
 SELECT ?mode ?execution
 WHERE {
   VALUES (?mode ?execution ?capability ?result ?verification) {
@@ -23,6 +25,11 @@ WHERE {
     ("calculation-medium" cal:mediumPizza-calculation-execution cal:PizzaAreaCalculationCapability cal:mediumPizza-calculation-result cal:mediumPizza-calculation-verification)
     ("calculation-large" cal:largePizza-calculation-execution cal:PizzaAreaCalculationCapability cal:largePizza-calculation-result cal:largePizza-calculation-verification)
     ("mapping" map:PizzaMenuProjectionExecution map:PizzaMenuProjectionCapability map:PizzaMenuProjectionResult map:PizzaMenuProjectionVerification)
+    ("workflow-valid" wf:valid-publication-workflow-execution wf:PizzaMenuPublicationWorkflowCapability wf:valid-publication-workflow-result wf:valid-publication-workflow-verification)
+    ("workflow-valid-validation-step" wf:valid-publication-ValidatePizzaData-execution val:PizzaValidationCapability wf:valid-publication-ValidatePizzaData-result wf:valid-publication-ValidatePizzaData-verification)
+    ("workflow-valid-mapping-step" wf:valid-publication-TransformPizzaToMenu-execution map:PizzaMenuProjectionCapability wf:valid-publication-TransformPizzaToMenu-result wf:valid-publication-TransformPizzaToMenu-verification)
+    ("workflow-invalid" wf:invalid-rejection-workflow-execution wf:PizzaMenuPublicationWorkflowCapability wf:invalid-rejection-workflow-result wf:invalid-rejection-workflow-verification)
+    ("workflow-invalid-validation-step" wf:invalid-rejection-ValidatePizzaData-execution val:PizzaValidationCapability wf:invalid-rejection-ValidatePizzaData-result wf:invalid-rejection-ValidatePizzaData-verification)
   }
 
   FILTER NOT EXISTS {
