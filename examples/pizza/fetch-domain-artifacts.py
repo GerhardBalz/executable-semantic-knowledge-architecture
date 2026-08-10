@@ -32,6 +32,12 @@ EXPECTED_ARTIFACTS = {
     "mappingTargetVocabulary": "artifacts/mappings/menu-vocabulary.ttl",
     "mappingSourceData": "artifacts/mappings/data/source-pizzas.ttl",
     "mappingExpectedOutput": "artifacts/mappings/data/expected-menu.ttl",
+    "workflowModel": "artifacts/workflows/pizza-menu-publication.bpmn",
+    "workflowVocabulary": "artifacts/workflows/workflow-vocabulary.ttl",
+    "workflowValidData": "artifacts/workflows/data/valid-pizza.ttl",
+    "workflowInvalidData": "artifacts/workflows/data/invalid-pizza.ttl",
+    "workflowExpectedTarget": "artifacts/workflows/data/expected-valid-menu.ttl",
+    "workflowCases": "artifacts/workflows/data/cases.json",
 }
 
 LOCAL_NAMES = {
@@ -52,6 +58,12 @@ LOCAL_NAMES = {
     "mappingTargetVocabulary": "mapping-target-vocabulary.ttl",
     "mappingSourceData": "mapping-source-data.ttl",
     "mappingExpectedOutput": "mapping-expected-output.ttl",
+    "workflowModel": "workflow.bpmn",
+    "workflowVocabulary": "workflow-vocabulary.ttl",
+    "workflowValidData": "workflow-valid-data.ttl",
+    "workflowInvalidData": "workflow-invalid-data.ttl",
+    "workflowExpectedTarget": "workflow-expected-target.ttl",
+    "workflowCases": "workflow-cases.json",
 }
 
 
@@ -66,7 +78,6 @@ def read_config() -> dict[str, object]:
     commit = data.get("commit")
     manifest = data.get("manifest")
     artifacts = data.get("artifacts")
-
     require(repository == "GerhardBalz/pizza-ontology", f"unexpected Pizza source repository: {repository!r}")
     require(isinstance(commit, str) and re.fullmatch(r"[0-9a-f]{40}", commit) is not None, "Pizza source must be pinned to a 40-character Git commit SHA")
     require(manifest == "artifacts/manifest.ttl", f"unexpected manifest path: {manifest!r}")
@@ -94,18 +105,12 @@ def main() -> None:
     commit = str(config["commit"])
     manifest_path = str(config["manifest"])
     artifact_paths = dict(config["artifacts"])
-
     TARGET.mkdir(parents=True, exist_ok=True)
 
     manifest_bytes = download(raw_url(repository, commit, manifest_path))
     manifest_text = manifest_bytes.decode("utf-8")
-
     for role, path in EXPECTED_ARTIFACTS.items():
-        require(
-            f'dcterms:identifier "{path}"' in manifest_text,
-            f"Pizza source manifest at {commit} does not publish {role}: {path}",
-        )
-
+        require(f'dcterms:identifier "{path}"' in manifest_text, f"Pizza source manifest at {commit} does not publish {role}: {path}")
     (TARGET / "manifest.ttl").write_bytes(manifest_bytes)
 
     materialized: dict[str, str] = {}
@@ -124,10 +129,7 @@ def main() -> None:
         "materialized": materialized,
         "sourceTree": f"https://github.com/{repository}/tree/{commit}/artifacts",
     }
-    (TARGET / "source.json").write_text(
-        json.dumps(source_metadata, indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
-    )
+    (TARGET / "source.json").write_text(json.dumps(source_metadata, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
     print(f"SUCCESS: materialized Pizza semantic artifacts from immutable commit {commit}.")
     for role in sorted(materialized):
