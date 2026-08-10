@@ -4,6 +4,7 @@ PREFIX run: <urn:eska:example:pizza:>
 PREFIX val: <urn:eska:example:pizza:validation:>
 PREFIX rul: <urn:eska:example:pizza:rule:>
 PREFIX dec: <urn:eska:example:pizza:decision:>
+PREFIX cal: <urn:eska:example:pizza:calculation:>
 
 # ROBOT verify treats returned rows as violations.
 # Runtime executions from different semantic modes must share the same core pattern.
@@ -17,6 +18,9 @@ WHERE {
     ("decision-meat" dec:meatyPizza-decision-execution dec:PizzaDietarySuitabilityCapability dec:meatyPizza-decision-result dec:meatyPizza-decision-verification)
     ("decision-fish" dec:fishPizza-decision-execution dec:PizzaDietarySuitabilityCapability dec:fishPizza-decision-result dec:fishPizza-decision-verification)
     ("decision-vegetarian" dec:vegetarianPizza-decision-execution dec:PizzaDietarySuitabilityCapability dec:vegetarianPizza-decision-result dec:vegetarianPizza-decision-verification)
+    ("calculation-small" cal:smallPizza-calculation-execution cal:PizzaAreaCalculationCapability cal:smallPizza-calculation-result cal:smallPizza-calculation-verification)
+    ("calculation-medium" cal:mediumPizza-calculation-execution cal:PizzaAreaCalculationCapability cal:mediumPizza-calculation-result cal:mediumPizza-calculation-verification)
+    ("calculation-large" cal:largePizza-calculation-execution cal:PizzaAreaCalculationCapability cal:largePizza-calculation-result cal:largePizza-calculation-verification)
   }
 
   FILTER NOT EXISTS {
