@@ -1,0 +1,34 @@
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX eska: <urn:eska:core:>
+PREFIX map: <urn:eska:example:pizza:mapping:>
+PREFIX pizza: <http://www.co-ode.org/ontologies/pizza/pizza.owl#>
+PREFIX pizzaWf: <urn:pizza-ontology:workflow:>
+PREFIX val: <urn:eska:example:pizza:validation:>
+PREFIX wf: <urn:eska:example:pizza:workflow:>
+
+# Returned rows are violations.
+SELECT ?capability
+WHERE {
+  VALUES ?capability { wf:PizzaMenuPublicationWorkflowCapability }
+
+  FILTER NOT EXISTS {
+    ?capability
+        a eska:SemanticCapability ;
+        dcterms:requires val:PizzaValidationCapability, map:PizzaMenuProjectionCapability ;
+        eska:subject pizza:Pizza ;
+        eska:inputType wf:PizzaWorkflowInputGraph ;
+        eska:outputType wf:PizzaWorkflowResult ;
+        eska:producesRelation pizzaWf:workflowOutcome ;
+        eska:usesSemanticModel wf:PizzaMenuPublicationBPMNModel, wf:PizzaWorkflowOutcomeModel ;
+        eska:usesExecutableArtifact wf:BPMNWorkflowExecutionArtifact ;
+        eska:requiresCondition wf:WorkflowInputCondition .
+
+    wf:PizzaMenuPublicationBPMNModel
+        a eska:SemanticModel ;
+        dcterms:conformsTo <https://www.omg.org/spec/BPMN/2.0.2/> .
+
+    wf:PizzaWorkflowOutcomeModel a eska:SemanticModel .
+    wf:BPMNWorkflowExecutionArtifact a eska:ExecutableSemanticKnowledgeArtifact .
+    wf:WorkflowInputCondition a eska:ApplicabilityCondition .
+  }
+}
