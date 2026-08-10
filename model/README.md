@@ -22,14 +22,17 @@ eska-core.ttl
 
 ## `eska-core.ttl`
 
-The core contains only concepts that have now been demonstrated across at least two different executable-semantic modes in the Pizza reference project:
+The core contains only concepts demonstrated across different executable-semantic modes in the Pizza reference project. It has now survived three distinct operational semantics:
 
 - OWL reasoning;
-- SHACL validation.
+- SHACL validation;
+- SPARQL rule evaluation.
 
-Both modes use a `SemanticModel`, an `ExecutableSemanticKnowledgeArtifact`, a bounded `SemanticCapability`, an `Execution`, a machine-interpretable `Result`, and an explicit `Verification` activity.
+All three modes use a `SemanticModel`, an `ExecutableSemanticKnowledgeArtifact`, a bounded `SemanticCapability`, an `ApplicabilityCondition`, an `Execution`, a machine-interpretable `Result`, and an explicit `Verification` activity.
 
-`Execution` and `Verification` specialize `prov:Activity`; `Result` specializes `prov:Entity`. ESKA therefore reuses PROV-O rather than inventing a parallel provenance model.
+The third mode was intentionally used as a falsification test. No changes to `eska-core.ttl` were required to model or verify the rule-evaluation path.
+
+`Execution` and `Verification` specialize `prov:Activity`; `Result` specializes `prov:Entity`. ESKA therefore continues to reuse PROV-O rather than inventing a parallel provenance model.
 
 ## Extensions
 
@@ -41,11 +44,32 @@ Contains capability-specific helper terms that are useful in examples but are no
 
 ### `eska-service.ttl`
 
-Contains Knowledge Service and transport/representation concepts. Service exposure is currently demonstrated on the Pizza classification path but not yet on the validation path, so these terms are deliberately not core.
+Contains Knowledge Service and transport/representation concepts. Service exposure is currently demonstrated on the Pizza classification path but not on the validation or rule-evaluation paths, so these terms remain deliberately outside the core.
 
 ### `eska-agent.ttl`
 
 Contains Knowledge Agent and discovery concepts. Agent discovery/invocation is currently demonstrated on the Pizza classification path only.
+
+## Why there is no rule-specific core model
+
+The third execution mode does not introduce `Rule`, `RuleExecution`, or `ExecutionMode` into the core.
+
+The source-owned SPARQL rule is represented as the `SemanticModel` for `PizzaRuleEvaluationCapability`; RDFLib supplies the execution mechanism; and the existing `Execution → Result → Verification` pattern captures the concrete run.
+
+```text
+SPARQL rule
+    a SemanticModel
+        ↓
+SemanticCapability
+        ↓
+Execution
+        ↓
+Result
+        ↓
+Verification
+```
+
+This keeps technology-specific semantics in their native artifacts until repeated executable evidence justifies a broader ESKA abstraction.
 
 ## Dependency representation
 
@@ -69,4 +93,4 @@ urn:eska:core:
 
 This is deliberate. The project should stabilize the concepts before choosing a permanent public namespace and publication policy.
 
-See [Execution Mode Comparison](../docs/execution-mode-comparison.md) for the evidence used to decide which concepts currently belong in the core.
+See [Execution Mode Comparison](../docs/execution-mode-comparison.md) for the executable evidence used to decide which concepts currently belong in the core.

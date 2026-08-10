@@ -121,15 +121,21 @@ Generated artifacts are written to `examples/pizza/rules/results/`.
 
 ## Architectural significance
 
-The third mode is deliberately implemented **without adding a rule-specific ESKA core class**. The first test is whether the existing provisional concepts are already sufficient:
+The third mode was deliberately implemented **without adding a rule-specific ESKA core class**. The subsequent cross-mode falsification pass now verifies the rule with the same generic queries used for OWL reasoning and SHACL validation:
 
 ```text
 SemanticModel
 → ExecutableSemanticKnowledgeArtifact
 → SemanticCapability
+→ ApplicabilityCondition
 → Execution
 → Result
 → Verification
 ```
 
-A separate core-validation increment should then compare all three modes and change the core only if this rule example exposes an actual mismatch.
+Both generic core verifiers now include the rule path:
+
+- [`../verify-core.sparql`](../verify-core.sparql) checks the shared Semantic Capability contract across all three modes;
+- [`../verify-core-executions.sparql`](../verify-core-executions.sparql) checks the shared runtime `Execution → Result → Verification` pattern.
+
+The result is intentionally conservative: **the third mode did not require a change to `model/eska-core.ttl`**. That strengthens the current core abstraction while leaving it provisional for future falsification by decisions, calculations, mappings, workflows, or other genuinely different execution semantics.
