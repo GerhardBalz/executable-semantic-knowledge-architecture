@@ -43,13 +43,13 @@ Capability      → invoke
 - **Executable where appropriate** — knowledge participates in computation according to its semantic type.
 - **Semantic continuity** — execution remains connected to the semantic model and artifacts that give it meaning.
 - **Provenance awareness** — sources, versions, transformations, assertions, deployments, and executions remain traceable.
-- **Verifiability** — semantics and executions are checked by mechanisms appropriate to their type.
-- **Agent accessibility** — deterministic or intelligent consumers can discover and invoke machine-described capabilities rather than reconstructing meaning from prompts.
+- **Verifiability** — semantics, execution, lineage, and publication contracts are checked by executable mechanisms.
+- **Agent accessibility** — agents can discover and invoke machine-described capabilities rather than reconstructing meaning from prompts alone.
 - **Explicit semantic-source ownership** — execution architecture should not become the accidental owner of domain semantics.
 
 ## Provisional ESKA core
 
-The current cross-mode core lives in [`model/eska-core.ttl`](model/eska-core.ttl):
+The cross-mode core lives in [`model/eska-core.ttl`](model/eska-core.ttl):
 
 ```text
 SemanticModel
@@ -79,7 +79,7 @@ ESKA reuses PROV-O rather than defining a parallel provenance model:
 - `Verification` specializes `prov:Activity`;
 - `Result` specializes `prov:Entity`.
 
-The core remains deliberately small. Seven materially different execution modes have been used as falsification tests, and none required a change to `model/eska-core.ttl`.
+Seven materially different execution modes have been used as falsification tests, and none required a change to `model/eska-core.ttl`.
 
 ## Architectural extensions
 
@@ -89,8 +89,6 @@ Operational exposure and runtime location are optional layers, so they remain ou
 
 A **Knowledge Service** exposes one or more Semantic Capabilities operationally.
 
-The generalized structure is:
-
 ```text
 KnowledgeService
     ├── exposesCapability → SemanticCapability
@@ -99,17 +97,7 @@ KnowledgeService
                            SemanticCapability
 ```
 
-Semantic meaning stays on the Capability:
-
-```text
-SemanticCapability
-    ├── inputType
-    ├── outputType
-    ├── producesRelation
-    └── requiresCondition
-```
-
-Concrete access details are separate:
+Semantic meaning stays on the Capability. Concrete access details are separate:
 
 ```text
 ServiceOperation
@@ -127,17 +115,7 @@ See [Knowledge Service Generalization](docs/knowledge-service-generalization.md)
 
 ### Knowledge Agent — `eska-agent.ttl` 0.3-provisional
 
-A **Knowledge Agent** uses machine-interpretable contracts to discover, invoke, and interpret semantic capabilities.
-
-The generalized deterministic reference Agent targets both Classification and Validation:
-
-```text
-PizzaGeneralizedKnowledgeAgent
-    ├── targets PizzaClassificationCapability
-    └── targets PizzaValidationCapability
-```
-
-Discovery and invocation are generic; semantically typed request/result handling is selected through an explicit adapter contract:
+The generalized deterministic reference Agent targets Classification and Validation and selects semantically compatible request/result adapters from the discovered Capability contract.
 
 ```text
 KnowledgeAgent
@@ -148,7 +126,7 @@ SemanticInvocationAdapter
     └── supportsRelation
 ```
 
-The first two adapters demonstrate genuinely different representations:
+The first two adapters demonstrate different semantic representations:
 
 ```text
 IRIListInvocationAdapter
@@ -187,27 +165,13 @@ HTTPAccessBinding.path
 concrete runtime endpoint
 ```
 
-The generalized Agent performs semantic discovery first, then resolves a deployment for the discovered Service and selected environment.
-
-Blue/green executable evidence proves:
-
-```text
-blue.discovery == green.discovery
-blue.adapter   == green.adapter
-
-blue.deployment != green.deployment
-blue.endpoint   != green.endpoint
-
-semantic result remains equivalent
-```
-
-Invocation provenance records both **what** was invoked and **where** it was invoked.
+Blue/green executable evidence proves that semantic discovery and adapter selection remain stable while the concrete deployment and endpoint change.
 
 See [Deployment Binding](docs/deployment-binding.md).
 
 ## Seven executable-semantic modes
 
-The Pizza reference currently exercises:
+The Pizza reference exercises:
 
 ```text
 Ontology    → reason
@@ -232,35 +196,14 @@ The generic Capability verifier covers **seven Capabilities**. The generic runti
 3 actually executed Workflow child steps
 ```
 
-### Mapping refinement below core
+Mapping and Workflow exposed real semantic refinements without forcing them into core:
 
-Mapping requires source, mapping, and target semantic-model roles. The example therefore defines mode-local subproperties of `eska:usesSemanticModel` and uses qualified PROV-O roles at runtime.
-
-> **Generic core relationships can be refined by mode-specific terms when an executable semantic contract requires additional role precision.**
-
-### Workflow composition below core
-
-Workflow composes existing Capabilities conditionally while retaining ordinary core `Execution` instances:
-
-```text
-Workflow Execution
-    │ dcterms:hasPart
-    ├── Validation Execution
-    │       ↓ sh:conforms
-    └── Mapping Execution       conforming path only
-            ↑ prov:wasInformedBy
-       Validation Execution
-```
-
-Composition uses `dcterms:hasPart` / `isPartOf`, `prov:wasInformedBy`, and `prov:wasDerivedFrom`; Workflow-local operation bindings connect BPMN operation identifiers to established Semantic Capabilities.
-
-No `WorkflowExecution`, `StepExecution`, or generic `ExecutionMode` taxonomy was needed in core.
+- Mapping refines source/mapping/target semantic-model roles below `eska:usesSemanticModel` and uses qualified PROV-O roles at runtime.
+- Workflow composes ordinary `eska:Execution` instances through `dcterms:hasPart`, `prov:wasInformedBy`, and `prov:wasDerivedFrom`, while BPMN-operation→Capability binding remains workflow-local.
 
 See [Execution Mode Comparison](docs/execution-mode-comparison.md).
 
 ## Layered operational architecture
-
-The executable evidence now supports a clear separation of concerns:
 
 ```text
 SemanticCapability
@@ -299,6 +242,72 @@ Execution → Result → Verification
 PROV-O lineage
 ```
 
+## Trust and lineage
+
+ESKA deliberately does **not** define a parallel provenance ontology. The executable trust plane combines existing ESKA execution concepts with PROV-O and Dublin Core Terms.
+
+CI verifies two profiles:
+
+```text
+Semantic execution lineage
+    16 Executions
+        ↓
+    Result
+        ↓ recursive prov:wasDerivedFrom
+    immutable pizza-ontology Git artifact
+
+Operational invocation lineage
+    5 Agent Executions
+        ↓
+    Capability + Service + Invocation Adapter
+    + ServiceDeployment + Environment + Binding
+    + invocation input + architecture/deployment models
+        ↓
+    Result → Verification
+```
+
+Every semantic Result recursively reaches an immutable `pizza-ontology/blob/<commit>/...` source. All five generalized Agent invocation Executions have distinct identities derived from semantic Capability + concrete Service Deployment + invocation input identity.
+
+See [Provenance, Evidence, and Result Lineage](docs/provenance-evidence-lineage.md).
+
+## Namespace, publication, and versioning
+
+The current authoritative ESKA term namespace remains:
+
+```text
+urn:eska:core:
+```
+
+The adopted permanent target is:
+
+```text
+https://w3id.org/eska#
+```
+
+**The W3ID namespace is planned, not active.** No source ontology terms have migrated yet and the repository does not claim that `https://w3id.org/eska` currently resolves.
+
+The publication contract separates stable term identity, independently versioned ontology modules, and repository releases:
+
+```text
+Term
+    https://w3id.org/eska#Execution
+
+Module
+    https://w3id.org/eska/model/core
+
+Versioned module
+    https://w3id.org/eska/model/core/0.1.0
+
+Repository release
+    eska-v0.1.0
+```
+
+The first publication preserves the existing module evolution rather than flattening every module to the repository release version.
+
+`model/publication-contract.json` and `model/verify-publication-contract.py` currently verify **5 modules and 53 declared ESKA terms** and fail if permanent W3ID IRIs leak into ontology source before activation.
+
+See [Namespace, Publication, and Versioning](docs/namespace-publication-versioning.md). Actual activation and the atomic namespace migration are tracked in **#53**.
+
 ## Pizza as the reference domain
 
 The companion repository [GerhardBalz/pizza-ontology](https://github.com/GerhardBalz/pizza-ontology) owns the Pizza semantic artifacts used by ESKA.
@@ -335,13 +344,14 @@ See [Pizza executable reference](examples/pizza/README.md).
 The repository now demonstrates:
 
 - seven executable-semantic modes over one unchanged provisional core;
-- sixteen verified core Executions, including composite Workflow child steps;
-- cross-repository immutable semantic-source consumption;
-- a generalized multi-capability Knowledge Service contract;
-- one generalized deterministic Knowledge Agent across Classification and Validation;
-- semantic invocation adapters selected from Capability input/output/relation contracts;
+- sixteen verified semantic Executions, including composite Workflow child steps;
+- twenty-three source-owned Pizza semantic distributions consumed from an immutable commit;
+- generalized multi-capability Knowledge Service semantics;
+- one generalized deterministic Knowledge Agent with semantic invocation adapters;
 - blue/green Service deployments resolved separately from semantic discovery;
-- execution, result, verification, source, adapter, and deployment provenance using ESKA + PROV-O.
+- five distinct operational Agent invocation lineages;
+- immutable source/result lineage through PROV-O without a parallel ESKA provenance ontology;
+- a machine-verifiable namespace/publication/versioning contract for five modules and 53 declared ESKA terms.
 
 The architecture intentionally does **not** claim that Service, Agent, Deployment, mode-specific role refinements, or technology-specific execution concepts belong in core.
 
@@ -350,23 +360,17 @@ The architecture intentionally does **not** claim that Service, Agent, Deploymen
 Completed foundations:
 
 - [x] ESKA terminology and provisional core.
-- [x] Pizza OWL reasoning and bounded Semantic Capability.
-- [x] SHACL Validation as a second mode.
-- [x] SPARQL Rule → evaluate.
-- [x] DMN Decision → decide.
-- [x] OpenMath Calculation → calculate.
-- [x] Mapping → transform with source/mapping/target role refinement.
-- [x] BPMN Workflow → execute with composite Execution evidence.
+- [x] Seven executable-semantic modes and sixteen core Executions.
 - [x] Commit-pinned Pizza semantic-source ownership boundary.
-- [x] Validation Knowledge Service and deterministic Agent path.
 - [x] Generalized Knowledge Service semantics across Classification + Validation.
 - [x] Generalized deterministic Knowledge Agent with semantic invocation adapters.
 - [x] Deployment binding separated from semantic Service contracts with blue/green evidence.
+- [x] Cross-cutting provenance/evidence/Result lineage verification across 16 semantic + 5 operational Executions.
+- [x] Namespace/publication/versioning strategy and machine-readable governance contract.
 
-Next architectural work:
+Next governed publication step:
 
-- [ ] Enrich execution provenance, evidence, and Result lineage only where the existing seven-mode / Service / Agent / Deployment evidence demonstrates a genuine gap.
-- [ ] Decide on a permanent ESKA namespace and publication strategy after further stabilization.
+- [ ] **#53 — establish real W3ID publication targets/resolver, verify resolvability, then perform one atomic permanent-IRI migration and prepare `eska-v0.1.0`.**
 
 The project intentionally does **not** begin as a general software framework, LLM-agent platform, or large meta-ontology.
 
@@ -376,6 +380,8 @@ The project intentionally does **not** begin as a general software framework, LL
 - [Knowledge Service Generalization](docs/knowledge-service-generalization.md)
 - [Knowledge Agent Generalization](docs/knowledge-agent-generalization.md)
 - [Deployment Binding](docs/deployment-binding.md)
+- [Provenance, Evidence, and Result Lineage](docs/provenance-evidence-lineage.md)
+- [Namespace, Publication, and Versioning](docs/namespace-publication-versioning.md)
 - [Execution Mode Comparison](docs/execution-mode-comparison.md)
 - [Pizza executable reference](examples/pizza/README.md)
 
