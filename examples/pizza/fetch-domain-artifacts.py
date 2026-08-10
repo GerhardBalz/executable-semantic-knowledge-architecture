@@ -25,6 +25,9 @@ EXPECTED_ARTIFACTS = {
     "decisionModel": "artifacts/decisions/pizza-dietary-suitability.dmn",
     "decisionVocabulary": "artifacts/decisions/decision-vocabulary.ttl",
     "decisionCases": "artifacts/decisions/data/cases.json",
+    "calculationFormula": "artifacts/calculations/pizza-area.openmath.xml",
+    "calculationVocabulary": "artifacts/calculations/calculation-vocabulary.ttl",
+    "calculationCases": "artifacts/calculations/data/cases.json",
 }
 
 LOCAL_NAMES = {
@@ -38,6 +41,9 @@ LOCAL_NAMES = {
     "decisionModel": "decision.dmn",
     "decisionVocabulary": "decision-vocabulary.ttl",
     "decisionCases": "decision-cases.json",
+    "calculationFormula": "calculation.openmath.xml",
+    "calculationVocabulary": "calculation-vocabulary.ttl",
+    "calculationCases": "calculation-cases.json",
 }
 
 
@@ -86,9 +92,6 @@ def main() -> None:
     manifest_bytes = download(raw_url(repository, commit, manifest_path))
     manifest_text = manifest_bytes.decode("utf-8")
 
-    # The source repository verifies the RDF catalog semantically in its own CI.
-    # Here we verify that our pinned operational binding still names exactly the
-    # published repository-relative artifact paths before materializing them.
     for role, path in EXPECTED_ARTIFACTS.items():
         require(
             f'dcterms:identifier "{path}"' in manifest_text,
