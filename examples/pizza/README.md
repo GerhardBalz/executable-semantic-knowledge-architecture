@@ -1,6 +1,6 @@
 # Pizza: executable semantic knowledge reference
 
-This directory contains the first executable reference examples for **Executable Semantic Knowledge Architecture (ESKA)**.
+This directory contains the executable reference examples for **Executable Semantic Knowledge Architecture (ESKA)**.
 
 The Pizza domain demonstrates different formal execution semantics while also testing an important repository boundary:
 
@@ -12,9 +12,9 @@ ESKA
     operationalizes those semantics
 ```
 
-ESKA no longer stores copies of the Pizza reasoning module, SHACL profile, or validation data used by this example. [`pizza-domain-source.json`](pizza-domain-source.json) pins `GerhardBalz/pizza-ontology` to an immutable Git commit, and [`fetch-domain-artifacts.py`](fetch-domain-artifacts.py) materializes the published artifacts under `.work/pizza-domain/` at execution time.
+ESKA does not store copies of the Pizza reasoning module, SHACL profile, validation data, rule query, rule vocabulary, or rule data used by this example. [`pizza-domain-source.json`](pizza-domain-source.json) pins `GerhardBalz/pizza-ontology` to an immutable Git commit, and [`fetch-domain-artifacts.py`](fetch-domain-artifacts.py) materializes the published artifacts under `.work/pizza-domain/` at execution time.
 
-Two execution modes are implemented:
+Three execution modes are implemented:
 
 ```text
 source-owned OWL module
@@ -24,9 +24,13 @@ inferred semantic knowledge
 source-owned SHACL profile + RDF data
     ↓ validate
 semantic conformance report
+
+source-owned SPARQL rule + RDF data
+    ↓ evaluate
+rule-derived RDF statement
 ```
 
-The OWL path is developed end-to-end through Capability, Service, and Agent. The SHACL path is developed through semantic execution, a bounded Validation Capability, verification, and provenance.
+The OWL path is developed end-to-end through Capability, Service, and Agent. The SHACL and rule paths are developed through semantic execution, bounded Semantic Capabilities, verification, and provenance without adding Service or Agent layers.
 
 ## Semantic source binding
 
@@ -37,18 +41,21 @@ Repository
     GerhardBalz/pizza-ontology
 
 Commit
-    613ff0b6e615cbb2eac7cd92358eca9f885fbc7d
+    bba9fa883f326ebeb395140abd523dc517caf071
 
 Manifest
     artifacts/manifest.ttl
 ```
 
-The manifest publishes four domain artifacts used here:
+The manifest publishes seven domain artifacts used here:
 
 - coherent Pizza reasoning module;
 - Pizza instance SHACL profile;
-- conforming RDF example;
-- non-conforming RDF example.
+- conforming RDF validation example;
+- non-conforming RDF validation example;
+- vegetarian-warning SPARQL rule;
+- rule result vocabulary;
+- rule evaluation RDF data.
 
 The combination of a stable role/path contract and immutable Git commit creates the actual execution binding:
 
@@ -195,8 +202,60 @@ Executable artifact
 This is intentionally different from OWL classification:
 
 ```text
-OWL entailment             → inferred semantic relation
+OWL entailment              → inferred semantic relation
 SHACL constraint evaluation → conformance report
+```
+
+## 3. SPARQL rule evaluation path
+
+The third execution mode is documented in [`rules/README.md`](rules/README.md).
+
+It asks:
+
+> **Can a source-owned semantic rule be evaluated deterministically and produce a machine-traceable derived result?**
+
+The Pizza repository publishes a SPARQL 1.1 `CONSTRUCT` rule, a result vocabulary, and explicit RDF data. The rule evaluates:
+
+```text
+Pizza
+    hasTopping topping
+    topping a MeatTopping
+        ↓ evaluate
+requiresVegetarianWarning true
+```
+
+The published data contains a matching meat-topping Pizza and a vegetable-only control. ESKA requires exactly one warning result and verifies that the vegetable control produces none.
+
+[`rules/pizza-rule-evaluation-capability.ttl`](rules/pizza-rule-evaluation-capability.ttl) describes the bounded ability:
+
+```text
+PizzaRuleEvaluationCapability
+
+Input
+    explicit Pizza RDF data graph
+
+Output
+    derived RDF result graph
+
+Produced relation
+    urn:pizza-ontology:rule:requiresVegetarianWarning
+
+Semantic model
+    commit-pinned SPARQL CONSTRUCT rule
+
+Executable artifact
+    SPARQL evaluation with RDFLib
+
+Applicability
+    explicit RDF assertions; no implicit OWL entailment
+```
+
+The mode deliberately performs neither OWL inference nor SHACL validation:
+
+```text
+OWL ontology     → reason   → inferred axiom
+SHACL constraint → validate → validation report
+SPARQL rule      → evaluate → derived RDF statement
 ```
 
 ## Execute
@@ -242,9 +301,49 @@ python examples/pizza/validation/validate.py
 
 The validation script fetches the same pinned Pizza contract, verifies `PizzaValidationCapability`, evaluates the source-owned positive/negative data, and records source-aware validation provenance.
 
+### Run SPARQL rule evaluation
+
+```bash
+python -m pip install -r examples/pizza/rules/requirements.txt
+python examples/pizza/rules/evaluate.py
+```
+
+The rule runner materializes the same pinned domain contract, verifies `PizzaRuleEvaluationCapability`, evaluates the source-owned SPARQL rule, checks the positive/control outcomes, and records rule execution and verification provenance.
+
+## Cross-mode core verification
+
+The third mode was introduced as a falsification test for the provisional ESKA core.
+
+[`verify-core.sparql`](verify-core.sparql) now verifies the same Capability contract across:
+
+- `PizzaClassificationCapability`;
+- `PizzaValidationCapability`;
+- `PizzaRuleEvaluationCapability`.
+
+[`verify-core-executions.sparql`](verify-core-executions.sparql) verifies the same runtime pattern across four concrete executions:
+
+- OWL reasoning;
+- conforming SHACL validation;
+- non-conforming SHACL validation;
+- SPARQL rule evaluation.
+
+The shared abstraction remains:
+
+```text
+SemanticModel
+→ ExecutableSemanticKnowledgeArtifact
+→ SemanticCapability
+→ ApplicabilityCondition
+→ Execution
+→ Result
+→ Verification
+```
+
+`model/eska-core.ttl` required **no change** for the third mode. No `Rule`, `RuleExecution`, `ExecutionMode`, rule-specific result superclass, or new ESKA provenance hierarchy was introduced.
+
 ## Verification
 
-The reference now verifies both **semantic execution** and **semantic source ownership**:
+The reference verifies both **semantic execution** and **semantic source ownership**:
 
 ```text
 Is the domain artifact pinned to an immutable Pizza commit?
@@ -253,11 +352,15 @@ Does the pinned Pizza manifest still publish the expected role/path contract?
 
 Does OWL reasoning produce the expected result?
 
-Does the Capability remain explicit?
-
-Can the Knowledge Agent discover and invoke the Service?
+Does the classification Capability remain explicit and agent-accessible?
 
 Does SHACL validation distinguish the published positive and negative data?
+
+Does rule evaluation produce the published rule outcome while preserving the control case?
+
+Do all three Capabilities satisfy the same generic core contract?
+
+Do all concrete executions satisfy the same Execution → Result → Verification pattern?
 
 Do execution provenance records retain the source artifact identity?
 ```
@@ -273,6 +376,8 @@ GerhardBalz/pizza-ontology
 ├── coherent reasoning module
 ├── Pizza SHACL validation profile
 ├── Pizza validation example data
+├── SPARQL rule + result vocabulary
+├── Pizza rule evaluation data
 └── semantic artifact manifest
           │
           │ pinned commit
@@ -281,14 +386,16 @@ GerhardBalz/executable-semantic-knowledge-architecture
 │
 ├── Semantic Capability
 ├── Execution / Result / Verification
-├── Knowledge Service
-├── Knowledge Agent
+├── Knowledge Service         classification only
+├── Knowledge Agent           classification only
 └── execution provenance
 ```
 
-This makes a central ESKA principle concrete:
+This makes two central ESKA principles concrete:
 
-> **Execution must not sever semantics — and execution architecture should not become the accidental owner of domain semantics.**
+> **Execution must not sever semantics.**
+
+> **Execution architecture should not become the accidental owner of domain semantics.**
 
 ## Source and license
 

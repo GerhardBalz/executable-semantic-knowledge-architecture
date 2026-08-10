@@ -154,11 +154,11 @@ A Semantic Capability is not necessarily a capability *about semantics*. It is a
 
 An **Execution** is a computational activity that applies executable semantic knowledge under a defined Semantic Capability.
 
-A **Result** is a machine-interpretable entity produced by an Execution, such as an inferred statement or SHACL validation report.
+A **Result** is a machine-interpretable entity produced by an Execution, such as an inferred statement, SHACL validation report, or rule-derived RDF statement.
 
 A **Verification** is an activity that checks semantic knowledge, an Execution, or a Result against explicit criteria.
 
-These concepts are also part of the provisional ESKA core because both OWL reasoning and SHACL validation instantiate the same pattern:
+These concepts are part of the provisional ESKA core because OWL reasoning, SHACL validation, and SPARQL rule evaluation all instantiate the same pattern:
 
 ```text
 SemanticCapability
@@ -210,7 +210,9 @@ eska-core.ttl
         └── eska-agent.ttl
 ```
 
-The core contains only concepts that have been demonstrated across more than one executable-semantic mode. Service and Agent semantics remain extensions because they are currently exercised only on the classification path.
+The core now has executable evidence across three distinct semantic execution modes: OWL reasoning, SHACL validation, and SPARQL rule evaluation. The third mode was used as an explicit falsification test and required no change to `model/eska-core.ttl`.
+
+Service and Agent semantics remain extensions because they are currently exercised only on the classification path. The three-mode test also did not justify introducing `Rule`, `RuleExecution`, or an `ExecutionMode` taxonomy into the core.
 
 The project deliberately continues to use the provisional namespace:
 
@@ -299,7 +301,7 @@ This enables explanation through explicit architecture and lineage rather than g
 
 ESKA uses the classic Pizza ontology as its initial reference domain because the domain is immediately understandable while still containing non-trivial formal semantics and reasoning behavior.
 
-The companion repository [GerhardBalz/pizza-ontology](https://github.com/GerhardBalz/pizza-ontology) is the **source owner** for the Pizza semantic artifacts used by the executable examples. It preserves Pizza Ontology 2.0, provides the canonical coherent reasoning module, publishes the Pizza SHACL validation profile and example data, and exposes those artifacts through a machine-readable manifest.
+The companion repository [GerhardBalz/pizza-ontology](https://github.com/GerhardBalz/pizza-ontology) is the **source owner** for the Pizza semantic artifacts used by the executable examples. It preserves Pizza Ontology 2.0, provides the canonical coherent reasoning module, publishes the Pizza SHACL validation profile and example data, publishes the Pizza rule-evaluation artifacts, and exposes those artifacts through a machine-readable manifest.
 
 ESKA consumes that semantic artifact contract from an immutable commit recorded in [`examples/pizza/pizza-domain-source.json`](examples/pizza/pizza-domain-source.json):
 
@@ -310,6 +312,8 @@ pizza-ontology
     ├── coherent OWL reasoning module
     ├── Pizza SHACL validation profile
     ├── validation example RDF
+    ├── SPARQL rule + result vocabulary
+    ├── rule evaluation RDF data
     └── artifacts/manifest.ttl
             │
             │ immutable Git commit
@@ -327,10 +331,10 @@ The current source binding pins:
 
 ```text
 GerhardBalz/pizza-ontology
-@613ff0b6e615cbb2eac7cd92358eca9f885fbc7d
+@bba9fa883f326ebeb395140abd523dc517caf071
 ```
 
-The Pizza files are materialized only at runtime beneath `examples/pizza/.work/pizza-domain/`. They are not maintained as duplicate ESKA source files. CI explicitly fails if the former local semantic-copy paths are reintroduced.
+The Pizza files are materialized only at runtime beneath `examples/pizza/.work/pizza-domain/`. They are not maintained as duplicate ESKA source files. CI explicitly fails if the former local semantic-copy paths—including the rule artifacts—are reintroduced.
 
 This makes the ownership boundary executable:
 
@@ -342,7 +346,7 @@ The executable example in [`examples/pizza`](examples/pizza) asks:
 
 > **Can `AmericanHot` be inferred to be a `SpicyPizza`, and can that result remain semantically connected as it is bounded, exposed, discovered, and invoked?**
 
-The end-to-end slice now spans two repositories while retaining one semantic source of truth:
+The end-to-end slice spans two repositories while retaining one semantic source of truth:
 
 ```text
 pizza-ontology
@@ -381,21 +385,39 @@ The source-owned non-conforming graph deliberately:
 - omits `pizza:hasBase`, producing a `sh:MinCountConstraintComponent` result;
 - points `pizza:hasTopping` to a value not typed as `pizza:PizzaTopping`, producing a `sh:ClassConstraintComponent` result.
 
-This establishes two distinct forms of Executable Semantic Knowledge:
+### Third execution mode: Pizza Rule Evaluation
+
+The third executable example is implemented in [`examples/pizza/rules`](examples/pizza/rules) and asks:
+
+> **Can a source-owned semantic rule be evaluated deterministically and produce a machine-traceable derived result?**
+
+The source-owned SPARQL 1.1 `CONSTRUCT` rule operates on explicit RDF assertions. A Pizza with a topping explicitly typed `pizza:MeatTopping` produces:
+
+```text
+requiresVegetarianWarning true
+```
+
+while the vegetable-only control produces no warning result.
+
+The three operational semantics are deliberately distinct:
 
 ```text
 source-owned OWL module
     ↓ reason
-inferred axioms
+inferred axiom
 
 source-owned SHACL profile + RDF data
     ↓ validate
 SHACL ValidationReport
+
+source-owned SPARQL rule + RDF data
+    ↓ evaluate
+rule-derived RDF statement
 ```
 
 The distinction is intentional. ESKA does not define one universal execution mechanism: a semantic artifact is executable according to the operational semantics appropriate to its type.
 
-The two modes also provide the evidence for the current ESKA core. CI verifies both the shared Semantic Capability contract and the shared runtime `Execution → Result → Verification` pattern.
+The third mode was then inserted into the same generic core verifiers as reasoning and validation. The result was a successful falsification pass: `model/eska-core.ttl` required no rule-specific change.
 
 ## Initial Scope
 
@@ -411,7 +433,9 @@ The project evolves incrementally.
 - [x] Add semantic validation as a second executable-semantic mode using SHACL.
 - [x] Generalize the first cross-mode ESKA core from concepts stable across reasoning and validation.
 - [x] Separate Pizza domain-artifact ownership from ESKA execution architecture and consume the domain contract through an immutable source binding.
-- [ ] Test the provisional core against additional execution modes before promoting further concepts.
+- [x] Add SPARQL rule evaluation as a third executable-semantic mode.
+- [x] Re-test the provisional core generically across reasoning, validation, and rule evaluation without changing the core model.
+- [ ] Continue falsifying the provisional core with another genuinely different execution mode before promoting further concepts.
 - [ ] Add richer provenance and deployment-binding concepts where concrete use cases require them.
 - [ ] Decide whether and how the validation Capability should be exposed through a Knowledge Service and Agent.
 - [ ] Add additional semantic capabilities and alternative service or agent implementations.
@@ -420,7 +444,13 @@ The project intentionally does **not** begin as a general software framework, ag
 
 ## Status
 
-The Pizza reference project now tests ESKA against two different executable-semantic modes, a deterministic Knowledge Agent path, and an explicit cross-repository semantic ownership boundary.
+The Pizza reference project now tests ESKA against three different executable-semantic modes, a deterministic Knowledge Agent path, and an explicit cross-repository semantic ownership boundary.
+
+```text
+Ontology   → reason
+Constraint → validate
+Rule       → evaluate
+```
 
 The classification path provides the first complete ESKA chain from externally owned formal semantic knowledge to agent-accessible operational knowledge:
 
@@ -433,7 +463,7 @@ Source-owned Semantic Model
 → Semantic Result
 ```
 
-The validation path separately demonstrates that the same architectural ideas apply when execution means constraint evaluation rather than inference:
+The validation and rule-evaluation paths separately demonstrate that the core does not depend on classification semantics or service exposure:
 
 ```text
 Source-owned SHACL Semantic Model
@@ -442,17 +472,27 @@ Source-owned SHACL Semantic Model
 → Execution
 → SHACL ValidationReport
 → Verification + Provenance
+
+Source-owned SPARQL Rule Model
+→ Executable Rule Evaluation Artifact
+→ PizzaRuleEvaluationCapability
+→ Execution
+→ Derived RDF Result
+→ Verification + Provenance
 ```
 
-Across both paths, CI verifies the shared core abstractions at two levels:
+Across all three modes, CI verifies the shared core Capability abstraction:
 
 ```text
 SemanticModel
 → ExecutableSemanticKnowledgeArtifact
 → SemanticCapability
+→ ApplicabilityCondition
+```
 
-and
+and verifies the shared runtime pattern across four concrete executions—reasoning, conforming validation, non-conforming validation, and rule evaluation:
 
+```text
 Execution
 → Result
 → Verification
@@ -460,7 +500,7 @@ Execution
 
 CI also verifies the source-ownership invariant itself: Pizza domain artifacts are fetched from the pinned `pizza-ontology` contract and are not duplicated as ESKA source files.
 
-The project remains intentionally small and provisional. The next architectural test should come from another genuinely different execution mode rather than expanding the ontology by speculation.
+The three-mode falsification pass strengthened the current provisional core without adding `Rule`, `RuleExecution`, `ExecutionMode`, a new result hierarchy, or ESKA-specific provenance classes. The project remains intentionally small and provisional; future modes should continue trying to falsify the current abstractions rather than expanding them by speculation.
 
 ## License
 
