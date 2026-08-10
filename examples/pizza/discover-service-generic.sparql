@@ -1,0 +1,45 @@
+PREFIX agentx: <urn:eska:example:pizza:general-agent:>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX eska: <urn:eska:core:>
+
+# Discover all operational contracts targeted by the generalized Pizza Agent,
+# including one semantically compatible invocation adapter per Capability.
+SELECT ?agent ?capability ?adapter ?adapterKey ?service ?operation ?binding
+       ?method ?path ?mediaType ?inputType ?outputType ?relation
+       ?requestField ?resultField ?relationField ?capabilityField
+WHERE {
+  BIND(agentx:PizzaGeneralizedKnowledgeAgent AS ?agent)
+
+  ?agent a eska:KnowledgeAgent ;
+         eska:targetsCapability ?capability ;
+         eska:usesInvocationAdapter ?adapter .
+
+  ?adapter a eska:SemanticInvocationAdapter ;
+           dcterms:identifier ?adapterKey ;
+           eska:supportsInputType ?inputType ;
+           eska:supportsOutputType ?outputType ;
+           eska:supportsRelation ?relation .
+
+  ?capability a eska:SemanticCapability ;
+              eska:inputType ?inputType ;
+              eska:outputType ?outputType ;
+              eska:producesRelation ?relation .
+
+  ?service a eska:KnowledgeService ;
+           eska:exposesCapability ?capability ;
+           eska:hasOperation ?operation .
+
+  ?operation a eska:ServiceOperation ;
+             eska:realizesCapability ?capability ;
+             eska:hasAccessBinding ?binding .
+
+  ?binding a eska:HTTPAccessBinding ;
+           eska:httpMethod ?method ;
+           eska:path ?path ;
+           eska:mediaType ?mediaType ;
+           eska:requestField ?requestField ;
+           eska:resultField ?resultField ;
+           eska:relationField ?relationField ;
+           eska:capabilityField ?capabilityField .
+}
+ORDER BY ?capability
