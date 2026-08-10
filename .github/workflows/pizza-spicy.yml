@@ -37,6 +37,9 @@ jobs:
       - name: Run semantic reasoning, Knowledge Service, and Knowledge Agent integration
         run: bash examples/pizza/test-agent.sh
 
+      - name: Verify Pizza domain-source ownership boundary
+        run: python examples/pizza/verify-domain-source.py
+
       - name: Verify ESKA core Capability abstraction
         run: bash examples/pizza/verify-core.sh
 

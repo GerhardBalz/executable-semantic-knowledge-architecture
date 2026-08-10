@@ -1,0 +1,11 @@
+{
+  "repository": "GerhardBalz/pizza-ontology",
+  "commit": "613ff0b6e615cbb2eac7cd92358eca9f885fbc7d",
+  "manifest": "artifacts/manifest.ttl",
+  "artifacts": {
+    "reasoning": "artifacts/reasoning/spicy-pizza.ofn",
+    "shapes": "artifacts/validation/pizza-instance-shapes.ttl",
+    "validData": "artifacts/validation/data/conforming.ttl",
+    "invalidData": "artifacts/validation/data/non-conforming.ttl"
+  }
+}
