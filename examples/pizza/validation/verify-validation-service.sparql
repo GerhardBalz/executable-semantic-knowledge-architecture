@@ -1,0 +1,28 @@
+PREFIX eska: <urn:eska:core:>
+PREFIX sh: <http://www.w3.org/ns/shacl#>
+PREFIX val: <urn:eska:example:pizza:validation:>
+PREFIX valsvc: <urn:eska:example:pizza:validation-service:>
+
+# ROBOT verify treats returned rows as violations.
+SELECT ?service
+WHERE {
+  BIND(valsvc:PizzaValidationService AS ?service)
+  FILTER NOT EXISTS {
+    ?service a eska:KnowledgeService ;
+             eska:exposesCapability val:PizzaValidationCapability ;
+             eska:hasOperation valsvc:ValidatePizzaDataOperation .
+
+    valsvc:ValidatePizzaDataOperation
+        a eska:ServiceOperation ;
+        eska:httpMethod "POST" ;
+        eska:path "/validate" ;
+        eska:mediaType "application/json" ;
+        eska:requestField "data" ;
+        eska:resultField "report" ;
+        eska:relationField "relation" ;
+        eska:capabilityField "capability" ;
+        eska:inputType val:PizzaDataGraph ;
+        eska:outputType sh:ValidationReport ;
+        eska:producesRelation sh:conforms .
+  }
+}
