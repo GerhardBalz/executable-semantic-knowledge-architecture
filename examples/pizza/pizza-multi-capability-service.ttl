@@ -1,0 +1,45 @@
+@prefix cap: <urn:eska:example:pizza:capability:> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix eska: <urn:eska:core:> .
+@prefix multi: <urn:eska:example:pizza:multi-service:> .
+@prefix val: <urn:eska:example:pizza:validation:> .
+
+multi:PizzaKnowledgeService
+    a eska:KnowledgeService ;
+    dcterms:title "Pizza Multi-Capability Knowledge Service Contract"@en ;
+    dcterms:description "Machine-readable contract specimen proving that one Knowledge Service can expose classification and validation without ambiguity because each ServiceOperation explicitly realizes one SemanticCapability."@en ;
+    dcterms:identifier "examples/pizza/pizza-multi-capability-service.ttl" ;
+    eska:exposesCapability cap:PizzaClassificationCapability, val:PizzaValidationCapability ;
+    eska:hasOperation multi:ClassifyOperation, multi:ValidateOperation .
+
+multi:ClassifyOperation
+    a eska:ServiceOperation ;
+    dcterms:title "Classify Pizza class"@en ;
+    eska:realizesCapability cap:PizzaClassificationCapability ;
+    eska:hasAccessBinding multi:ClassifyHTTPBinding .
+
+multi:ClassifyHTTPBinding
+    a eska:HTTPAccessBinding ;
+    eska:httpMethod "POST" ;
+    eska:path "/classify" ;
+    eska:mediaType "application/json" ;
+    eska:requestField "class" ;
+    eska:resultField "classifications" ;
+    eska:relationField "relation" ;
+    eska:capabilityField "capability" .
+
+multi:ValidateOperation
+    a eska:ServiceOperation ;
+    dcterms:title "Validate Pizza RDF"@en ;
+    eska:realizesCapability val:PizzaValidationCapability ;
+    eska:hasAccessBinding multi:ValidateHTTPBinding .
+
+multi:ValidateHTTPBinding
+    a eska:HTTPAccessBinding ;
+    eska:httpMethod "POST" ;
+    eska:path "/validate" ;
+    eska:mediaType "application/json" ;
+    eska:requestField "data" ;
+    eska:resultField "report" ;
+    eska:relationField "relation" ;
+    eska:capabilityField "capability" .
