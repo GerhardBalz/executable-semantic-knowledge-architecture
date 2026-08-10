@@ -4,9 +4,11 @@ PREFIX val: <urn:eska:example:pizza:validation:>
 PREFIX rul: <urn:eska:example:pizza:rule:>
 PREFIX dec: <urn:eska:example:pizza:decision:>
 PREFIX cal: <urn:eska:example:pizza:calculation:>
+PREFIX map: <urn:eska:example:pizza:mapping:>
 PREFIX pizzaRule: <urn:pizza-ontology:rule:>
 PREFIX pizzaDecision: <urn:pizza-ontology:decision:>
 PREFIX pizzaCalc: <urn:pizza-ontology:calculation:>
+PREFIX menu: <urn:pizza-ontology:menu:>
 PREFIX pizza: <http://www.co-ode.org/ontologies/pizza/pizza.owl#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX sh: <http://www.w3.org/ns/shacl#>
@@ -21,6 +23,7 @@ WHERE {
     ("rule" rul:PizzaRuleEvaluationCapability rul:VegetarianWarningRuleModel rul:SPARQLRuleEvaluationArtifact pizzaRule:requiresVegetarianWarning)
     ("decision" dec:PizzaDietarySuitabilityCapability dec:PizzaDietarySuitabilityDecisionModel dec:DMNDecisionEvaluationArtifact pizzaDecision:dietarySuitability)
     ("calculation" cal:PizzaAreaCalculationCapability cal:PizzaAreaFormulaModel cal:OpenMathCalculationArtifact pizzaCalc:areaSquareCentimetres)
+    ("mapping" map:PizzaMenuProjectionCapability map:PizzaToMenuMappingModel map:SPARQLMappingExecutionArtifact menu:displayName)
   }
 
   FILTER NOT EXISTS {
