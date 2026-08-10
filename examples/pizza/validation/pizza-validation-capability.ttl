@@ -27,10 +27,10 @@ val:PizzaDataGraph
 val:PizzaShapesGraph
     a eska:SemanticModel, prov:Entity ;
     dcterms:title "Pizza SHACL shapes graph"@en ;
-    dcterms:identifier "artifacts/validation/pizza-instance-shapes.ttl@613ff0b6e615cbb2eac7cd92358eca9f885fbc7d" ;
+    dcterms:identifier "artifacts/validation/pizza-instance-shapes.ttl@bba9fa883f326ebeb395140abd523dc517caf071" ;
     dcterms:description "Commit-pinned SHACL validation profile owned and published by the companion pizza-ontology repository."@en ;
-    dcterms:source <https://github.com/GerhardBalz/pizza-ontology/blob/613ff0b6e615cbb2eac7cd92358eca9f885fbc7d/artifacts/validation/pizza-instance-shapes.ttl> ;
-    dcterms:relation <https://github.com/GerhardBalz/pizza-ontology/blob/613ff0b6e615cbb2eac7cd92358eca9f885fbc7d/artifacts/manifest.ttl> .
+    dcterms:source <https://github.com/GerhardBalz/pizza-ontology/blob/bba9fa883f326ebeb395140abd523dc517caf071/artifacts/validation/pizza-instance-shapes.ttl> ;
+    dcterms:relation <https://github.com/GerhardBalz/pizza-ontology/blob/bba9fa883f326ebeb395140abd523dc517caf071/artifacts/manifest.ttl> .
 
 val:SHACLValidationArtifact
     a eska:ExecutableSemanticKnowledgeArtifact, prov:Entity ;
