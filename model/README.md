@@ -22,16 +22,17 @@ eska-core.ttl
 
 ## `eska-core.ttl`
 
-The core contains only concepts demonstrated across different executable-semantic modes in the Pizza reference project. It has now survived four distinct operational semantics:
+The core contains only concepts demonstrated across different executable-semantic modes in the Pizza reference project. It has now survived five distinct operational semantics:
 
 - OWL reasoning;
 - SHACL validation;
 - SPARQL rule evaluation;
-- DMN decision evaluation.
+- DMN decision evaluation;
+- OpenMath calculation.
 
-All four modes use a `SemanticModel`, an `ExecutableSemanticKnowledgeArtifact`, a bounded `SemanticCapability`, an `ApplicabilityCondition`, an `Execution`, a machine-interpretable `Result`, and an explicit `Verification` activity.
+All five modes use a `SemanticModel`, an `ExecutableSemanticKnowledgeArtifact`, a bounded `SemanticCapability`, an `ApplicabilityCondition`, an `Execution`, a machine-interpretable `Result`, and an explicit `Verification` activity.
 
-Both the rule and decision modes were intentionally used as falsification tests. No changes to `eska-core.ttl` were required to model or generically verify either mode.
+Rule, Decision, and Calculation were intentionally used as falsification tests. No changes to `eska-core.ttl` were required to model or generically verify any of those modes.
 
 `Execution` and `Verification` specialize `prov:Activity`; `Result` specializes `prov:Entity`. ESKA therefore continues to reuse PROV-O rather than inventing a parallel provenance model.
 
@@ -45,7 +46,7 @@ Contains capability-specific helper terms that are useful in examples but are no
 
 ### `eska-service.ttl`
 
-Contains Knowledge Service and transport/representation concepts. Service exposure is currently demonstrated on the Pizza classification path but not on validation, rule-evaluation, or decision paths, so these terms remain deliberately outside the core.
+Contains Knowledge Service and transport/representation concepts. Service exposure is currently demonstrated on the Pizza classification path but not on validation, rule, decision, or calculation paths, so these terms remain deliberately outside core.
 
 ### `eska-agent.ttl`
 
@@ -53,7 +54,7 @@ Contains Knowledge Agent and discovery concepts. Agent discovery/invocation is c
 
 ## Why there is no execution-type taxonomy in core
 
-The third and fourth execution modes do not introduce `Rule`, `Decision`, `RuleExecution`, `DecisionExecution`, or `ExecutionMode` into the core.
+The additional modes do not introduce `Rule`, `Decision`, `Calculation`, `Formula`, their execution/result subclasses, or `ExecutionMode` into core.
 
 Their native semantic artifacts already carry the mode-specific meaning:
 
@@ -71,9 +72,18 @@ DMN decision table
 PizzaDietarySuitabilityCapability
         ↓
 Execution → Result → Verification
+
+OpenMath formula + calculation vocabulary
+    a SemanticModel
+        ↓
+PizzaAreaCalculationCapability
+        ↓
+Execution → Result → Verification
 ```
 
 The execution mechanism is represented separately as an `ExecutableSemanticKnowledgeArtifact`. This keeps technology-specific semantics in their native artifacts until repeated executable evidence justifies a broader ESKA abstraction.
+
+The calculation mode also demonstrates that typed numeric values do not require datatype-specific core classes. `PizzaAreaResult` is the Capability output type; the actual numeric value is carried as an `xsd:decimal` through the semantic result relation defined by the source-owned calculation vocabulary.
 
 ## Dependency representation
 
