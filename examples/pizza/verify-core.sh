@@ -22,6 +22,7 @@ ROBOT=(java -jar "${ROBOT_JAR}")
   --input "${HERE}/pizza-classification-capability.ttl" \
   --input "${HERE}/validation/pizza-validation-capability.ttl" \
   --input "${HERE}/rules/pizza-rule-evaluation-capability.ttl" \
+  --input "${HERE}/decisions/pizza-dietary-suitability-capability.ttl" \
   --output "${RESULTS_DIR}/core-examples.owl"
 
 "${ROBOT[@]}" verify \
@@ -29,4 +30,4 @@ ROBOT=(java -jar "${ROBOT_JAR}")
   --queries "${HERE}/verify-core.sparql" \
   --output-dir "${VERIFY_DIR}"
 
-echo "SUCCESS: reasoning, validation, and rule evaluation satisfy the same ESKA core Capability abstraction."
+echo "SUCCESS: reasoning, validation, rule evaluation, and decision evaluation satisfy the same ESKA core Capability abstraction."
