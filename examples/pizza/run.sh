@@ -136,6 +136,7 @@ run:spicy-pizza-verification a eska:Verification, prov:Activity ;
     dcterms:description "Verification that OWL reasoning over the pinned Pizza semantic artifact produced the expected AmericanHot to SpicyPizza semantic result."@en ;
     eska:verifiesExecution run:spicy-pizza-reasoning ;
     eska:verifiesResult run:american-hot-spicy-inference ;
+    prov:used run:american-hot-spicy-inference ;
     prov:used run:spicy-pizza-verification-query ;
     prov:endedAtTime "${EXECUTED_AT}"^^xsd:dateTime .
 
