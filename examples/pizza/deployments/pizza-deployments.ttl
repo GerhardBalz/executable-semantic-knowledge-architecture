@@ -1,0 +1,61 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix dep: <urn:eska:example:pizza:deployment:> .
+@prefix eska: <urn:eska:core:> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix svc: <urn:eska:example:pizza:service:> .
+@prefix valsvc: <urn:eska:example:pizza:validation-service:> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+dep:BlueEnvironment
+    a eska:DeploymentEnvironment ;
+    dcterms:identifier "blue" ;
+    dcterms:title "Blue local deployment environment"@en .
+
+dep:GreenEnvironment
+    a eska:DeploymentEnvironment ;
+    dcterms:identifier "green" ;
+    dcterms:title "Green local deployment environment"@en .
+
+dep:ClassificationBlueDeployment
+    a eska:ServiceDeployment, prov:Entity ;
+    dcterms:identifier "pizza-classification-blue" ;
+    eska:deploysService svc:PizzaClassificationService ;
+    eska:inEnvironment dep:BlueEnvironment ;
+    eska:hasDeploymentBinding dep:ClassificationBlueHTTPBinding .
+
+dep:ClassificationBlueHTTPBinding
+    a eska:HTTPDeploymentBinding ;
+    eska:baseURL "http://127.0.0.1:18083"^^xsd:anyURI .
+
+dep:ClassificationGreenDeployment
+    a eska:ServiceDeployment, prov:Entity ;
+    dcterms:identifier "pizza-classification-green" ;
+    eska:deploysService svc:PizzaClassificationService ;
+    eska:inEnvironment dep:GreenEnvironment ;
+    eska:hasDeploymentBinding dep:ClassificationGreenHTTPBinding .
+
+dep:ClassificationGreenHTTPBinding
+    a eska:HTTPDeploymentBinding ;
+    eska:baseURL "http://127.0.0.1:18085"^^xsd:anyURI .
+
+dep:ValidationBlueDeployment
+    a eska:ServiceDeployment, prov:Entity ;
+    dcterms:identifier "pizza-validation-blue" ;
+    eska:deploysService valsvc:PizzaValidationService ;
+    eska:inEnvironment dep:BlueEnvironment ;
+    eska:hasDeploymentBinding dep:ValidationBlueHTTPBinding .
+
+dep:ValidationBlueHTTPBinding
+    a eska:HTTPDeploymentBinding ;
+    eska:baseURL "http://127.0.0.1:18084"^^xsd:anyURI .
+
+dep:ValidationGreenDeployment
+    a eska:ServiceDeployment, prov:Entity ;
+    dcterms:identifier "pizza-validation-green" ;
+    eska:deploysService valsvc:PizzaValidationService ;
+    eska:inEnvironment dep:GreenEnvironment ;
+    eska:hasDeploymentBinding dep:ValidationGreenHTTPBinding .
+
+dep:ValidationGreenHTTPBinding
+    a eska:HTTPDeploymentBinding ;
+    eska:baseURL "http://127.0.0.1:18086"^^xsd:anyURI .
