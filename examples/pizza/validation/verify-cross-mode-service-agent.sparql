@@ -7,12 +7,12 @@ PREFIX valsvc: <urn:eska:example:pizza:validation-service:>
 PREFIX valagent: <urn:eska:example:pizza:validation-agent:>
 
 # ROBOT verify treats returned rows as violations.
-# Both classification and validation must fit the same provisional Service/Agent extension pattern.
+# Classification and validation must share the same semantic Service/Operation/AccessBinding pattern.
 SELECT ?mode ?capability
 WHERE {
-  VALUES (?mode ?capability ?service ?operation ?knowledgeAgent ?discovery) {
-    ("classification" cap:PizzaClassificationCapability svc:PizzaClassificationService svc:ClassifyPizzaClassOperation agent:PizzaKnowledgeAgent agent:PizzaClassificationServiceDiscovery)
-    ("validation" val:PizzaValidationCapability valsvc:PizzaValidationService valsvc:ValidatePizzaDataOperation valagent:PizzaValidationAgent valagent:PizzaValidationServiceDiscovery)
+  VALUES (?mode ?capability ?service ?operation ?binding ?knowledgeAgent ?discovery) {
+    ("classification" cap:PizzaClassificationCapability svc:PizzaClassificationService svc:ClassifyPizzaClassOperation svc:ClassifyPizzaClassHTTPBinding agent:PizzaKnowledgeAgent agent:PizzaClassificationServiceDiscovery)
+    ("validation" val:PizzaValidationCapability valsvc:PizzaValidationService valsvc:ValidatePizzaDataOperation valsvc:ValidatePizzaDataHTTPBinding valagent:PizzaValidationAgent valagent:PizzaValidationServiceDiscovery)
   }
 
   FILTER NOT EXISTS {
@@ -23,16 +23,24 @@ WHERE {
 
     ?operation
         a eska:ServiceOperation ;
+        eska:realizesCapability ?capability ;
+        eska:hasAccessBinding ?binding .
+
+    ?capability
+        eska:inputType ?inputType ;
+        eska:outputType ?outputType ;
+        eska:producesRelation ?relation ;
+        eska:requiresCondition ?condition .
+
+    ?binding
+        a eska:HTTPAccessBinding ;
         eska:httpMethod ?method ;
         eska:path ?path ;
         eska:mediaType ?mediaType ;
         eska:requestField ?requestField ;
         eska:resultField ?resultField ;
         eska:relationField ?relationField ;
-        eska:capabilityField ?capabilityField ;
-        eska:inputType ?inputType ;
-        eska:outputType ?outputType ;
-        eska:producesRelation ?relation .
+        eska:capabilityField ?capabilityField .
 
     ?knowledgeAgent
         a eska:KnowledgeAgent ;
