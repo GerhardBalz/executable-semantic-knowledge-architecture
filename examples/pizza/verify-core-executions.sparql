@@ -2,6 +2,7 @@ PREFIX eska: <urn:eska:core:>
 PREFIX cap: <urn:eska:example:pizza:capability:>
 PREFIX run: <urn:eska:example:pizza:>
 PREFIX val: <urn:eska:example:pizza:validation:>
+PREFIX rul: <urn:eska:example:pizza:rule:>
 
 # ROBOT verify treats returned rows as violations.
 # Runtime executions from different semantic modes must share the same core pattern.
@@ -11,6 +12,7 @@ WHERE {
     ("reasoning" run:spicy-pizza-reasoning cap:PizzaClassificationCapability run:american-hot-spicy-inference run:spicy-pizza-verification)
     ("validation-conform" val:valid-pizza-validation val:PizzaValidationCapability val:ValidPizzaValidationReport val:valid-pizza-validation-verification)
     ("validation-nonconform" val:invalid-pizza-validation val:PizzaValidationCapability val:InvalidPizzaValidationReport val:invalid-pizza-validation-verification)
+    ("rule" rul:PizzaRuleEvaluationExecution rul:PizzaRuleEvaluationCapability rul:MeatyPizzaWarningResult rul:PizzaRuleEvaluationVerification)
   }
 
   FILTER NOT EXISTS {
