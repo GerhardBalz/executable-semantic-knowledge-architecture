@@ -5,7 +5,7 @@ ESKA does not store a second source-of-truth copy of the Pizza semantic artifact
 The domain artifacts are owned and published by the companion repository:
 
 - Source repository: <https://github.com/GerhardBalz/pizza-ontology>
-- Pinned source commit: `5b993ed9321f3dc5889f6e111d933feddbcd13d3`
+- Pinned source commit: `715f0460a43abacb5258eedd3d722da219a25a43`
 - Consumer manifest: `artifacts/manifest.ttl`
 - ESKA binding: [`pizza-domain-source.json`](pizza-domain-source.json)
 
