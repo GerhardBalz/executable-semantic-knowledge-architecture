@@ -27,20 +27,24 @@ ROBOT=(java -jar "${ROBOT_JAR}")
   --input "${ROOT_DIR}/model/eska-capability.ttl" \
   --input "${ROOT_DIR}/model/eska-service.ttl" \
   --input "${ROOT_DIR}/model/eska-agent.ttl" \
+  --input "${PIZZA_DIR}/pizza-classification-capability.ttl" \
+  --input "${PIZZA_DIR}/pizza-classification-service.ttl" \
+  --input "${PIZZA_DIR}/pizza-knowledge-agent.ttl" \
   --input "${HERE}/pizza-validation-capability.ttl" \
   --input "${HERE}/pizza-validation-service.ttl" \
   --input "${HERE}/pizza-validation-agent.ttl" \
   --output "${RESULTS_DIR}/architecture-model.owl"
 
-"${ROBOT[@]}" verify \
-  --input "${RESULTS_DIR}/architecture-model.owl" \
-  --queries "${HERE}/verify-validation-service.sparql" \
-  --output-dir "${VERIFY_DIR}"
-
-"${ROBOT[@]}" verify \
-  --input "${RESULTS_DIR}/architecture-model.owl" \
-  --queries "${HERE}/verify-validation-agent.sparql" \
-  --output-dir "${VERIFY_DIR}"
+for query in \
+  "${HERE}/verify-validation-service.sparql" \
+  "${HERE}/verify-validation-agent.sparql" \
+  "${HERE}/verify-cross-mode-service-agent.sparql"
+do
+  "${ROBOT[@]}" verify \
+    --input "${RESULTS_DIR}/architecture-model.owl" \
+    --queries "${query}" \
+    --output-dir "${VERIFY_DIR}"
+done
 
 python3 "${HERE}/service.py" \
   --host 127.0.0.1 \
@@ -86,9 +90,9 @@ expected = {
     "invalid": (False, 1),
 }
 ESKA = Namespace("urn:eska:core:")
-PROV = Namespace("http://www.w3.org/ns/prov#")
 SH = Namespace("http://www.w3.org/ns/shacl#")
 RUN = Namespace("urn:eska:example:pizza:validation-agent-run:")
+VAL = Namespace("urn:eska:example:pizza:validation:")
 
 for name, (expected_conforms, min_violations) in expected.items():
     result = json.loads((results / f"{name}-agent-result.json").read_text(encoding="utf-8"))
@@ -108,7 +112,7 @@ for name, (expected_conforms, min_violations) in expected.items():
     report = RUN.validation_report
     verification = RUN.validation_report_verification
     assert (execution, RDF.type, ESKA.Execution) in graph
-    assert (execution, ESKA.executesCapability, Namespace("urn:eska:example:pizza:validation:").PizzaValidationCapability) in graph
+    assert (execution, ESKA.executesCapability, VAL.PizzaValidationCapability) in graph
     assert (execution, ESKA.generatesResult, report) in graph
     assert (report, RDF.type, ESKA.Result) in graph
     assert (report, RDF.type, SH.ValidationReport) in graph
@@ -118,6 +122,7 @@ for name, (expected_conforms, min_violations) in expected.items():
 PY
 
 printf '\nSUCCESS: Pizza Validation Agent discovered and invoked PizzaValidationCapability for conforming and non-conforming RDF.\n'
+printf 'Cross-mode: classification and validation share the same provisional Service/Agent extension pattern.\n'
 printf 'Architecture: %s\n' "${RESULTS_DIR}/architecture-model.owl"
 printf 'Valid result: %s\n' "${RESULTS_DIR}/valid-agent-result.json"
 printf 'Invalid result: %s\n' "${RESULTS_DIR}/invalid-agent-result.json"
