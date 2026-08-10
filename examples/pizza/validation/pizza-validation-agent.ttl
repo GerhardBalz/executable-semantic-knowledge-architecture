@@ -1,0 +1,19 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix eska: <urn:eska:core:> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix val: <urn:eska:example:pizza:validation:> .
+@prefix valagent: <urn:eska:example:pizza:validation-agent:> .
+
+valagent:PizzaValidationAgent
+    a eska:KnowledgeAgent, prov:SoftwareAgent ;
+    dcterms:title "Pizza Validation Knowledge Agent"@en ;
+    dcterms:description "A deterministic reference agent that targets PizzaValidationCapability, discovers a validation Knowledge Service from machine-readable ESKA contracts, invokes it, and interprets the returned SHACL ValidationReport."@en ;
+    dcterms:identifier "examples/pizza/validation/agent.py" ;
+    eska:targetsCapability val:PizzaValidationCapability ;
+    eska:usesDiscoveryArtifact valagent:PizzaValidationServiceDiscovery .
+
+valagent:PizzaValidationServiceDiscovery
+    a eska:DiscoveryArtifact ;
+    dcterms:title "Pizza Validation service discovery query"@en ;
+    dcterms:identifier "examples/pizza/validation/discover-service.sparql" ;
+    dcterms:description "SPARQL query used to discover the Knowledge Service operation that exposes PizzaValidationCapability."@en .
