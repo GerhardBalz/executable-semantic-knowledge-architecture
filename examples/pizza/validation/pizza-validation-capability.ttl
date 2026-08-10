@@ -27,13 +27,15 @@ val:PizzaDataGraph
 val:PizzaShapesGraph
     a eska:SemanticModel, prov:Entity ;
     dcterms:title "Pizza SHACL shapes graph"@en ;
-    dcterms:identifier "examples/pizza/validation/pizza-shapes.ttl" ;
-    dcterms:description "SHACL constraints defining the initial structural validation contract for Pizza instance data."@en .
+    dcterms:identifier "artifacts/validation/pizza-instance-shapes.ttl@613ff0b6e615cbb2eac7cd92358eca9f885fbc7d" ;
+    dcterms:description "Commit-pinned SHACL validation profile owned and published by the companion pizza-ontology repository."@en ;
+    dcterms:source <https://github.com/GerhardBalz/pizza-ontology/blob/613ff0b6e615cbb2eac7cd92358eca9f885fbc7d/artifacts/validation/pizza-instance-shapes.ttl> ;
+    dcterms:relation <https://github.com/GerhardBalz/pizza-ontology/blob/613ff0b6e615cbb2eac7cd92358eca9f885fbc7d/artifacts/manifest.ttl> .
 
 val:SHACLValidationArtifact
     a eska:ExecutableSemanticKnowledgeArtifact, prov:Entity ;
     dcterms:title "SHACL validation with pySHACL"@en ;
-    dcterms:description "Executable semantic knowledge artifact that evaluates RDF data against the Pizza SHACL shapes graph and produces a SHACL ValidationReport."@en ;
+    dcterms:description "Executable semantic knowledge artifact that evaluates RDF data against the source-owned Pizza SHACL shapes graph and produces a SHACL ValidationReport."@en ;
     eska:inputType val:PizzaDataGraph ;
     eska:outputType sh:ValidationReport ;
     eska:producesRelation sh:conforms .
