@@ -25,6 +25,10 @@ FORBIDDEN_LOCAL_COPIES = (
     HERE / "calculations" / "pizza-area.openmath.xml",
     HERE / "calculations" / "calculation-vocabulary.ttl",
     HERE / "calculations" / "data" / "cases.json",
+    HERE / "mappings" / "pizza-to-menu.rq",
+    HERE / "mappings" / "menu-vocabulary.ttl",
+    HERE / "mappings" / "data" / "source-pizzas.ttl",
+    HERE / "mappings" / "data" / "expected-menu.ttl",
 )
 
 EXPECTED_ARTIFACTS = {
@@ -41,6 +45,10 @@ EXPECTED_ARTIFACTS = {
     "calculationFormula": "artifacts/calculations/pizza-area.openmath.xml",
     "calculationVocabulary": "artifacts/calculations/calculation-vocabulary.ttl",
     "calculationCases": "artifacts/calculations/data/cases.json",
+    "mappingQuery": "artifacts/mappings/pizza-to-menu.rq",
+    "mappingTargetVocabulary": "artifacts/mappings/menu-vocabulary.ttl",
+    "mappingSourceData": "artifacts/mappings/data/source-pizzas.ttl",
+    "mappingExpectedOutput": "artifacts/mappings/data/expected-menu.ttl",
 }
 
 EXPECTED_MATERIALIZED = (
@@ -58,6 +66,10 @@ EXPECTED_MATERIALIZED = (
     "calculation.openmath.xml",
     "calculation-vocabulary.ttl",
     "calculation-cases.json",
+    "mapping.rq",
+    "mapping-target-vocabulary.ttl",
+    "mapping-source-data.ttl",
+    "mapping-expected-output.ttl",
     "source.json",
 )
 
