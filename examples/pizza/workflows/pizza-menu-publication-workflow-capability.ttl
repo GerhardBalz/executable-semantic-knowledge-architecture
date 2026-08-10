@@ -4,17 +4,42 @@
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix pizza: <http://www.co-ode.org/ontologies/pizza/pizza.owl#> .
 @prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix val: <urn:eska:example:pizza:validation:> .
 @prefix wf: <urn:eska:example:pizza:workflow:> .
 @prefix pizzaWf: <urn:pizza-ontology:workflow:> .
 
+wf:WorkflowOperationBinding
+    a owl:Class ;
+    rdfs:label "Workflow operation binding"@en ;
+    dcterms:description "An ESKA example-local binding from a source workflow operation identifier to an established Semantic Capability."@en .
+
+wf:sourceOperation
+    a rdf:Property ;
+    rdfs:label "source workflow operation"@en .
+
+wf:boundCapability
+    a rdf:Property ;
+    rdfs:label "bound Semantic Capability"@en .
+
+wf:ValidatePizzaDataBinding
+    a wf:WorkflowOperationBinding ;
+    wf:sourceOperation pizzaWf:ValidatePizzaData ;
+    wf:boundCapability val:PizzaValidationCapability .
+
+wf:TransformPizzaToMenuBinding
+    a wf:WorkflowOperationBinding ;
+    wf:sourceOperation pizzaWf:TransformPizzaToMenu ;
+    wf:boundCapability map:PizzaMenuProjectionCapability .
+
 wf:PizzaMenuPublicationWorkflowCapability
     a eska:SemanticCapability ;
     dcterms:title "Pizza Menu Publication Workflow"@en ;
     dcterms:description "Execute the source-owned BPMN workflow that validates Pizza RDF and conditionally transforms conforming data into the Menu projection."@en ;
-    skos:scopeNote "The Capability is composite: BPMN owns orchestration while the validation and mapping step semantics remain in their established Semantic Capabilities and source-owned artifacts. Composition is represented with established dependency/part relations rather than Workflow-specific ESKA core classes."@en ;
-    dcterms:requires val:PizzaValidationCapability, map:PizzaMenuProjectionCapability ;
+    skos:scopeNote "The Capability is composite: BPMN owns orchestration while the validation and mapping step semantics remain in their established Semantic Capabilities and source-owned artifacts. Composition and operation binding are represented with established relations plus workflow-local refinements rather than Workflow-specific ESKA core classes."@en ;
+    dcterms:requires val:PizzaValidationCapability, map:PizzaMenuProjectionCapability, wf:ValidatePizzaDataBinding, wf:TransformPizzaToMenuBinding ;
     eska:subject pizza:Pizza ;
     eska:inputType wf:PizzaWorkflowInputGraph ;
     eska:outputType wf:PizzaWorkflowResult ;
@@ -51,7 +76,7 @@ wf:PizzaWorkflowOutcomeModel
 wf:BPMNWorkflowExecutionArtifact
     a eska:ExecutableSemanticKnowledgeArtifact, prov:Entity ;
     dcterms:title "BPMN workflow execution"@en ;
-    dcterms:description "Executable artifact that interprets the source-owned BPMN control flow and invokes the established Pizza Validation and Menu Projection semantic capabilities for workflow steps."@en ;
+    dcterms:description "Executable artifact that interprets the source-owned BPMN control flow and resolves semantic workflow operations to established Pizza Validation and Menu Projection Capabilities."@en ;
     eska:inputType wf:PizzaWorkflowInputGraph ;
     eska:outputType wf:PizzaWorkflowResult ;
     eska:producesRelation pizzaWf:workflowOutcome .
