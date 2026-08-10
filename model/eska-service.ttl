@@ -7,19 +7,30 @@
 <urn:eska:model:service>
     a owl:Ontology ;
     dcterms:title "ESKA service model"@en ;
-    dcterms:description "A deliberately small, provisional extension containing terms needed to describe and test Knowledge Services and their operations."@en ;
+    dcterms:description "A deliberately small, provisional extension containing stable Knowledge Service semantics plus separate access-binding terms."@en ;
     dcterms:requires <urn:eska:model:core> ;
-    owl:versionInfo "0.3-provisional" .
+    owl:versionInfo "0.4-provisional" .
 
 eska:KnowledgeService
     a owl:Class ;
     rdfs:label "Knowledge Service"@en ;
-    skos:definition "An operational interface through which knowledge or a Semantic Capability can be discovered, queried, reasoned over, validated, evaluated, transformed, explained, or acted upon."@en .
+    skos:definition "An operational interface through which one or more Semantic Capabilities can be exposed for discovery and invocation."@en .
 
 eska:ServiceOperation
     a owl:Class ;
     rdfs:label "Service Operation"@en ;
-    skos:definition "A bounded operation exposed by a Knowledge Service through a concrete access mechanism."@en .
+    skos:definition "An operational realization of one Semantic Capability exposed by a Knowledge Service. Its semantic input, output, relation, and applicability are defined by the Capability; concrete access details are supplied through an Access Binding."@en .
+
+eska:AccessBinding
+    a owl:Class ;
+    rdfs:label "Access Binding"@en ;
+    skos:definition "A concrete transport or representation binding through which a Service Operation can be invoked."@en .
+
+eska:HTTPAccessBinding
+    a owl:Class ;
+    rdfs:subClassOf eska:AccessBinding ;
+    rdfs:label "HTTP Access Binding"@en ;
+    skos:definition "An Access Binding that identifies an HTTP operation contract independently of a particular runtime deployment location."@en .
 
 eska:exposesCapability
     a owl:ObjectProperty ;
@@ -33,34 +44,57 @@ eska:hasOperation
     rdfs:domain eska:KnowledgeService ;
     rdfs:range eska:ServiceOperation .
 
+eska:realizesCapability
+    a owl:ObjectProperty ;
+    rdfs:label "realizes capability"@en ;
+    skos:definition "Identifies the Semantic Capability operationally realized by a Service Operation."@en ;
+    rdfs:domain eska:ServiceOperation ;
+    rdfs:range eska:SemanticCapability .
+
+eska:hasAccessBinding
+    a owl:ObjectProperty ;
+    rdfs:label "has access binding"@en ;
+    skos:definition "Associates a Service Operation with a concrete access contract without making that transport contract part of the Semantic Capability."@en ;
+    rdfs:domain eska:ServiceOperation ;
+    rdfs:range eska:AccessBinding .
+
 eska:httpMethod
     a owl:DatatypeProperty ;
-    rdfs:label "HTTP method"@en .
+    rdfs:label "HTTP method"@en ;
+    rdfs:domain eska:HTTPAccessBinding .
 
 eska:path
     a owl:DatatypeProperty ;
-    rdfs:label "path"@en .
+    rdfs:label "path"@en ;
+    rdfs:domain eska:HTTPAccessBinding ;
+    skos:definition "Contract-relative HTTP path. Runtime scheme, host, and port are deployment bindings and remain separate."@en .
 
 eska:mediaType
     a owl:DatatypeProperty ;
-    rdfs:label "media type"@en .
+    rdfs:label "media type"@en ;
+    rdfs:domain eska:AccessBinding ;
+    skos:definition "Media type of the access representation envelope. It does not replace the Semantic Capability output type or determine how the semantic result must be interpreted."@en .
 
 eska:requestField
     a owl:DatatypeProperty ;
     rdfs:label "request field"@en ;
+    rdfs:domain eska:AccessBinding ;
     skos:definition "Representation field that carries the semantically typed service input."@en .
 
 eska:resultField
     a owl:DatatypeProperty ;
     rdfs:label "result field"@en ;
-    skos:definition "Representation field that carries the semantically typed service result."@en .
+    rdfs:domain eska:AccessBinding ;
+    skos:definition "Representation field that carries the semantically typed service result. The field location is an access concern; result meaning comes from the Capability output type and produced relation."@en .
 
 eska:relationField
     a owl:DatatypeProperty ;
     rdfs:label "relation field"@en ;
-    skos:definition "Representation field that identifies the semantic relation expressed by a result."@en .
+    rdfs:domain eska:AccessBinding ;
+    skos:definition "Representation field that identifies the semantic relation expressed by the result."@en .
 
 eska:capabilityField
     a owl:DatatypeProperty ;
     rdfs:label "capability field"@en ;
+    rdfs:domain eska:AccessBinding ;
     skos:definition "Representation field that identifies the Semantic Capability under which the result was produced."@en .
