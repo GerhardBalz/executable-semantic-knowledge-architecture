@@ -49,6 +49,9 @@ jobs:
       - name: Run validation Knowledge Service and Knowledge Agent integration
         run: bash examples/pizza/validation/test-agent.sh
 
+      - name: Verify generalized multi-capability Knowledge Service model
+        run: bash examples/pizza/verify-service-generalization.sh
+
       - name: Run semantic validation example
         run: python examples/pizza/validation/validate.py
 
