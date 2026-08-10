@@ -102,6 +102,10 @@ Knowledge and execution can be checked through appropriate mechanisms such as lo
 
 Software agents can discover, query, interpret, reason over, verify, and invoke knowledge through explicit computational interfaces instead of reconstructing its meaning from unstructured text alone.
 
+### Explicit ownership of semantic sources
+
+Execution architecture should not become the accidental owner of domain semantics. Semantic artifacts can be maintained by a domain repository and consumed through immutable, machine-described source bindings while ESKA retains ownership of execution, Capability, Service, Agent, verification, and provenance concerns.
+
 ## Core Concepts
 
 The ESKA conceptual model distinguishes knowledge assets, executable artifacts, bounded capabilities, executions and results, operational services, and agents.
@@ -144,7 +148,7 @@ A **Semantic Capability** is a Capability whose scope, inputs, outputs, applicab
 
 A Semantic Capability is not necessarily a capability *about semantics*. It is a capability that is itself semantically defined.
 
-`Capability`, `SemanticCapability`, their shared semantic contract properties, `SemanticModel`, `ExecutableSemanticKnowledgeArtifact`, and `ApplicabilityCondition` are now part of the provisional cross-mode core in [`model/eska-core.ttl`](model/eska-core.ttl).
+`Capability`, `SemanticCapability`, their shared semantic contract properties, `SemanticModel`, `ExecutableSemanticKnowledgeArtifact`, and `ApplicabilityCondition` are part of the provisional cross-mode core in [`model/eska-core.ttl`](model/eska-core.ttl).
 
 ### Execution, Result and Verification
 
@@ -154,7 +158,7 @@ A **Result** is a machine-interpretable entity produced by an Execution, such as
 
 A **Verification** is an activity that checks semantic knowledge, an Execution, or a Result against explicit criteria.
 
-These concepts are also part of the provisional ESKA core because both OWL reasoning and SHACL validation now instantiate the same pattern:
+These concepts are also part of the provisional ESKA core because both OWL reasoning and SHACL validation instantiate the same pattern:
 
 ```text
 SemanticCapability
@@ -186,7 +190,7 @@ The provisional agent extension is captured in [`model/eska-agent.ttl`](model/es
 
 ## Provisional ESKA Core
 
-The repository now separates a small cross-mode core from architectural extensions:
+The repository separates a small cross-mode core from architectural extensions:
 
 ```text
 eska-core.ttl
@@ -295,52 +299,67 @@ This enables explanation through explicit architecture and lineage rather than g
 
 ESKA uses the classic Pizza ontology as its initial reference domain because the domain is immediately understandable while still containing non-trivial formal semantics and reasoning behavior.
 
-The companion repository [GerhardBalz/pizza-ontology](https://github.com/GerhardBalz/pizza-ontology) provides the semantic reference project based on the Manchester / Protégé Pizza ontology tradition.
+The companion repository [GerhardBalz/pizza-ontology](https://github.com/GerhardBalz/pizza-ontology) is the **source owner** for the Pizza semantic artifacts used by the executable examples. It preserves Pizza Ontology 2.0, provides the canonical coherent reasoning module, publishes the Pizza SHACL validation profile and example data, and exposes those artifacts through a machine-readable manifest.
 
-The relationship is intentionally separated:
+ESKA consumes that semantic artifact contract from an immutable commit recorded in [`examples/pizza/pizza-domain-source.json`](examples/pizza/pizza-domain-source.json):
 
 ```text
 pizza-ontology
-     │
-     │ provides the reference semantic domain
-     ▼
-Semantic Knowledge
-     │
-     │ operationalized through
-     ▼
-Executable Semantic Knowledge
-     │
-     │ organized and exposed through
-     ▼
+    │ owns
+    ├── Pizza Ontology 2.0 preservation source
+    ├── coherent OWL reasoning module
+    ├── Pizza SHACL validation profile
+    ├── validation example RDF
+    └── artifacts/manifest.ttl
+            │
+            │ immutable Git commit
+            ▼
 ESKA
+    │ operationalizes
+    ├── Semantic Capability
+    ├── Execution / Result / Verification
+    ├── Knowledge Service
+    ├── Knowledge Agent
+    └── execution provenance
 ```
 
-ESKA should not require changing the Pizza ontology merely to make it executable. Instead, the reference implementation demonstrates how architecture can be built around and through an existing semantic model.
+The current source binding pins:
+
+```text
+GerhardBalz/pizza-ontology
+@613ff0b6e615cbb2eac7cd92358eca9f885fbc7d
+```
+
+The Pizza files are materialized only at runtime beneath `examples/pizza/.work/pizza-domain/`. They are not maintained as duplicate ESKA source files. CI explicitly fails if the former local semantic-copy paths are reintroduced.
+
+This makes the ownership boundary executable:
+
+> **Execution must not sever semantics — and execution architecture should not become the accidental owner of domain semantics.**
 
 ### First vertical slice: Pizza Classification
 
-The executable example is implemented in [`examples/pizza`](examples/pizza) and answers a deliberately small question:
+The executable example in [`examples/pizza`](examples/pizza) asks:
 
 > **Can `AmericanHot` be inferred to be a `SpicyPizza`, and can that result remain semantically connected as it is bounded, exposed, discovered, and invoked?**
 
-The first end-to-end slice spans:
+The end-to-end slice now spans two repositories while retaining one semantic source of truth:
 
 ```text
-Pizza Semantic Model
-        ↓ selected semantic knowledge
-Coherent Reasoning Slice
-        ↓ execute OWL semantics with HermiT
-Inferred Classification
+pizza-ontology
+    source-owned coherent reasoning module
+        ↓ pinned fetch
+ESKA
+    HermiT reasoning
+        ↓
+    Inferred Classification
         ↓ verify / explain / trace
-Executable Semantic Knowledge
-        ↓ bounded and machine-described as
-PizzaClassificationCapability
+    PizzaClassificationCapability
         ↓ exposed through
-PizzaClassificationService
+    PizzaClassificationService
         ↓ discovered from machine-readable contracts
-PizzaKnowledgeAgent
+    PizzaKnowledgeAgent
         ↓ invokes service
-Semantic Result
+    Semantic Result
 ```
 
 The Knowledge Agent knows the Capability it wants but does not hard-code the service, HTTP path, result relation, representation field names, or `SpicyPizza` as the answer. It discovers the service operation from the merged ESKA architecture model and combines that contract with a separate runtime deployment location.
@@ -353,18 +372,23 @@ This demonstrates a core ESKA claim:
 
 The second executable example is implemented in [`examples/pizza/validation`](examples/pizza/validation) and asks a different question:
 
-> **Does a concrete Pizza RDF data graph conform to an explicit semantic validation contract?**
+> **Does concrete Pizza RDF data conform to the Pizza validation profile published by the domain repository?**
 
-It introduces `PizzaValidationCapability` and a SHACL shapes graph with explicit structural constraints. A conforming Pizza graph produces `sh:conforms true`; a deliberately invalid Pizza with two `hasBase` values produces `sh:conforms false` and the expected `sh:MaxCountConstraintComponent` validation result.
+The source-owned SHACL profile defines explicit structural constraints. The source-owned conforming graph produces `sh:conforms true`.
+
+The source-owned non-conforming graph deliberately:
+
+- omits `pizza:hasBase`, producing a `sh:MinCountConstraintComponent` result;
+- points `pizza:hasTopping` to a value not typed as `pizza:PizzaTopping`, producing a `sh:ClassConstraintComponent` result.
 
 This establishes two distinct forms of Executable Semantic Knowledge:
 
 ```text
-OWL ontology
+source-owned OWL module
     ↓ reason
 inferred axioms
 
-SHACL shapes graph
+source-owned SHACL profile + RDF data
     ↓ validate
 SHACL ValidationReport
 ```
@@ -372,8 +396,6 @@ SHACL ValidationReport
 The distinction is intentional. ESKA does not define one universal execution mechanism: a semantic artifact is executable according to the operational semantics appropriate to its type.
 
 The two modes also provide the evidence for the current ESKA core. CI verifies both the shared Semantic Capability contract and the shared runtime `Execution → Result → Verification` pattern.
-
-The purpose of both examples is not to build a sophisticated pizza application. It is to make the semantic-to-execution architecture visible in a domain that is easy to understand.
 
 ## Initial Scope
 
@@ -388,6 +410,7 @@ The project evolves incrementally.
 - [x] Demonstrate machine-described discovery and invocation by a deterministic Knowledge Agent.
 - [x] Add semantic validation as a second executable-semantic mode using SHACL.
 - [x] Generalize the first cross-mode ESKA core from concepts stable across reasoning and validation.
+- [x] Separate Pizza domain-artifact ownership from ESKA execution architecture and consume the domain contract through an immutable source binding.
 - [ ] Test the provisional core against additional execution modes before promoting further concepts.
 - [ ] Add richer provenance and deployment-binding concepts where concrete use cases require them.
 - [ ] Decide whether and how the validation Capability should be exposed through a Knowledge Service and Agent.
@@ -397,13 +420,12 @@ The project intentionally does **not** begin as a general software framework, ag
 
 ## Status
 
-The Pizza reference project now tests ESKA against two different executable-semantic modes and uses those modes to define and verify a small provisional ESKA core.
+The Pizza reference project now tests ESKA against two different executable-semantic modes, a deterministic Knowledge Agent path, and an explicit cross-repository semantic ownership boundary.
 
-The classification path provides the first complete ESKA chain from formal semantic knowledge to agent-accessible operational knowledge:
+The classification path provides the first complete ESKA chain from externally owned formal semantic knowledge to agent-accessible operational knowledge:
 
 ```text
-Semantic Model
-→ Semantic Knowledge
+Source-owned Semantic Model
 → Executable Semantic Knowledge
 → Semantic Capability
 → Knowledge Service
@@ -414,7 +436,7 @@ Semantic Model
 The validation path separately demonstrates that the same architectural ideas apply when execution means constraint evaluation rather than inference:
 
 ```text
-SHACL Semantic Model
+Source-owned SHACL Semantic Model
 → Executable Validation Artifact
 → PizzaValidationCapability
 → Execution
@@ -422,7 +444,7 @@ SHACL Semantic Model
 → Verification + Provenance
 ```
 
-Across both paths, CI now verifies the shared core abstractions at two levels:
+Across both paths, CI verifies the shared core abstractions at two levels:
 
 ```text
 SemanticModel
@@ -436,10 +458,12 @@ Execution
 → Verification
 ```
 
+CI also verifies the source-ownership invariant itself: Pizza domain artifacts are fetched from the pinned `pizza-ontology` contract and are not duplicated as ESKA source files.
+
 The project remains intentionally small and provisional. The next architectural test should come from another genuinely different execution mode rather than expanding the ontology by speculation.
 
 ## License
 
 New material in this repository is licensed under the [MIT License](LICENSE).
 
-External semantic models and reference artifacts used by examples retain their own provenance and licensing and should not be assumed to inherit this repository's license.
+External semantic models and reference artifacts used by examples retain their own provenance and licensing and should not be assumed to inherit this repository's license. See [`examples/pizza/LICENSE-NOTICE.md`](examples/pizza/LICENSE-NOTICE.md) for the current Pizza source and licensing boundary.
