@@ -1,0 +1,24 @@
+PREFIX dec: <urn:eska:example:pizza:decision:>
+PREFIX decision: <urn:pizza-ontology:decision:>
+PREFIX eska: <urn:eska:core:>
+PREFIX pizza: <http://www.co-ode.org/ontologies/pizza/pizza.owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+# rdflib query results are treated as violations by the Python runner.
+SELECT ?subject ?predicate ?object
+WHERE {
+  VALUES (?subject ?predicate ?object) {
+    (dec:PizzaDietarySuitabilityCapability rdf:type eska:SemanticCapability)
+    (dec:PizzaDietarySuitabilityCapability eska:subject pizza:Pizza)
+    (dec:PizzaDietarySuitabilityCapability eska:inputType dec:PizzaDietaryDecisionContext)
+    (dec:PizzaDietarySuitabilityCapability eska:outputType decision:DietarySuitabilityOutcome)
+    (dec:PizzaDietarySuitabilityCapability eska:producesRelation decision:dietarySuitability)
+    (dec:PizzaDietarySuitabilityCapability eska:usesSemanticModel dec:PizzaDietarySuitabilityDecisionModel)
+    (dec:PizzaDietarySuitabilityCapability eska:usesExecutableArtifact dec:DMNDecisionEvaluationArtifact)
+    (dec:PizzaDietarySuitabilityCapability eska:requiresCondition dec:ExplicitDecisionInputCondition)
+    (dec:PizzaDietarySuitabilityDecisionModel rdf:type eska:SemanticModel)
+    (dec:DMNDecisionEvaluationArtifact rdf:type eska:ExecutableSemanticKnowledgeArtifact)
+    (dec:ExplicitDecisionInputCondition rdf:type eska:ApplicabilityCondition)
+  }
+  FILTER NOT EXISTS { ?subject ?predicate ?object }
+}

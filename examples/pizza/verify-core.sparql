@@ -2,7 +2,9 @@ PREFIX eska: <urn:eska:core:>
 PREFIX cap: <urn:eska:example:pizza:capability:>
 PREFIX val: <urn:eska:example:pizza:validation:>
 PREFIX rul: <urn:eska:example:pizza:rule:>
+PREFIX dec: <urn:eska:example:pizza:decision:>
 PREFIX pizzaRule: <urn:pizza-ontology:rule:>
+PREFIX pizzaDecision: <urn:pizza-ontology:decision:>
 PREFIX pizza: <http://www.co-ode.org/ontologies/pizza/pizza.owl#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX sh: <http://www.w3.org/ns/shacl#>
@@ -15,6 +17,7 @@ WHERE {
     ("reasoning" cap:PizzaClassificationCapability cap:SpicyPizzaSemanticModel cap:OWLClassificationArtifact rdfs:subClassOf)
     ("validation" val:PizzaValidationCapability val:PizzaShapesGraph val:SHACLValidationArtifact sh:conforms)
     ("rule" rul:PizzaRuleEvaluationCapability rul:VegetarianWarningRuleModel rul:SPARQLRuleEvaluationArtifact pizzaRule:requiresVegetarianWarning)
+    ("decision" dec:PizzaDietarySuitabilityCapability dec:PizzaDietarySuitabilityDecisionModel dec:DMNDecisionEvaluationArtifact pizzaDecision:dietarySuitability)
   }
 
   FILTER NOT EXISTS {

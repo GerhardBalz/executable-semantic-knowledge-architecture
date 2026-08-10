@@ -1,6 +1,6 @@
 {
   "repository": "GerhardBalz/pizza-ontology",
-  "commit": "bba9fa883f326ebeb395140abd523dc517caf071",
+  "commit": "983b691d9d2102ffad97a3ec31aa9b1435b3e547",
   "manifest": "artifacts/manifest.ttl",
   "artifacts": {
     "reasoning": "artifacts/reasoning/spicy-pizza.ofn",
@@ -9,6 +9,9 @@
     "invalidData": "artifacts/validation/data/non-conforming.ttl",
     "ruleQuery": "artifacts/rules/vegetarian-warning.rq",
     "ruleVocabulary": "artifacts/rules/rule-vocabulary.ttl",
-    "ruleData": "artifacts/rules/data/menu-pizzas.ttl"
+    "ruleData": "artifacts/rules/data/menu-pizzas.ttl",
+    "decisionModel": "artifacts/decisions/pizza-dietary-suitability.dmn",
+    "decisionVocabulary": "artifacts/decisions/decision-vocabulary.ttl",
+    "decisionCases": "artifacts/decisions/data/cases.json"
   }
 }

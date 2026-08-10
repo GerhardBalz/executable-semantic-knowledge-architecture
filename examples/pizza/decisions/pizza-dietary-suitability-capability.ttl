@@ -1,0 +1,47 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix eska: <urn:eska:core:> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix dec: <urn:eska:example:pizza:decision:> .
+@prefix decision: <urn:pizza-ontology:decision:> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix pizza: <http://www.co-ode.org/ontologies/pizza/pizza.owl#> .
+
+ dec:PizzaDietarySuitabilityCapability
+    a eska:SemanticCapability ;
+    dcterms:title "Pizza Dietary Suitability Decision"@en ;
+    dcterms:description "Select one semantic dietary-suitability outcome by evaluating the source-owned Pizza DMN decision table against an explicit decision-input context."@en ;
+    skos:scopeNote "The capability is bounded to deterministic evaluation of one commit-pinned DMN 1.5 UNIQUE decision table. The supplied containsMeat and containsFish inputs are explicit decision inputs; this capability does not infer them from OWL, execute the Pizza SPARQL rule, or expose the decision through a service or agent."@en ;
+    eska:subject pizza:Pizza ;
+    eska:inputType dec:PizzaDietaryDecisionContext ;
+    eska:outputType decision:DietarySuitabilityOutcome ;
+    eska:producesRelation decision:dietarySuitability ;
+    eska:usesSemanticModel dec:PizzaDietarySuitabilityDecisionModel ;
+    eska:usesExecutableArtifact dec:DMNDecisionEvaluationArtifact ;
+    eska:requiresCondition dec:ExplicitDecisionInputCondition .
+
+ dec:PizzaDietaryDecisionContext
+    a owl:Class ;
+    dcterms:description "An explicit decision-input context providing boolean containsMeat and containsFish values for one Pizza decision case."@en .
+
+ dec:PizzaDietarySuitabilityDecisionModel
+    a eska:SemanticModel, prov:Entity ;
+    dcterms:title "Pizza dietary suitability DMN decision model"@en ;
+    dcterms:identifier "artifacts/decisions/pizza-dietary-suitability.dmn@983b691d9d2102ffad97a3ec31aa9b1435b3e547" ;
+    dcterms:description "Commit-pinned DMN 1.5 UNIQUE decision table owned and published by the companion pizza-ontology repository."@en ;
+    dcterms:conformsTo <https://www.omg.org/spec/DMN/1.5/> ;
+    dcterms:source <https://github.com/GerhardBalz/pizza-ontology/blob/983b691d9d2102ffad97a3ec31aa9b1435b3e547/artifacts/decisions/pizza-dietary-suitability.dmn> ;
+    dcterms:requires <https://github.com/GerhardBalz/pizza-ontology/blob/983b691d9d2102ffad97a3ec31aa9b1435b3e547/artifacts/decisions/decision-vocabulary.ttl> ;
+    dcterms:relation <https://github.com/GerhardBalz/pizza-ontology/blob/983b691d9d2102ffad97a3ec31aa9b1435b3e547/artifacts/manifest.ttl> .
+
+ dec:DMNDecisionEvaluationArtifact
+    a eska:ExecutableSemanticKnowledgeArtifact, prov:Entity ;
+    dcterms:title "DMN decision evaluation"@en ;
+    dcterms:description "Executable semantic knowledge artifact that evaluates the supported subset of the source-owned DMN decision model and emits a semantic dietary-suitability outcome."@en ;
+    eska:inputType dec:PizzaDietaryDecisionContext ;
+    eska:outputType decision:DietarySuitabilityOutcome ;
+    eska:producesRelation decision:dietarySuitability .
+
+ dec:ExplicitDecisionInputCondition
+    a eska:ApplicabilityCondition ;
+    dcterms:description "The decision context must explicitly provide boolean containsMeat and containsFish inputs. Decision evaluation does not infer those values from ontology or rule semantics."@en .

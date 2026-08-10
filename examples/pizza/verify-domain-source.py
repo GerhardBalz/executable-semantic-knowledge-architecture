@@ -19,6 +19,9 @@ FORBIDDEN_LOCAL_COPIES = (
     HERE / "rules" / "vegetarian-warning.rq",
     HERE / "rules" / "rule-vocabulary.ttl",
     HERE / "rules" / "data" / "menu-pizzas.ttl",
+    HERE / "decisions" / "pizza-dietary-suitability.dmn",
+    HERE / "decisions" / "decision-vocabulary.ttl",
+    HERE / "decisions" / "data" / "cases.json",
 )
 
 EXPECTED_ARTIFACTS = {
@@ -29,6 +32,9 @@ EXPECTED_ARTIFACTS = {
     "ruleQuery": "artifacts/rules/vegetarian-warning.rq",
     "ruleVocabulary": "artifacts/rules/rule-vocabulary.ttl",
     "ruleData": "artifacts/rules/data/menu-pizzas.ttl",
+    "decisionModel": "artifacts/decisions/pizza-dietary-suitability.dmn",
+    "decisionVocabulary": "artifacts/decisions/decision-vocabulary.ttl",
+    "decisionCases": "artifacts/decisions/data/cases.json",
 }
 
 EXPECTED_MATERIALIZED = (
@@ -40,6 +46,9 @@ EXPECTED_MATERIALIZED = (
     "rule.rq",
     "rule-vocabulary.ttl",
     "rule-data.ttl",
+    "decision.dmn",
+    "decision-vocabulary.ttl",
+    "decision-cases.json",
     "source.json",
 )
 

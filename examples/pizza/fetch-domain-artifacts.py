@@ -22,6 +22,9 @@ EXPECTED_ARTIFACTS = {
     "ruleQuery": "artifacts/rules/vegetarian-warning.rq",
     "ruleVocabulary": "artifacts/rules/rule-vocabulary.ttl",
     "ruleData": "artifacts/rules/data/menu-pizzas.ttl",
+    "decisionModel": "artifacts/decisions/pizza-dietary-suitability.dmn",
+    "decisionVocabulary": "artifacts/decisions/decision-vocabulary.ttl",
+    "decisionCases": "artifacts/decisions/data/cases.json",
 }
 
 LOCAL_NAMES = {
@@ -32,6 +35,9 @@ LOCAL_NAMES = {
     "ruleQuery": "rule.rq",
     "ruleVocabulary": "rule-vocabulary.ttl",
     "ruleData": "rule-data.ttl",
+    "decisionModel": "decision.dmn",
+    "decisionVocabulary": "decision-vocabulary.ttl",
+    "decisionCases": "decision-cases.json",
 }
 
 
