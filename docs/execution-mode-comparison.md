@@ -1,90 +1,82 @@
 # Execution Mode Comparison
 
-Executable Semantic Knowledge Architecture (ESKA) does not define a single universal execution mechanism. Instead, semantic artifacts are executable according to the operational semantics appropriate to their type.
+Executable Semantic Knowledge Architecture (ESKA) does not define a single universal execution mechanism. Semantic artifacts are executable according to the operational semantics appropriate to their type.
 
-The Pizza reference project now demonstrates three genuinely different execution modes:
+The Pizza reference now demonstrates four genuinely different execution modes:
 
-| Concern | OWL reasoning | SHACL validation | Rule evaluation |
-| --- | --- | --- | --- |
-| Semantic model | OWL class axioms | SHACL shapes graph | SPARQL 1.1 `CONSTRUCT` rule |
-| Semantic input | Ontology / class knowledge | RDF data graph | Explicit RDF rule-input graph |
-| Executable artifact | HermiT classification via ROBOT | SHACL validation via pySHACL | SPARQL evaluation via RDFLib |
-| Operation | reason | validate | evaluate |
-| Primary result | inferred axiom | `sh:ValidationReport` | derived RDF statement |
-| Result relation | `rdfs:subClassOf` | `sh:conforms` | `urn:pizza-ontology:rule:requiresVegetarianWarning` |
-| Bounded capability | `PizzaClassificationCapability` | `PizzaValidationCapability` | `PizzaRuleEvaluationCapability` |
-| Applicability boundary | coherent OWL model | parseable RDF using the SHACL vocabulary | explicit RDF assertions; no implicit OWL entailment |
-| Verification | expected inference query | expected conformance / violation checks | expected derived statement + non-matching control |
-| Provenance | PROV-O reasoning activity | PROV-O validation activity | PROV-O rule-evaluation activity |
+| Concern | OWL reasoning | SHACL validation | Rule evaluation | Decision evaluation |
+| --- | --- | --- | --- | --- |
+| Semantic model | OWL class axioms | SHACL shapes graph | SPARQL 1.1 `CONSTRUCT` rule | DMN 1.5 `UNIQUE` decision table |
+| Semantic input | Ontology / class knowledge | RDF data graph | Explicit RDF rule-input graph | Explicit decision-input context |
+| Executable artifact | HermiT via ROBOT | pySHACL | RDFLib SPARQL evaluation | Canonical DMN subset evaluator |
+| Operation | reason | validate | evaluate | decide |
+| Primary result | inferred axiom | `sh:ValidationReport` | derived RDF statement | selected semantic outcome |
+| Result relation | `rdfs:subClassOf` | `sh:conforms` | `rule:requiresVegetarianWarning` | `decision:dietarySuitability` |
+| Bounded capability | `PizzaClassificationCapability` | `PizzaValidationCapability` | `PizzaRuleEvaluationCapability` | `PizzaDietarySuitabilityCapability` |
+| Applicability boundary | coherent OWL model | parseable RDF using SHACL vocabulary | explicit RDF assertions; no implicit OWL entailment | explicit boolean decision inputs; no inferred input values |
+| Verification | expected inference query | expected conformance / violations | expected derived statement + control | expected UNIQUE outcome for every decision context |
+| Provenance | PROV-O reasoning activity | PROV-O validation activity | PROV-O rule-evaluation activity | PROV-O decision activities |
 
-## What is stable across all three modes?
+## What is stable across all four modes?
 
-The third mode was introduced as a falsification test for the provisional ESKA core. It fits the same abstraction without changing `model/eska-core.ttl`:
+The rule and decision modes were introduced as falsification tests for the provisional ESKA core. Both fit the same abstraction without changing `model/eska-core.ttl`:
 
 ```text
 SemanticModel
-        │
-        │ gives meaning to
-        ▼
-Semantic Knowledge
-        │
-        │ operationalized through
-        ▼
+        ↓
 ExecutableSemanticKnowledgeArtifact
-        │
-        │ realizes
-        ▼
+        ↓
 SemanticCapability
-        │
-        │ executed as
-        ▼
+        ↓
+ApplicabilityCondition
+        ↓
 Execution
-        │
-        │ generates
-        ▼
+        ↓
 Result
-        │
-        ├── verified by → Verification
-        └── traced with → PROV-O provenance
+        ↓
+Verification
+        ↓
+PROV-O provenance
 ```
 
-Across OWL reasoning, SHACL validation, and SPARQL rule evaluation, the same core concepts remain sufficient:
+Across OWL reasoning, SHACL validation, SPARQL rule evaluation, and DMN decision evaluation:
 
 - `SemanticModel` identifies the formal semantic artifact that gives the operation meaning;
 - `ExecutableSemanticKnowledgeArtifact` identifies the computational realization appropriate to that semantic type;
 - `SemanticCapability` bounds subject, input, output, result relation, semantic model, executable artifact, and applicability;
-- `ApplicabilityCondition` captures preconditions without embedding technology-specific rules in the core;
-- `Execution` identifies a concrete computational activity;
-- `Result` identifies the machine-interpretable output of that activity;
-- `Verification` identifies an explicit check over execution and result;
-- PROV-O provides the execution and derivation lineage without an ESKA-specific provenance hierarchy.
+- `ApplicabilityCondition` records preconditions without embedding technology-specific semantics into the core;
+- `Execution` represents a concrete computational activity;
+- `Result` represents the machine-interpretable output of that activity;
+- `Verification` explicitly checks execution and result;
+- PROV-O provides execution and derivation lineage without an ESKA-specific provenance hierarchy.
 
-This is stronger evidence for the current core than the original two-mode comparison, but it is not a claim that the model is universally complete.
+The same generic Capability verifier now checks all four modes. The same generic runtime verifier checks seven concrete executions: one reasoning execution, two validation executions, one rule execution, and three decision executions.
 
 ## Falsification result
 
-The rule example did **not** require any of the following additions to the ESKA core:
+The fourth mode did **not** require any of the following additions to the ESKA core:
 
-- a `Rule` core class;
-- a `RuleExecution` core class;
-- a general `ExecutionMode` taxonomy;
-- a rule-specific result superclass;
-- a second ESKA provenance vocabulary;
-- Service or Agent semantics.
+- `Decision` as a core class;
+- `DecisionExecution`;
+- `DecisionResult`;
+- a generic `ExecutionMode` taxonomy;
+- DMN-specific properties;
+- a second provenance vocabulary;
+- promotion of Service or Agent semantics.
 
-That absence is architecturally useful. The rule semantics remain in the source-owned SPARQL artifact; ESKA describes how that semantic artifact participates in a bounded capability and concrete execution.
+The decision semantics remain in the source-owned DMN artifact and its outcome vocabulary. ESKA describes how that model participates in a bounded Capability and concrete executions.
 
 ```text
-Pizza SPARQL rule
-        │ source-owned semantic model
+Pizza DMN decision model
+        │ source-owned SemanticModel
         ▼
-PizzaRuleEvaluationCapability
+PizzaDietarySuitabilityCapability
         │
         ▼
 Execution
         │
         ▼
-Derived RDF Result
+Semantic outcome Result
         │
         ▼
 Verification + PROV-O
@@ -92,37 +84,36 @@ Verification + PROV-O
 
 ## What is still not core?
 
-Several concepts remain important but still lack cross-mode evidence:
+Several concepts remain important but lack sufficient cross-mode evidence:
 
-- `KnowledgeService` — demonstrated only for classification;
-- `ServiceOperation` — specific to operational service exposure;
-- `KnowledgeAgent` and `DiscoveryArtifact` — demonstrated only on the classification path;
-- HTTP-specific properties such as method, path and representation fields;
-- deployment binding — currently supplied separately at runtime;
-- a dedicated `ExecutionMode` concept — the three modes remain distinguishable through their semantic models, artifacts, capabilities, results, and implementations without requiring a core taxonomy;
-- a dedicated ESKA provenance class — PROV-O continues to provide the required interoperable semantics.
+- `KnowledgeService` and `ServiceOperation` — demonstrated only for classification;
+- `KnowledgeAgent` and `DiscoveryArtifact` — demonstrated only on classification;
+- HTTP and representation-specific properties;
+- deployment binding — supplied separately at runtime;
+- a dedicated `ExecutionMode` concept — the four modes remain distinguishable through their native semantic models, artifacts, Capabilities, results, and implementations;
+- a dedicated ESKA provenance class — PROV-O remains sufficient.
 
-The core model should therefore remain smaller than the complete reference architecture.
+The core should remain smaller than the complete reference architecture.
 
 ## Execution is polymorphic
 
-The three Pizza examples now provide executable evidence for three different meanings of **execute**:
+The executable evidence now covers:
 
 ```text
 Ontology   → reason
 Constraint → validate
 Rule       → evaluate
+Decision   → decide
 ```
 
-The mechanisms and result types differ, but formal semantic artifacts participate directly in computation and their results remain machine-traceable to the semantic knowledge that gives them meaning.
+The mechanisms and result types differ, but formal semantic artifacts participate directly in computation and their results remain machine-traceable to the semantics that give them meaning.
 
 Future examples can continue trying to falsify the same core with modes such as:
 
 ```text
-Decision    → decide
 Calculation → calculate
 Mapping     → transform
 Workflow    → execute
 ```
 
-A future mode should change the ESKA core only when an executable example demonstrates that a current concept is too broad, too narrow, or missing—not because a technology-specific taxonomy appears attractive in advance.
+A future mode should change the ESKA core only when an executable example demonstrates that a current concept is too broad, too narrow, or missing—not because a technology-specific taxonomy looks attractive in advance.
