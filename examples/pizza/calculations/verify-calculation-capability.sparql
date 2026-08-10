@@ -1,0 +1,26 @@
+PREFIX eska: <urn:eska:core:>
+PREFIX cal: <urn:eska:example:pizza:calculation:>
+PREFIX calc: <urn:pizza-ontology:calculation:>
+PREFIX pizza: <http://www.co-ode.org/ontologies/pizza/pizza.owl#>
+
+# ROBOT / RDFLib verification treats returned rows as violations.
+SELECT ?capability
+WHERE {
+  VALUES ?capability { cal:PizzaAreaCalculationCapability }
+
+  FILTER NOT EXISTS {
+    ?capability
+        a eska:SemanticCapability ;
+        eska:subject pizza:Pizza ;
+        eska:inputType cal:PizzaDiameterContext ;
+        eska:outputType cal:PizzaAreaResult ;
+        eska:producesRelation calc:areaSquareCentimetres ;
+        eska:usesSemanticModel cal:PizzaAreaFormulaModel ;
+        eska:usesExecutableArtifact cal:OpenMathCalculationArtifact ;
+        eska:requiresCondition cal:PositiveDiameterCentimetresCondition .
+
+    cal:PizzaAreaFormulaModel a eska:SemanticModel .
+    cal:OpenMathCalculationArtifact a eska:ExecutableSemanticKnowledgeArtifact .
+    cal:PositiveDiameterCentimetresCondition a eska:ApplicabilityCondition .
+  }
+}

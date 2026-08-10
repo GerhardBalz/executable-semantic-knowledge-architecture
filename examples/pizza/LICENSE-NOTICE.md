@@ -5,7 +5,7 @@ ESKA does not store a second source-of-truth copy of the Pizza semantic artifact
 The domain artifacts are owned and published by the companion repository:
 
 - Source repository: <https://github.com/GerhardBalz/pizza-ontology>
-- Pinned source commit: `983b691d9d2102ffad97a3ec31aa9b1435b3e547`
+- Pinned source commit: `fcefdc7acddf2ca9a9dc4dad9e410cea992011ff`
 - Consumer manifest: `artifacts/manifest.ttl`
 - ESKA binding: [`pizza-domain-source.json`](pizza-domain-source.json)
 
@@ -29,9 +29,11 @@ The historical Pizza ontology credits:
 - Nick Drummond
 - Robert Stevens
 
-## Validation profile and data
+## Repository-authored semantic-engineering artifacts
 
-The source repository also publishes:
+The source repository publishes the following newly authored artifacts under the **MIT License**:
+
+### Validation
 
 ```text
 artifacts/validation/pizza-instance-shapes.ttl
@@ -39,11 +41,7 @@ artifacts/validation/data/conforming.ttl
 artifacts/validation/data/non-conforming.ttl
 ```
 
-These are newly authored semantic-engineering artifacts identified as **MIT License** in the Pizza manifest.
-
-## Rule semantics and data
-
-The rule-evaluation mode consumes:
+### Rule evaluation
 
 ```text
 artifacts/rules/vegetarian-warning.rq
@@ -51,11 +49,7 @@ artifacts/rules/rule-vocabulary.ttl
 artifacts/rules/data/menu-pizzas.ttl
 ```
 
-These source-owned rule, vocabulary, and RDF input artifacts are repository-authored semantic-engineering material identified as **MIT License**.
-
-## Decision semantics and cases
-
-The Decision → decide mode consumes:
+### Decision evaluation
 
 ```text
 artifacts/decisions/pizza-dietary-suitability.dmn
@@ -63,9 +57,17 @@ artifacts/decisions/decision-vocabulary.ttl
 artifacts/decisions/data/cases.json
 ```
 
-These source-owned DMN decision, semantic outcome vocabulary, and canonical decision-input artifacts are repository-authored semantic-engineering material identified as **MIT License** in the Pizza manifest. The manifest also identifies the decision model as conforming to DMN 1.5.
+The manifest identifies the decision model as conforming to DMN 1.5.
 
-ESKA does not copy the decision model or cases into its source tree. It supplies the bounded Semantic Capability, evaluator binding, Execution, Result, Verification, and PROV-O lineage around the pinned external artifacts.
+### Calculation
+
+```text
+artifacts/calculations/pizza-area.openmath.xml
+artifacts/calculations/calculation-vocabulary.ttl
+artifacts/calculations/data/cases.json
+```
+
+The manifest identifies the mathematical formula as conforming to OpenMath 2.0 Revision 2. ESKA does not copy the formula, vocabulary, or calculation cases into its source tree. It supplies the bounded Semantic Capability, OpenMath evaluator binding, Execution, Result, Verification, and PROV-O lineage around the pinned artifacts.
 
 ## ESKA material
 
@@ -104,5 +106,11 @@ Pizza repository-authored DMN/vocabulary/cases
     MIT
         ↓ pinned source artifact
 ESKA decision evaluation execution
+    MIT
+
+Pizza repository-authored OpenMath/vocabulary/cases
+    MIT
+        ↓ pinned source artifact
+ESKA calculation execution
     MIT
 ```

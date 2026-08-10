@@ -1,0 +1,51 @@
+@prefix calc: <urn:pizza-ontology:calculation:> .
+@prefix cal: <urn:eska:example:pizza:calculation:> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix eska: <urn:eska:core:> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix pizza: <http://www.co-ode.org/ontologies/pizza/pizza.owl#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+cal:PizzaAreaCalculationCapability
+    a eska:SemanticCapability ;
+    dcterms:title "Pizza Area Calculation"@en ;
+    dcterms:description "Calculate circular Pizza area in square centimetres by evaluating the source-owned OpenMath formula against an explicit diameter in centimetres."@en ;
+    skos:scopeNote "The capability is bounded to deterministic evaluation of one commit-pinned OpenMath formula. It does not infer diameter values, execute a decision or rule, or expose the calculation through a service or agent."@en ;
+    eska:subject pizza:Pizza ;
+    eska:inputType cal:PizzaDiameterContext ;
+    eska:outputType cal:PizzaAreaResult ;
+    eska:producesRelation calc:areaSquareCentimetres ;
+    eska:usesSemanticModel cal:PizzaAreaFormulaModel ;
+    eska:usesExecutableArtifact cal:OpenMathCalculationArtifact ;
+    eska:requiresCondition cal:PositiveDiameterCentimetresCondition .
+
+cal:PizzaDiameterContext
+    a owl:Class ;
+    dcterms:description "An explicit calculation input providing a positive numeric Pizza diameter measured in centimetres."@en .
+
+cal:PizzaAreaResult
+    a owl:Class ;
+    dcterms:description "A machine-interpretable calculation result whose areaSquareCentimetres value is represented as an xsd:decimal literal."@en .
+
+cal:PizzaAreaFormulaModel
+    a eska:SemanticModel, prov:Entity ;
+    dcterms:title "Pizza circular-area OpenMath formula"@en ;
+    dcterms:identifier "artifacts/calculations/pizza-area.openmath.xml@fcefdc7acddf2ca9a9dc4dad9e410cea992011ff" ;
+    dcterms:description "Commit-pinned OpenMath formula owned and published by the companion pizza-ontology repository."@en ;
+    dcterms:conformsTo <https://openmath.org/standard/om20-2019-07-01/omstd20.html> ;
+    dcterms:source <https://github.com/GerhardBalz/pizza-ontology/blob/fcefdc7acddf2ca9a9dc4dad9e410cea992011ff/artifacts/calculations/pizza-area.openmath.xml> ;
+    dcterms:requires <https://github.com/GerhardBalz/pizza-ontology/blob/fcefdc7acddf2ca9a9dc4dad9e410cea992011ff/artifacts/calculations/calculation-vocabulary.ttl> ;
+    dcterms:relation <https://github.com/GerhardBalz/pizza-ontology/blob/fcefdc7acddf2ca9a9dc4dad9e410cea992011ff/artifacts/manifest.ttl> .
+
+cal:OpenMathCalculationArtifact
+    a eska:ExecutableSemanticKnowledgeArtifact, prov:Entity ;
+    dcterms:title "OpenMath calculation evaluation"@en ;
+    dcterms:description "Executable semantic knowledge artifact that evaluates the supported OpenMath expression against an explicit numeric input and emits a typed decimal Pizza area result."@en ;
+    eska:inputType cal:PizzaDiameterContext ;
+    eska:outputType cal:PizzaAreaResult ;
+    eska:producesRelation calc:areaSquareCentimetres .
+
+cal:PositiveDiameterCentimetresCondition
+    a eska:ApplicabilityCondition ;
+    dcterms:description "The calculation context must explicitly provide a positive finite diameter in centimetres. Calculation does not infer or convert the input unit."@en .
