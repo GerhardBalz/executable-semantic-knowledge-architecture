@@ -1,8 +1,15 @@
 #!/usr/bin/env python3
 """Generalized deterministic ESKA Knowledge Agent for the Pizza reference.
 
-Discovery and HTTP invocation are generic. Semantically typed request/result
-adaptation is selected from the machine-readable Agent + Capability contract.
+Semantic discovery and deployment resolution are deliberately separate:
+
+- the architecture model describes Capability, Service Operation, access binding,
+  and semantic invocation adapters;
+- the deployment model binds the discovered stable Knowledge Service to one
+  concrete runtime location in a selected environment.
+
+Semantically typed request/result adaptation is selected from the machine-
+readable Agent + Capability contract.
 """
 
 from __future__ import annotations
@@ -42,6 +49,8 @@ def _clean(value: str | None) -> str:
 def discover_contract(
     robot_jar: Path, architecture: Path, query: Path, target_capability: str
 ) -> dict[str, str]:
+    """Discover exactly one semantically compatible Service + adapter contract."""
+
     if not robot_jar.exists():
         raise FileNotFoundError(f"ROBOT jar not found: {robot_jar}")
     if not architecture.exists():
@@ -108,6 +117,83 @@ def discover_contract(
     return matches[0]
 
 
+def resolve_deployment(
+    deployment_model: Path, service_iri: str, environment_id: str
+) -> dict[str, str]:
+    """Resolve one runtime Service deployment independently of semantic discovery."""
+
+    if not deployment_model.exists():
+        raise FileNotFoundError(f"Deployment model not found: {deployment_model}")
+
+    graph = Graph().parse(deployment_model, format="turtle")
+    environments = []
+    for environment in graph.subjects(RDF.type, ESKA.DeploymentEnvironment):
+        identifier = graph.value(environment, DCTERMS.identifier)
+        if str(environment) == environment_id or (
+            isinstance(identifier, Literal) and str(identifier) == environment_id
+        ):
+            environments.append(environment)
+
+    environments = list(dict.fromkeys(environments))
+    if not environments:
+        raise RuntimeError(f"Deployment environment not found: {environment_id}")
+    if len(environments) != 1:
+        raise RuntimeError(
+            f"Deployment environment is ambiguous: {environment_id} matched {len(environments)} resources"
+        )
+    environment = environments[0]
+
+    service = URIRef(service_iri)
+    deployments = [
+        deployment
+        for deployment in graph.subjects(ESKA.deploysService, service)
+        if (deployment, RDF.type, ESKA.ServiceDeployment) in graph
+        and (deployment, ESKA.inEnvironment, environment) in graph
+    ]
+    deployments = list(dict.fromkeys(deployments))
+    if not deployments:
+        raise RuntimeError(
+            f"No deployment for Service {service_iri} in environment {environment_id}"
+        )
+    if len(deployments) != 1:
+        raise RuntimeError(
+            f"Deployment is ambiguous: found {len(deployments)} deployments for Service {service_iri} in {environment_id}"
+        )
+    deployment = deployments[0]
+
+    bindings = list(dict.fromkeys(graph.objects(deployment, ESKA.hasDeploymentBinding)))
+    if len(bindings) != 1:
+        raise RuntimeError(
+            f"Expected exactly one Deployment Binding for {deployment}, found {len(bindings)}"
+        )
+    binding = bindings[0]
+    if (binding, RDF.type, ESKA.HTTPDeploymentBinding) not in graph:
+        raise RuntimeError(
+            f"Reference Agent requires an HTTPDeploymentBinding, found {binding}"
+        )
+
+    base_urls = list(dict.fromkeys(graph.objects(binding, ESKA.baseURL)))
+    if len(base_urls) != 1:
+        raise RuntimeError(
+            f"Expected exactly one baseURL for {binding}, found {len(base_urls)}"
+        )
+    base_url = str(base_urls[0])
+    if not base_url.startswith(("http://", "https://")):
+        raise RuntimeError(f"Unsupported HTTP deployment base URL: {base_url}")
+
+    deployment_identifier = graph.value(deployment, DCTERMS.identifier)
+    environment_identifier = graph.value(environment, DCTERMS.identifier)
+
+    return {
+        "deployment": str(deployment),
+        "deploymentIdentifier": str(deployment_identifier or deployment),
+        "environment": str(environment),
+        "environmentIdentifier": str(environment_identifier or environment),
+        "binding": str(binding),
+        "baseURL": base_url,
+    }
+
+
 def prepare_input(contract: dict[str, str], raw_input: str, input_format: str) -> object:
     adapter_key = contract["adapterKey"]
     if adapter_key == IRI_LIST_ADAPTER:
@@ -157,9 +243,13 @@ def invoke_service(
     if not isinstance(body, dict):
         raise RuntimeError("Knowledge Service response is not a JSON object")
     if body.get(contract["capabilityField"]) != contract["capability"]:
-        raise RuntimeError("Semantic continuity violation: returned capability differs from discovered contract")
+        raise RuntimeError(
+            "Semantic continuity violation: returned capability differs from discovered contract"
+        )
     if body.get(contract["relationField"]) != contract["relation"]:
-        raise RuntimeError("Semantic continuity violation: returned relation differs from discovered contract")
+        raise RuntimeError(
+            "Semantic continuity violation: returned relation differs from discovered contract"
+        )
     return endpoint, body
 
 
@@ -174,7 +264,9 @@ def interpret_result(
             isinstance(item, str) for item in result_value
         ):
             raise RuntimeError("IRI-list adapter expected a list of semantic IRIs")
-        if not all(item.startswith(("http://", "https://", "urn:")) for item in result_value):
+        if not all(
+            item.startswith(("http://", "https://", "urn:")) for item in result_value
+        ):
             raise RuntimeError("IRI-list adapter received a non-IRI result")
         return {
             "adapterKey": adapter_key,
@@ -188,7 +280,9 @@ def interpret_result(
         graph = Graph().parse(data=json.dumps(result_value), format="json-ld")
         reports = list(graph.subjects(RDF.type, SH.ValidationReport))
         if len(reports) != 1:
-            raise RuntimeError(f"Expected exactly one sh:ValidationReport, found {len(reports)}")
+            raise RuntimeError(
+                f"Expected exactly one sh:ValidationReport, found {len(reports)}"
+            )
         conforms_literal = graph.value(reports[0], SH.conforms)
         if not isinstance(conforms_literal, Literal):
             raise RuntimeError("SHACL ValidationReport is missing literal sh:conforms")
@@ -196,7 +290,9 @@ def interpret_result(
             "adapterKey": adapter_key,
             "relation": contract["relation"],
             "conforms": bool(conforms_literal.toPython()),
-            "validationResultCount": len(set(graph.subjects(RDF.type, SH.ValidationResult))),
+            "validationResultCount": len(
+                set(graph.subjects(RDF.type, SH.ValidationResult))
+            ),
             "report": result_value,
         }
 
@@ -206,18 +302,25 @@ def interpret_result(
 def write_provenance(
     path: Path,
     contract: dict[str, str],
+    deployment: dict[str, str],
     raw_input: str,
     architecture: Path,
+    deployment_model: Path,
     semantic_result: dict[str, object],
 ) -> None:
     timestamp = datetime.now(timezone.utc).replace(microsecond=0)
-    slug = "classification" if contract["adapterKey"] == IRI_LIST_ADAPTER else "validation"
+    slug = (
+        "classification"
+        if contract["adapterKey"] == IRI_LIST_ADAPTER
+        else "validation"
+    )
     base = f"urn:eska:example:pizza:general-agent-run:{slug}:"
     execution = URIRef(base + "execution")
     result = URIRef(base + "result")
     verification = URIRef(base + "verification")
     input_entity = URIRef(base + "input")
     architecture_entity = URIRef(base + "architecture")
+    deployment_model_entity = URIRef(base + "deployment-model")
 
     graph = Graph()
     graph.bind("dcterms", DCTERMS)
@@ -233,8 +336,12 @@ def write_provenance(
     graph.add((execution, PROV.wasAssociatedWith, URIRef(AGENT_IRI)))
     graph.add((execution, PROV.used, URIRef(contract["service"])))
     graph.add((execution, PROV.used, URIRef(contract["adapter"])))
+    graph.add((execution, PROV.used, URIRef(deployment["deployment"])))
+    graph.add((execution, PROV.used, URIRef(deployment["binding"])))
+    graph.add((execution, PROV.used, URIRef(deployment["environment"])))
     graph.add((execution, PROV.used, input_entity))
     graph.add((execution, PROV.used, architecture_entity))
+    graph.add((execution, PROV.used, deployment_model_entity))
     graph.add((execution, PROV.generated, result))
     graph.add((execution, PROV.endedAtTime, Literal(timestamp, datatype=XSD.dateTime)))
 
@@ -244,7 +351,9 @@ def write_provenance(
     graph.add((result, PROV.wasGeneratedBy, execution))
     if contract["adapterKey"] == SHACL_REPORT_ADAPTER:
         graph.add((result, RDF.type, SH.ValidationReport))
-        graph.add((result, SH.conforms, Literal(bool(semantic_result["conforms"]))))
+        graph.add(
+            (result, SH.conforms, Literal(bool(semantic_result["conforms"])))
+        )
     else:
         for value in semantic_result.get("values", []):
             if isinstance(value, str):
@@ -261,6 +370,10 @@ def write_provenance(
     graph.add((input_entity, DCTERMS.identifier, Literal(raw_input)))
     graph.add((architecture_entity, RDF.type, PROV.Entity))
     graph.add((architecture_entity, DCTERMS.identifier, Literal(str(architecture))))
+    graph.add((deployment_model_entity, RDF.type, PROV.Entity))
+    graph.add(
+        (deployment_model_entity, DCTERMS.identifier, Literal(str(deployment_model)))
+    )
 
     path.parent.mkdir(parents=True, exist_ok=True)
     graph.serialize(destination=path, format="turtle")
@@ -268,21 +381,42 @@ def write_provenance(
 
 def main() -> None:
     here = Path(__file__).resolve().parent
-    parser = argparse.ArgumentParser(description="Generalized deterministic ESKA Pizza Knowledge Agent")
-    parser.add_argument("--robot-jar", type=Path, default=here / ".work" / "robot.jar")
+    parser = argparse.ArgumentParser(
+        description="Generalized deterministic ESKA Pizza Knowledge Agent"
+    )
+    parser.add_argument(
+        "--robot-jar", type=Path, default=here / ".work" / "robot.jar"
+    )
     parser.add_argument("--architecture", type=Path, required=True)
-    parser.add_argument("--query", type=Path, default=here / "discover-service-generic.sparql")
+    parser.add_argument(
+        "--query", type=Path, default=here / "discover-service-generic.sparql"
+    )
     parser.add_argument("--capability", required=True)
-    parser.add_argument("--service-base-url", required=True)
+    parser.add_argument(
+        "--deployment-model",
+        type=Path,
+        required=True,
+        help="RDF deployment model kept separate from the semantic Service architecture",
+    )
+    parser.add_argument(
+        "--environment",
+        required=True,
+        help="Deployment environment identifier or IRI used to resolve the Service runtime",
+    )
     parser.add_argument("--input", required=True)
     parser.add_argument("--input-format", default="turtle")
     parser.add_argument("--output", type=Path)
     parser.add_argument("--provenance", type=Path)
     args = parser.parse_args()
 
-    contract = discover_contract(args.robot_jar, args.architecture, args.query, args.capability)
+    contract = discover_contract(
+        args.robot_jar, args.architecture, args.query, args.capability
+    )
+    deployment = resolve_deployment(
+        args.deployment_model, contract["service"], args.environment
+    )
     prepared = prepare_input(contract, args.input, args.input_format)
-    endpoint, body = invoke_service(contract, args.service_base_url, prepared)
+    endpoint, body = invoke_service(contract, deployment["baseURL"], prepared)
     semantic_result = interpret_result(contract, body)
 
     result = {
@@ -303,6 +437,7 @@ def main() -> None:
             "outputType": contract["outputType"],
             "relation": contract["relation"],
         },
+        "deployment": deployment,
         "invocation": {"endpoint": endpoint, "input": args.input},
         "semanticResult": semantic_result,
     }
@@ -315,7 +450,15 @@ def main() -> None:
         print(rendered)
 
     if args.provenance:
-        write_provenance(args.provenance, contract, args.input, args.architecture, semantic_result)
+        write_provenance(
+            args.provenance,
+            contract,
+            deployment,
+            args.input,
+            args.architecture,
+            args.deployment_model,
+            semantic_result,
+        )
 
 
 if __name__ == "__main__":

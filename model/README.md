@@ -17,7 +17,8 @@ eska-core.ttl
         │
         ├── eska-capability.ttl
         ├── eska-service.ttl
-        └── eska-agent.ttl
+        ├── eska-agent.ttl
+        └── eska-deployment.ttl
 ```
 
 ## `eska-core.ttl`
@@ -48,7 +49,7 @@ Contains capability-specific helper terms useful in examples but not yet justifi
 
 Contains the provisional Knowledge Service model. Classification and validation provide the first cross-mode evidence for separating stable Service semantics from concrete access bindings.
 
-The stable semantic structure is now:
+The stable semantic structure is:
 
 ```text
 KnowledgeService
@@ -68,7 +69,7 @@ SemanticCapability
     requiresCondition
 ```
 
-A `ServiceOperation` no longer duplicates those assertions. This removes the hidden single-capability assumption from the earlier model and makes it possible for one Knowledge Service to expose multiple Capabilities unambiguously.
+A `ServiceOperation` does not duplicate those assertions. This removes the hidden single-capability assumption from the earlier model and makes it possible for one Knowledge Service to expose multiple Capabilities unambiguously.
 
 Concrete access details are separated through:
 
@@ -80,7 +81,7 @@ AccessBinding
 HTTPAccessBinding
 ```
 
-The current HTTP bindings carry method, contract-relative path, media-type envelope, and representation-field mappings. Runtime scheme/host/port remain separate deployment bindings.
+The HTTP Access Binding carries method, contract-relative path, media-type envelope, and representation-field mappings. It deliberately does not contain a runtime host or port.
 
 The two working modes still differ in result representation:
 
@@ -93,21 +94,84 @@ validation     → JSON-LD sh:ValidationReport graph
 
 ### `eska-agent.ttl`
 
-Contains Knowledge Agent and discovery concepts. Deterministic Agent discovery/invocation is now demonstrated for both classification and validation:
+Contains deterministic Knowledge Agent, discovery, and semantic invocation-adapter concepts.
+
+The generalized reference Agent targets both Classification and Validation:
 
 ```text
-PizzaKnowledgeAgent
-    targets PizzaClassificationCapability
-
-PizzaValidationAgent
-    targets PizzaValidationCapability
+PizzaGeneralizedKnowledgeAgent
+    ├── targets PizzaClassificationCapability
+    └── targets PizzaValidationCapability
 ```
 
-Both discover a Service operation from machine-readable ESKA contracts and combine that semantic contract with a runtime deployment binding.
+Generic discovery/invocation is shared, while request/result representation is selected through a semantic adapter contract:
 
-The Agent vocabulary itself required no change, but the executable Agent implementations interpret results according to the discovered semantic output contract. Classification interprets `owl:Class` result IRIs; validation parses and checks a `sh:ValidationReport` RDF graph. This is evidence against embedding one result-shape assumption into the generic Agent model.
+```text
+KnowledgeAgent
+    ↓ usesInvocationAdapter
+SemanticInvocationAdapter
+    ├── supportsInputType
+    ├── supportsOutputType
+    └── supportsRelation
+```
 
-Service and Agent remain outside core because operational exposure is still an optional layer and only two of the seven execution modes currently demonstrate it.
+The reference provides:
+
+```text
+IRIListInvocationAdapter
+    owl:Class → rdfs:subClassOf → owl:Class
+
+SHACLReportInvocationAdapter
+    PizzaDataGraph → sh:conforms → sh:ValidationReport
+```
+
+The Agent combines the discovered semantic contract with a separately resolved runtime deployment. It remains deterministic and non-LLM; prompt or LLM semantics are not required for agent accessibility.
+
+See [Knowledge Agent Generalization](../docs/knowledge-agent-generalization.md).
+
+### `eska-deployment.ttl`
+
+Contains the provisional runtime deployment-binding model. It exists because #13 and #14 made a stable distinction executable:
+
+```text
+Service contract
+    what/how the operation means
+
+Deployment binding
+    where a concrete runtime Service instance is reachable
+```
+
+The deployment extension uses:
+
+```text
+ServiceDeployment
+    ├── deploysService → KnowledgeService
+    ├── inEnvironment  → DeploymentEnvironment
+    └── hasDeploymentBinding
+            ↓
+       DeploymentBinding
+            ↓
+       HTTPDeploymentBinding
+            └── baseURL
+```
+
+An Agent first discovers the stable Service/Operation/AccessBinding contract, then resolves one `ServiceDeployment` for the discovered Service and selected environment. Only at invocation time are the two access components combined:
+
+```text
+HTTPDeploymentBinding.baseURL
+        +
+HTTPAccessBinding.path
+        ↓
+concrete runtime endpoint
+```
+
+The Pizza regression provides blue and green deployments for both Classification and Validation and verifies that semantic discovery remains identical while base URLs and endpoints change.
+
+`ServiceDeployment` specializes `prov:Entity`, so invocation provenance can identify the exact runtime deployment, environment, and deployment binding without redefining the semantic Result model.
+
+See [Deployment Binding](../docs/deployment-binding.md).
+
+Service, Agent, and Deployment remain outside core because operational exposure and runtime location are optional architectural layers rather than prerequisites for executable semantic knowledge.
 
 ## Mode-specific semantic refinements
 
@@ -210,15 +274,16 @@ Workflow further demonstrates that one execution can contain other ordinary exec
 
 ## Dependency representation
 
-The extension ontologies use:
+The extension ontologies use `dcterms:requires` while the project still uses provisional `urn:eska:*` identifiers that are intentionally not presented as resolvable public ontology IRIs.
 
-```turtle
-dcterms:requires <urn:eska:model:core>
+```text
+eska-capability.ttl → requires eska-core.ttl
+eska-service.ttl    → requires eska-core.ttl
+eska-agent.ttl      → requires eska-core.ttl
+eska-deployment.ttl → requires eska-service.ttl
 ```
 
-rather than `owl:imports` while the project uses provisional `urn:eska:*` identifiers that are intentionally not presented as resolvable public ontology IRIs.
-
-The executable examples explicitly merge required model artifacts during verification.
+The executable examples explicitly merge required model artifacts during verification rather than relying on `owl:imports`.
 
 ## Provisional namespace
 

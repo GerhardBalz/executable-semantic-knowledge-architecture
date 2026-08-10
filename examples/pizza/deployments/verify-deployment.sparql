@@ -1,0 +1,70 @@
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX dep: <urn:eska:example:pizza:deployment:>
+PREFIX eska: <urn:eska:core:>
+PREFIX svc: <urn:eska:example:pizza:service:>
+PREFIX valsvc: <urn:eska:example:pizza:validation-service:>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+# ROBOT verify treats every returned row as a violation.
+SELECT ?problem ?subject
+WHERE {
+  {
+    VALUES (?deployment ?service ?environment ?environmentId ?binding ?baseURL) {
+      (dep:ClassificationBlueDeployment  svc:PizzaClassificationService dep:BlueEnvironment  "blue"  dep:ClassificationBlueHTTPBinding  "http://127.0.0.1:18083"^^xsd:anyURI)
+      (dep:ClassificationGreenDeployment svc:PizzaClassificationService dep:GreenEnvironment "green" dep:ClassificationGreenHTTPBinding "http://127.0.0.1:18085"^^xsd:anyURI)
+      (dep:ValidationBlueDeployment valsvc:PizzaValidationService dep:BlueEnvironment  "blue"  dep:ValidationBlueHTTPBinding  "http://127.0.0.1:18084"^^xsd:anyURI)
+      (dep:ValidationGreenDeployment valsvc:PizzaValidationService dep:GreenEnvironment "green" dep:ValidationGreenHTTPBinding "http://127.0.0.1:18086"^^xsd:anyURI)
+    }
+    FILTER NOT EXISTS {
+      ?deployment
+          a eska:ServiceDeployment ;
+          eska:deploysService ?service ;
+          eska:inEnvironment ?environment ;
+          eska:hasDeploymentBinding ?binding .
+      ?environment
+          a eska:DeploymentEnvironment ;
+          dcterms:identifier ?environmentId .
+      ?binding
+          a eska:HTTPDeploymentBinding ;
+          eska:baseURL ?baseURL .
+    }
+    BIND("missing-or-inconsistent-deployment" AS ?problem)
+    BIND(?deployment AS ?subject)
+  }
+  UNION
+  {
+    {
+      SELECT ?service
+      WHERE {
+        VALUES ?service { svc:PizzaClassificationService valsvc:PizzaValidationService }
+        ?deployment
+            a eska:ServiceDeployment ;
+            eska:deploysService ?service .
+      }
+      GROUP BY ?service
+      HAVING (COUNT(DISTINCT ?deployment) != 2)
+    }
+    BIND("expected-two-deployments-per-service" AS ?problem)
+    BIND(?service AS ?subject)
+  }
+  UNION
+  {
+    ?subject eska:baseURL ?url .
+    FILTER NOT EXISTS { ?subject a eska:HTTPDeploymentBinding }
+    BIND("base-url-outside-http-deployment-binding" AS ?problem)
+  }
+  UNION
+  {
+    ?operation a eska:ServiceOperation .
+    FILTER EXISTS { ?operation eska:baseURL ?url }
+    BIND("service-operation-contains-runtime-location" AS ?problem)
+    BIND(?operation AS ?subject)
+  }
+  UNION
+  {
+    ?service a eska:KnowledgeService .
+    FILTER EXISTS { ?service eska:baseURL ?url }
+    BIND("knowledge-service-contains-runtime-location" AS ?problem)
+    BIND(?service AS ?subject)
+  }
+}
