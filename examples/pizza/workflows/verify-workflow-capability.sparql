@@ -14,7 +14,7 @@ WHERE {
   FILTER NOT EXISTS {
     ?capability
         a eska:SemanticCapability ;
-        dcterms:requires val:PizzaValidationCapability, map:PizzaMenuProjectionCapability ;
+        dcterms:requires val:PizzaValidationCapability, map:PizzaMenuProjectionCapability, wf:ValidatePizzaDataBinding, wf:TransformPizzaToMenuBinding ;
         eska:subject pizza:Pizza ;
         eska:inputType wf:PizzaWorkflowInputGraph ;
         eska:outputType wf:PizzaWorkflowResult ;
@@ -22,6 +22,16 @@ WHERE {
         eska:usesSemanticModel wf:PizzaMenuPublicationBPMNModel, wf:PizzaWorkflowOutcomeModel ;
         eska:usesExecutableArtifact wf:BPMNWorkflowExecutionArtifact ;
         eska:requiresCondition wf:WorkflowInputCondition .
+
+    wf:ValidatePizzaDataBinding
+        a wf:WorkflowOperationBinding ;
+        wf:sourceOperation pizzaWf:ValidatePizzaData ;
+        wf:boundCapability val:PizzaValidationCapability .
+
+    wf:TransformPizzaToMenuBinding
+        a wf:WorkflowOperationBinding ;
+        wf:sourceOperation pizzaWf:TransformPizzaToMenu ;
+        wf:boundCapability map:PizzaMenuProjectionCapability .
 
     wf:PizzaMenuPublicationBPMNModel
         a eska:SemanticModel ;
