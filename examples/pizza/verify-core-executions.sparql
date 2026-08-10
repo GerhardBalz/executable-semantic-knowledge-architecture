@@ -3,6 +3,7 @@ PREFIX cap: <urn:eska:example:pizza:capability:>
 PREFIX run: <urn:eska:example:pizza:>
 PREFIX val: <urn:eska:example:pizza:validation:>
 PREFIX rul: <urn:eska:example:pizza:rule:>
+PREFIX dec: <urn:eska:example:pizza:decision:>
 
 # ROBOT verify treats returned rows as violations.
 # Runtime executions from different semantic modes must share the same core pattern.
@@ -13,6 +14,9 @@ WHERE {
     ("validation-conform" val:valid-pizza-validation val:PizzaValidationCapability val:ValidPizzaValidationReport val:valid-pizza-validation-verification)
     ("validation-nonconform" val:invalid-pizza-validation val:PizzaValidationCapability val:InvalidPizzaValidationReport val:invalid-pizza-validation-verification)
     ("rule" rul:PizzaRuleEvaluationExecution rul:PizzaRuleEvaluationCapability rul:MeatyPizzaWarningResult rul:PizzaRuleEvaluationVerification)
+    ("decision-meat" dec:meatyPizza-decision-execution dec:PizzaDietarySuitabilityCapability dec:meatyPizza-decision-result dec:meatyPizza-decision-verification)
+    ("decision-fish" dec:fishPizza-decision-execution dec:PizzaDietarySuitabilityCapability dec:fishPizza-decision-result dec:fishPizza-decision-verification)
+    ("decision-vegetarian" dec:vegetarianPizza-decision-execution dec:PizzaDietarySuitabilityCapability dec:vegetarianPizza-decision-result dec:vegetarianPizza-decision-verification)
   }
 
   FILTER NOT EXISTS {
