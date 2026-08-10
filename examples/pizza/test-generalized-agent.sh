@@ -194,7 +194,6 @@ for document, environment, deployment, port in (
     assert document["semanticResult"]["relation"] == "http://www.w3.org/2000/01/rdf-schema#subClassOf"
     assert spicy in document["semanticResult"]["values"], document
 
-# Semantic Service discovery must remain stable when deployment changes.
 assert class_blue["discovery"] == class_green["discovery"]
 assert class_blue["adapter"] == class_green["adapter"]
 assert class_blue["deployment"] != class_green["deployment"]
@@ -230,7 +229,6 @@ assert valid_blue["semanticResult"]["conforms"] == valid_green["semanticResult"]
 checks = [
     (
         "general-agent-classification-blue-provenance.ttl",
-        "classification",
         DEP + "ClassificationBlueDeployment",
         DEP + "BlueEnvironment",
         "urn:eska:example:pizza:general-agent:IRIListInvocationAdapter",
@@ -238,7 +236,6 @@ checks = [
     ),
     (
         "general-agent-classification-green-provenance.ttl",
-        "classification",
         DEP + "ClassificationGreenDeployment",
         DEP + "GreenEnvironment",
         "urn:eska:example:pizza:general-agent:IRIListInvocationAdapter",
@@ -246,7 +243,6 @@ checks = [
     ),
     (
         "general-agent-validation-valid-blue-provenance.ttl",
-        "validation",
         DEP + "ValidationBlueDeployment",
         DEP + "BlueEnvironment",
         "urn:eska:example:pizza:general-agent:SHACLReportInvocationAdapter",
@@ -254,30 +250,46 @@ checks = [
     ),
     (
         "general-agent-validation-valid-green-provenance.ttl",
-        "validation",
+        DEP + "ValidationGreenDeployment",
+        DEP + "GreenEnvironment",
+        "urn:eska:example:pizza:general-agent:SHACLReportInvocationAdapter",
+        True,
+    ),
+    (
+        "general-agent-validation-invalid-green-provenance.ttl",
         DEP + "ValidationGreenDeployment",
         DEP + "GreenEnvironment",
         "urn:eska:example:pizza:general-agent:SHACLReportInvocationAdapter",
         True,
     ),
 ]
-for filename, slug, deployment, environment, adapter, is_shacl in checks:
+execution_ids = set()
+for filename, deployment, environment, adapter, is_shacl in checks:
     graph = Graph().parse(results / filename, format="turtle")
-    base = f"urn:eska:example:pizza:general-agent-run:{slug}:"
-    execution = URIRef(base + "execution")
-    result = URIRef(base + "result")
-    verification = URIRef(base + "verification")
-    assert (execution, RDF.type, ESKA.Execution) in graph
-    assert (execution, ESKA.generatesResult, result) in graph
+    executions = list(dict.fromkeys(graph.subjects(RDF.type, ESKA.Execution)))
+    assert len(executions) == 1, (filename, executions)
+    execution = executions[0]
+    execution_ids.add(execution)
+    generated = list(dict.fromkeys(graph.objects(execution, ESKA.generatesResult)))
+    assert len(generated) == 1, (filename, generated)
+    result = generated[0]
+    verifications = [
+        v
+        for v in graph.subjects(ESKA.verifiesExecution, execution)
+        if (v, ESKA.verifiesResult, result) in graph
+    ]
+    assert len(verifications) == 1, (filename, verifications)
+    verification = verifications[0]
     assert (execution, PROV.used, URIRef(adapter)) in graph
     assert (execution, PROV.used, URIRef(deployment)) in graph
     assert (execution, PROV.used, URIRef(environment)) in graph
     assert (result, RDF.type, ESKA.Result) in graph
     assert (verification, RDF.type, ESKA.Verification) in graph
-    assert (verification, ESKA.verifiesExecution, execution) in graph
-    assert (verification, ESKA.verifiesResult, result) in graph
+    assert (verification, PROV.used, result) in graph
     if is_shacl:
         assert (result, RDF.type, SH.ValidationReport) in graph
+
+assert len(execution_ids) == len(checks), "Agent invocation provenance IRIs must remain unique across blue/green and input cases"
 PY
 
 printf '\nSUCCESS: semantic Service discovery is stable while blue/green deployment bindings change runtime endpoints.\n'
@@ -285,3 +297,4 @@ printf 'Architecture:      %s\n' "${ARCHITECTURE}"
 printf 'Deployment model: %s\n' "${DEPLOYMENT_MODEL}"
 printf 'Classification:   blue + green\n'
 printf 'Validation:       blue + green, including non-conforming green case\n'
+printf 'Provenance:       five distinct invocation identities\n'
