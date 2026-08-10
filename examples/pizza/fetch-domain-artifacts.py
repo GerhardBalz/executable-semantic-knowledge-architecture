@@ -28,6 +28,10 @@ EXPECTED_ARTIFACTS = {
     "calculationFormula": "artifacts/calculations/pizza-area.openmath.xml",
     "calculationVocabulary": "artifacts/calculations/calculation-vocabulary.ttl",
     "calculationCases": "artifacts/calculations/data/cases.json",
+    "mappingQuery": "artifacts/mappings/pizza-to-menu.rq",
+    "mappingTargetVocabulary": "artifacts/mappings/menu-vocabulary.ttl",
+    "mappingSourceData": "artifacts/mappings/data/source-pizzas.ttl",
+    "mappingExpectedOutput": "artifacts/mappings/data/expected-menu.ttl",
 }
 
 LOCAL_NAMES = {
@@ -44,6 +48,10 @@ LOCAL_NAMES = {
     "calculationFormula": "calculation.openmath.xml",
     "calculationVocabulary": "calculation-vocabulary.ttl",
     "calculationCases": "calculation-cases.json",
+    "mappingQuery": "mapping.rq",
+    "mappingTargetVocabulary": "mapping-target-vocabulary.ttl",
+    "mappingSourceData": "mapping-source-data.ttl",
+    "mappingExpectedOutput": "mapping-expected-output.ttl",
 }
 
 
