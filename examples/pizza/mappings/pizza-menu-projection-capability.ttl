@@ -1,0 +1,86 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix eska: <urn:eska:core:> .
+@prefix map: <urn:eska:example:pizza:mapping:> .
+@prefix menu: <urn:pizza-ontology:menu:> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix pizza: <http://www.co-ode.org/ontologies/pizza/pizza.owl#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+map:sourceSemanticModel
+    a rdf:Property ;
+    rdfs:label "source semantic model"@en ;
+    rdfs:subPropertyOf eska:usesSemanticModel .
+
+map:targetSemanticModel
+    a rdf:Property ;
+    rdfs:label "target semantic model"@en ;
+    rdfs:subPropertyOf eska:usesSemanticModel .
+
+map:mappingSemanticModel
+    a rdf:Property ;
+    rdfs:label "mapping semantic model"@en ;
+    rdfs:subPropertyOf eska:usesSemanticModel .
+
+map:PizzaMenuProjectionCapability
+    a eska:SemanticCapability ;
+    dcterms:title "Pizza Menu Projection"@en ;
+    dcterms:description "Transform source Pizza RDF into a target Menu projection graph using the source-owned SPARQL mapping specification."@en ;
+    skos:scopeNote "The mapping has explicit source, target, and mapping semantic roles. The role-specific properties remain mapping-local subproperties of the generic ESKA usesSemanticModel relation and are not promoted into the provisional core."@en ;
+    eska:subject pizza:Pizza ;
+    eska:inputType map:PizzaSourceGraph ;
+    eska:outputType map:MenuProjectionGraph ;
+    eska:producesRelation rdf:type, menu:displayName, menu:ingredientName ;
+    eska:usesSemanticModel map:PizzaSourceSemanticModel, map:MenuTargetSemanticModel, map:PizzaToMenuMappingModel ;
+    map:sourceSemanticModel map:PizzaSourceSemanticModel ;
+    map:targetSemanticModel map:MenuTargetSemanticModel ;
+    map:mappingSemanticModel map:PizzaToMenuMappingModel ;
+    eska:usesExecutableArtifact map:SPARQLMappingExecutionArtifact ;
+    eska:requiresCondition map:ExplicitMappingInputCondition .
+
+map:PizzaSourceGraph
+    a owl:Class ;
+    dcterms:description "An explicit RDF source graph whose meaning is given by the historical Pizza vocabulary."@en .
+
+map:MenuProjectionGraph
+    a owl:Class ;
+    dcterms:description "An RDF target graph expressed using the repository-owned Menu projection semantic model."@en .
+
+map:PizzaSourceSemanticModel
+    a eska:SemanticModel, prov:Entity ;
+    dcterms:title "Pizza source semantic model"@en ;
+    dcterms:description "Source semantic role grounded in the historical Pizza ontology vocabulary and exercised by the commit-pinned mapping source graph."@en ;
+    dcterms:relation <http://www.co-ode.org/ontologies/pizza> ;
+    dcterms:source <https://github.com/GerhardBalz/pizza-ontology/blob/ef05531c5a362d8d1454e94e59a44f750515dd1c/artifacts/mappings/data/source-pizzas.ttl> .
+
+map:MenuTargetSemanticModel
+    a eska:SemanticModel, prov:Entity ;
+    dcterms:title "Menu target semantic model"@en ;
+    dcterms:description "Commit-pinned target semantic model defining MenuItem, displayName, and ingredientName."@en ;
+    dcterms:identifier "artifacts/mappings/menu-vocabulary.ttl@ef05531c5a362d8d1454e94e59a44f750515dd1c" ;
+    dcterms:source <https://github.com/GerhardBalz/pizza-ontology/blob/ef05531c5a362d8d1454e94e59a44f750515dd1c/artifacts/mappings/menu-vocabulary.ttl> ;
+    dcterms:relation <https://github.com/GerhardBalz/pizza-ontology/blob/ef05531c5a362d8d1454e94e59a44f750515dd1c/artifacts/manifest.ttl> .
+
+map:PizzaToMenuMappingModel
+    a eska:SemanticModel, prov:Entity ;
+    dcterms:title "Pizza to Menu SPARQL mapping model"@en ;
+    dcterms:description "Commit-pinned SPARQL 1.1 CONSTRUCT transformation connecting the Pizza source semantic model to the Menu target semantic model."@en ;
+    dcterms:identifier "artifacts/mappings/pizza-to-menu.rq@ef05531c5a362d8d1454e94e59a44f750515dd1c" ;
+    dcterms:conformsTo <https://www.w3.org/TR/sparql11-query/> ;
+    dcterms:source <https://github.com/GerhardBalz/pizza-ontology/blob/ef05531c5a362d8d1454e94e59a44f750515dd1c/artifacts/mappings/pizza-to-menu.rq> ;
+    dcterms:requires map:PizzaSourceSemanticModel, map:MenuTargetSemanticModel ;
+    dcterms:relation <https://github.com/GerhardBalz/pizza-ontology/blob/ef05531c5a362d8d1454e94e59a44f750515dd1c/artifacts/manifest.ttl> .
+
+map:SPARQLMappingExecutionArtifact
+    a eska:ExecutableSemanticKnowledgeArtifact, prov:Entity ;
+    dcterms:title "SPARQL mapping execution with RDFLib"@en ;
+    dcterms:description "Executable artifact that evaluates the commit-pinned SPARQL CONSTRUCT mapping against explicit Pizza RDF and produces the target Menu projection graph."@en ;
+    eska:inputType map:PizzaSourceGraph ;
+    eska:outputType map:MenuProjectionGraph ;
+    eska:producesRelation rdf:type, menu:displayName, menu:ingredientName .
+
+map:ExplicitMappingInputCondition
+    a eska:ApplicabilityCondition ;
+    dcterms:description "The source graph must explicitly provide Pizza type, English label, hasTopping, and topping label assertions required by the mapping; no OWL inference is performed by this transformation."@en .

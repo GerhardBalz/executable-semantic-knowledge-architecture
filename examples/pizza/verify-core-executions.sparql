@@ -5,6 +5,7 @@ PREFIX val: <urn:eska:example:pizza:validation:>
 PREFIX rul: <urn:eska:example:pizza:rule:>
 PREFIX dec: <urn:eska:example:pizza:decision:>
 PREFIX cal: <urn:eska:example:pizza:calculation:>
+PREFIX map: <urn:eska:example:pizza:mapping:>
 
 # ROBOT verify treats returned rows as violations.
 # Runtime executions from different semantic modes must share the same core pattern.
@@ -21,6 +22,7 @@ WHERE {
     ("calculation-small" cal:smallPizza-calculation-execution cal:PizzaAreaCalculationCapability cal:smallPizza-calculation-result cal:smallPizza-calculation-verification)
     ("calculation-medium" cal:mediumPizza-calculation-execution cal:PizzaAreaCalculationCapability cal:mediumPizza-calculation-result cal:mediumPizza-calculation-verification)
     ("calculation-large" cal:largePizza-calculation-execution cal:PizzaAreaCalculationCapability cal:largePizza-calculation-result cal:largePizza-calculation-verification)
+    ("mapping" map:PizzaMenuProjectionExecution map:PizzaMenuProjectionCapability map:PizzaMenuProjectionResult map:PizzaMenuProjectionVerification)
   }
 
   FILTER NOT EXISTS {

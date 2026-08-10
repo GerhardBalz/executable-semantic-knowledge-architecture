@@ -12,30 +12,19 @@ if [[ ! -f "${ROBOT_JAR}" ]]; then
   exit 1
 fi
 
-if [[ ! -f "${RESULTS_DIR}/provenance.ttl" ]]; then
-  echo "Classification provenance not found. Run examples/pizza/run.sh first." >&2
-  exit 1
-fi
-
-if [[ ! -f "${HERE}/validation/results/provenance.ttl" ]]; then
-  echo "Validation provenance not found. Run examples/pizza/validation/validate.py first." >&2
-  exit 1
-fi
-
-if [[ ! -f "${HERE}/rules/results/provenance.ttl" ]]; then
-  echo "Rule-evaluation provenance not found. Run examples/pizza/rules/evaluate.py first." >&2
-  exit 1
-fi
-
-if [[ ! -f "${HERE}/decisions/results/provenance.ttl" ]]; then
-  echo "Decision provenance not found. Run examples/pizza/decisions/evaluate.py first." >&2
-  exit 1
-fi
-
-if [[ ! -f "${HERE}/calculations/results/provenance.ttl" ]]; then
-  echo "Calculation provenance not found. Run examples/pizza/calculations/evaluate.py first." >&2
-  exit 1
-fi
+for required in \
+  "${RESULTS_DIR}/provenance.ttl" \
+  "${HERE}/validation/results/provenance.ttl" \
+  "${HERE}/rules/results/provenance.ttl" \
+  "${HERE}/decisions/results/provenance.ttl" \
+  "${HERE}/calculations/results/provenance.ttl" \
+  "${HERE}/mappings/results/provenance.ttl"
+do
+  if [[ ! -f "${required}" ]]; then
+    echo "Required execution provenance not found: ${required}" >&2
+    exit 1
+  fi
+done
 
 mkdir -p "${RESULTS_DIR}" "${VERIFY_DIR}"
 ROBOT=(java -jar "${ROBOT_JAR}")
@@ -47,6 +36,7 @@ ROBOT=(java -jar "${ROBOT_JAR}")
   --input "${HERE}/rules/results/provenance.ttl" \
   --input "${HERE}/decisions/results/provenance.ttl" \
   --input "${HERE}/calculations/results/provenance.ttl" \
+  --input "${HERE}/mappings/results/provenance.ttl" \
   --output "${RESULTS_DIR}/core-executions.owl"
 
 "${ROBOT[@]}" verify \
@@ -54,4 +44,4 @@ ROBOT=(java -jar "${ROBOT_JAR}")
   --queries "${HERE}/verify-core-executions.sparql" \
   --output-dir "${VERIFY_DIR}"
 
-echo "SUCCESS: reasoning, validation, rule evaluation, decision evaluation, and calculation share the ESKA Execution → Result → Verification core pattern."
+echo "SUCCESS: reasoning, validation, rule evaluation, decision evaluation, calculation, and mapping share the ESKA Execution → Result → Verification core pattern."

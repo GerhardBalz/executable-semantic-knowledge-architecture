@@ -1,6 +1,6 @@
 {
   "repository": "GerhardBalz/pizza-ontology",
-  "commit": "fcefdc7acddf2ca9a9dc4dad9e410cea992011ff",
+  "commit": "ef05531c5a362d8d1454e94e59a44f750515dd1c",
   "manifest": "artifacts/manifest.ttl",
   "artifacts": {
     "reasoning": "artifacts/reasoning/spicy-pizza.ofn",
@@ -15,6 +15,10 @@
     "decisionCases": "artifacts/decisions/data/cases.json",
     "calculationFormula": "artifacts/calculations/pizza-area.openmath.xml",
     "calculationVocabulary": "artifacts/calculations/calculation-vocabulary.ttl",
-    "calculationCases": "artifacts/calculations/data/cases.json"
+    "calculationCases": "artifacts/calculations/data/cases.json",
+    "mappingQuery": "artifacts/mappings/pizza-to-menu.rq",
+    "mappingTargetVocabulary": "artifacts/mappings/menu-vocabulary.ttl",
+    "mappingSourceData": "artifacts/mappings/data/source-pizzas.ttl",
+    "mappingExpectedOutput": "artifacts/mappings/data/expected-menu.ttl"
   }
 }

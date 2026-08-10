@@ -22,23 +22,22 @@ eska-core.ttl
 
 ## `eska-core.ttl`
 
-The core contains only concepts demonstrated across different executable-semantic modes in the Pizza reference project. It has now survived five distinct operational semantics:
+The core has now survived six distinct operational semantics:
 
 - OWL reasoning;
 - SHACL validation;
 - SPARQL rule evaluation;
 - DMN decision evaluation;
-- OpenMath calculation.
+- OpenMath calculation;
+- semantic mapping from a Pizza source model to a Menu target model.
 
-All five modes use a `SemanticModel`, an `ExecutableSemanticKnowledgeArtifact`, a bounded `SemanticCapability`, an `ApplicabilityCondition`, an `Execution`, a machine-interpretable `Result`, and an explicit `Verification` activity.
+All six modes use a `SemanticModel`, an `ExecutableSemanticKnowledgeArtifact`, a bounded `SemanticCapability`, an `ApplicabilityCondition`, an `Execution`, a machine-interpretable `Result`, and an explicit `Verification` activity.
 
-Rule, Decision, and Calculation were intentionally used as falsification tests. No changes to `eska-core.ttl` were required to model or generically verify any of those modes.
+`model/eska-core.ttl` remains unchanged through the six-mode falsification sequence.
 
-`Execution` and `Verification` specialize `prov:Activity`; `Result` specializes `prov:Entity`. ESKA therefore continues to reuse PROV-O rather than inventing a parallel provenance model.
+`Execution` and `Verification` specialize `prov:Activity`; `Result` specializes `prov:Entity`. ESKA continues to reuse PROV-O rather than inventing a parallel provenance model.
 
-## Extensions
-
-The other model files remain provisional extensions.
+## Architectural extensions
 
 ### `eska-capability.ttl`
 
@@ -46,44 +45,81 @@ Contains capability-specific helper terms that are useful in examples but are no
 
 ### `eska-service.ttl`
 
-Contains Knowledge Service and transport/representation concepts. Service exposure is currently demonstrated on the Pizza classification path but not on validation, rule, decision, or calculation paths, so these terms remain deliberately outside core.
+Contains Knowledge Service and transport/representation concepts. Service exposure is currently demonstrated on the Pizza classification path only.
 
 ### `eska-agent.ttl`
 
 Contains Knowledge Agent and discovery concepts. Agent discovery/invocation is currently demonstrated on the Pizza classification path only.
 
+Service and Agent therefore remain deliberately outside core.
+
+## Mode-specific semantic refinements
+
+The Mapping example exposed a useful extension pattern without requiring a new shared ontology file.
+
+The generic core property remains:
+
+```text
+eska:usesSemanticModel
+```
+
+The Mapping Capability needs three more precise roles, so its example model defines:
+
+```text
+map:sourceSemanticModel
+map:targetSemanticModel
+map:mappingSemanticModel
+```
+
+with each declared:
+
+```text
+rdfs:subPropertyOf eska:usesSemanticModel
+```
+
+The same Capability also states the three semantic models through the generic core relation.
+
+This keeps the layering explicit:
+
+```text
+cross-mode core
+    usesSemanticModel
+        ↑
+mode-specific refinement
+    sourceSemanticModel
+    targetSemanticModel
+    mappingSemanticModel
+```
+
+Only Mapping currently needs that distinction, so promoting these roles into `eska-core.ttl` would violate the evidence-driven rule used by this project. At runtime, PROV-O `prov:hadRole` provides the corresponding role distinction for qualified semantic-model usage.
+
 ## Why there is no execution-type taxonomy in core
 
-The additional modes do not introduce `Rule`, `Decision`, `Calculation`, `Formula`, their execution/result subclasses, or `ExecutionMode` into core.
+The executable modes do not require core classes such as `Rule`, `Decision`, `Calculation`, `Mapping`, `Formula`, `Transformation`, or a generic `ExecutionMode`.
 
-Their native semantic artifacts already carry the mode-specific meaning:
+Their native semantic artifacts and bounded Capabilities already carry the mode-specific meaning:
 
 ```text
 SPARQL rule
-    a SemanticModel
-        ↓
-PizzaRuleEvaluationCapability
-        ↓
-Execution → Result → Verification
+    ↓ PizzaRuleEvaluationCapability
 
-DMN decision table
-    a SemanticModel
-        ↓
-PizzaDietarySuitabilityCapability
-        ↓
-Execution → Result → Verification
+DMN decision
+    ↓ PizzaDietarySuitabilityCapability
 
-OpenMath formula + calculation vocabulary
-    a SemanticModel
-        ↓
-PizzaAreaCalculationCapability
-        ↓
+OpenMath formula
+    ↓ PizzaAreaCalculationCapability
+
+Pizza source model + SPARQL mapping + Menu target model
+    ↓ PizzaMenuProjectionCapability
+```
+
+Each then participates in the same generic runtime pattern:
+
+```text
 Execution → Result → Verification
 ```
 
-The execution mechanism is represented separately as an `ExecutableSemanticKnowledgeArtifact`. This keeps technology-specific semantics in their native artifacts until repeated executable evidence justifies a broader ESKA abstraction.
-
-The calculation mode also demonstrates that typed numeric values do not require datatype-specific core classes. `PizzaAreaResult` is the Capability output type; the actual numeric value is carried as an `xsd:decimal` through the semantic result relation defined by the source-owned calculation vocabulary.
+The mapping example also shows that sharing an implementation language does not make two semantic execution modes identical: both Rule and Mapping use SPARQL `CONSTRUCT`, but Rule derives a statement inside the source semantic domain while Mapping transforms into a distinct target semantic model.
 
 ## Dependency representation
 
@@ -99,7 +135,7 @@ The executable examples explicitly merge the required model artifacts during ver
 
 ## Provisional namespace
 
-All ESKA terms currently use:
+All ESKA core terms currently use:
 
 ```text
 urn:eska:core:
@@ -107,4 +143,4 @@ urn:eska:core:
 
 This is deliberate. The project should stabilize the concepts before choosing a permanent public namespace and publication policy.
 
-See [Execution Mode Comparison](../docs/execution-mode-comparison.md) for the executable evidence used to decide which concepts currently belong in the core.
+See [Execution Mode Comparison](../docs/execution-mode-comparison.md) for the executable evidence used to decide which concepts currently belong in core.

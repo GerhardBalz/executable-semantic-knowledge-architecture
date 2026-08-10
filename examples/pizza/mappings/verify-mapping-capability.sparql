@@ -1,0 +1,41 @@
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX eska: <urn:eska:core:>
+PREFIX map: <urn:eska:example:pizza:mapping:>
+PREFIX menu: <urn:pizza-ontology:menu:>
+PREFIX pizza: <http://www.co-ode.org/ontologies/pizza/pizza.owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+# ROBOT verify treats returned rows as violations.
+SELECT ?capability
+WHERE {
+  VALUES ?capability { map:PizzaMenuProjectionCapability }
+
+  FILTER NOT EXISTS {
+    ?capability
+        a eska:SemanticCapability ;
+        eska:subject pizza:Pizza ;
+        eska:inputType map:PizzaSourceGraph ;
+        eska:outputType map:MenuProjectionGraph ;
+        eska:producesRelation rdf:type, menu:displayName, menu:ingredientName ;
+        eska:usesSemanticModel map:PizzaSourceSemanticModel, map:MenuTargetSemanticModel, map:PizzaToMenuMappingModel ;
+        map:sourceSemanticModel map:PizzaSourceSemanticModel ;
+        map:targetSemanticModel map:MenuTargetSemanticModel ;
+        map:mappingSemanticModel map:PizzaToMenuMappingModel ;
+        eska:usesExecutableArtifact map:SPARQLMappingExecutionArtifact ;
+        eska:requiresCondition map:ExplicitMappingInputCondition .
+
+    map:sourceSemanticModel rdfs:subPropertyOf eska:usesSemanticModel .
+    map:targetSemanticModel rdfs:subPropertyOf eska:usesSemanticModel .
+    map:mappingSemanticModel rdfs:subPropertyOf eska:usesSemanticModel .
+
+    map:PizzaSourceSemanticModel a eska:SemanticModel .
+    map:MenuTargetSemanticModel a eska:SemanticModel .
+    map:PizzaToMenuMappingModel
+        a eska:SemanticModel ;
+        dcterms:requires map:PizzaSourceSemanticModel, map:MenuTargetSemanticModel .
+
+    map:SPARQLMappingExecutionArtifact a eska:ExecutableSemanticKnowledgeArtifact .
+    map:ExplicitMappingInputCondition a eska:ApplicabilityCondition .
+  }
+}
