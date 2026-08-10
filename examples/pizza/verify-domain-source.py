@@ -16,6 +16,9 @@ FORBIDDEN_LOCAL_COPIES = (
     HERE / "validation" / "pizza-shapes.ttl",
     HERE / "validation" / "valid-pizza.ttl",
     HERE / "validation" / "invalid-pizza.ttl",
+    HERE / "rules" / "vegetarian-warning.rq",
+    HERE / "rules" / "rule-vocabulary.ttl",
+    HERE / "rules" / "data" / "menu-pizzas.ttl",
 )
 
 EXPECTED_ARTIFACTS = {
@@ -23,7 +26,22 @@ EXPECTED_ARTIFACTS = {
     "shapes": "artifacts/validation/pizza-instance-shapes.ttl",
     "validData": "artifacts/validation/data/conforming.ttl",
     "invalidData": "artifacts/validation/data/non-conforming.ttl",
+    "ruleQuery": "artifacts/rules/vegetarian-warning.rq",
+    "ruleVocabulary": "artifacts/rules/rule-vocabulary.ttl",
+    "ruleData": "artifacts/rules/data/menu-pizzas.ttl",
 }
+
+EXPECTED_MATERIALIZED = (
+    "manifest.ttl",
+    "reasoning.ofn",
+    "shapes.ttl",
+    "valid-data.ttl",
+    "invalid-data.ttl",
+    "rule.rq",
+    "rule-vocabulary.ttl",
+    "rule-data.ttl",
+    "source.json",
+)
 
 
 def require(condition: bool, message: str) -> None:
@@ -43,8 +61,8 @@ def main() -> None:
     for path in FORBIDDEN_LOCAL_COPIES:
         require(not path.exists(), f"ESKA must not regain ownership of Pizza domain semantic copy: {path.relative_to(HERE)}")
 
-    require((DOMAIN_DIR / "manifest.ttl").is_file(), "Pinned Pizza manifest was not materialized during execution")
-    require((DOMAIN_DIR / "reasoning.ofn").is_file(), "Pinned Pizza reasoning module was not materialized during execution")
+    for name in EXPECTED_MATERIALIZED:
+        require((DOMAIN_DIR / name).is_file(), f"Pinned Pizza artifact was not materialized during execution: {name}")
 
     source_metadata = json.loads((DOMAIN_DIR / "source.json").read_text(encoding="utf-8"))
     require(source_metadata.get("commit") == commit, "runtime Pizza materialization does not match the configured source commit")
