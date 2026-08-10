@@ -1,0 +1,24 @@
+PREFIX eska: <urn:eska:core:>
+PREFIX rul: <urn:eska:example:pizza:rule:>
+PREFIX pizzaRule: <urn:pizza-ontology:rule:>
+PREFIX pizza: <http://www.co-ode.org/ontologies/pizza/pizza.owl#>
+
+# Return one row when any required part of the PizzaRuleEvaluationCapability contract is absent.
+SELECT ?capability
+WHERE {
+  BIND(rul:PizzaRuleEvaluationCapability AS ?capability)
+  FILTER NOT EXISTS {
+    ?capability a eska:SemanticCapability ;
+                eska:subject pizza:Pizza ;
+                eska:inputType rul:PizzaRuleDataGraph ;
+                eska:outputType rul:RuleResultGraph ;
+                eska:producesRelation pizzaRule:requiresVegetarianWarning ;
+                eska:usesSemanticModel rul:VegetarianWarningRuleModel ;
+                eska:usesExecutableArtifact rul:SPARQLRuleEvaluationArtifact ;
+                eska:requiresCondition rul:ExplicitRDFRuleInputCondition .
+
+    rul:VegetarianWarningRuleModel a eska:SemanticModel .
+    rul:SPARQLRuleEvaluationArtifact a eska:ExecutableSemanticKnowledgeArtifact .
+    rul:ExplicitRDFRuleInputCondition a eska:ApplicabilityCondition .
+  }
+}
