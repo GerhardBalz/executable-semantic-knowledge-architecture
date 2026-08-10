@@ -7,9 +7,9 @@
 <urn:eska:model:agent>
     a owl:Ontology ;
     dcterms:title "ESKA agent model"@en ;
-    dcterms:description "A deliberately small, provisional extension containing terms needed to describe and test Knowledge Agents and semantic service discovery."@en ;
+    dcterms:description "A deliberately small, provisional extension containing terms needed to describe and test Knowledge Agents, semantic service discovery, and semantically typed invocation adaptation."@en ;
     dcterms:requires <urn:eska:model:core> ;
-    owl:versionInfo "0.2-provisional" .
+    owl:versionInfo "0.3-provisional" .
 
 eska:KnowledgeAgent
     a owl:Class ;
@@ -20,6 +20,11 @@ eska:DiscoveryArtifact
     a owl:Class ;
     rdfs:label "Discovery Artifact"@en ;
     skos:definition "An executable or queryable artifact used by an agent to discover an operational realization of a semantic capability."@en .
+
+eska:SemanticInvocationAdapter
+    a owl:Class ;
+    rdfs:label "Semantic Invocation Adapter"@en ;
+    skos:definition "An agent-side executable adapter that encodes a semantically typed input for a discovered access contract and interprets the returned result according to the discovered Capability output type and relation."@en .
 
 eska:targetsCapability
     a owl:ObjectProperty ;
@@ -32,3 +37,27 @@ eska:usesDiscoveryArtifact
     rdfs:label "uses discovery artifact"@en ;
     rdfs:domain eska:KnowledgeAgent ;
     rdfs:range eska:DiscoveryArtifact .
+
+eska:usesInvocationAdapter
+    a owl:ObjectProperty ;
+    rdfs:label "uses invocation adapter"@en ;
+    rdfs:domain eska:KnowledgeAgent ;
+    rdfs:range eska:SemanticInvocationAdapter .
+
+eska:supportsInputType
+    a owl:ObjectProperty ;
+    rdfs:label "supports input type"@en ;
+    rdfs:domain eska:SemanticInvocationAdapter ;
+    skos:definition "Identifies a semantic input type that an invocation adapter can encode for service access."@en .
+
+eska:supportsOutputType
+    a owl:ObjectProperty ;
+    rdfs:label "supports output type"@en ;
+    rdfs:domain eska:SemanticInvocationAdapter ;
+    skos:definition "Identifies a semantic output type that an invocation adapter can interpret from a service result."@en .
+
+eska:supportsRelation
+    a owl:ObjectProperty ;
+    rdfs:label "supports relation"@en ;
+    rdfs:domain eska:SemanticInvocationAdapter ;
+    skos:definition "Identifies a semantic result relation that an invocation adapter can preserve and interpret."@en .
