@@ -22,6 +22,11 @@ if [[ ! -f "${HERE}/validation/results/provenance.ttl" ]]; then
   exit 1
 fi
 
+if [[ ! -f "${HERE}/rules/results/provenance.ttl" ]]; then
+  echo "Rule-evaluation provenance not found. Run examples/pizza/rules/evaluate.py first." >&2
+  exit 1
+fi
+
 mkdir -p "${RESULTS_DIR}" "${VERIFY_DIR}"
 ROBOT=(java -jar "${ROBOT_JAR}")
 
@@ -29,6 +34,7 @@ ROBOT=(java -jar "${ROBOT_JAR}")
   --input "${ROOT_DIR}/model/eska-core.ttl" \
   --input "${RESULTS_DIR}/provenance.ttl" \
   --input "${HERE}/validation/results/provenance.ttl" \
+  --input "${HERE}/rules/results/provenance.ttl" \
   --output "${RESULTS_DIR}/core-executions.owl"
 
 "${ROBOT[@]}" verify \
@@ -36,4 +42,4 @@ ROBOT=(java -jar "${ROBOT_JAR}")
   --queries "${HERE}/verify-core-executions.sparql" \
   --output-dir "${VERIFY_DIR}"
 
-echo "SUCCESS: reasoning and validation share the ESKA Execution → Result → Verification core pattern."
+echo "SUCCESS: reasoning, validation, and rule evaluation share the ESKA Execution → Result → Verification core pattern."
