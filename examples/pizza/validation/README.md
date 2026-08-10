@@ -1,59 +1,64 @@
 # Pizza SHACL validation
 
-This slice adds a second form of **Executable Semantic Knowledge** to ESKA: semantic validation.
+This slice demonstrates a second form of **Executable Semantic Knowledge** in ESKA: semantic validation.
 
-The existing Pizza example demonstrates OWL inference:
-
-```text
-formal semantics
-    ↓ reason
-new entailed knowledge
-```
-
-This example demonstrates SHACL validation:
+The Pizza-domain SHACL profile and example RDF data are **not owned by this repository**. They are published by [`GerhardBalz/pizza-ontology`](https://github.com/GerhardBalz/pizza-ontology) and consumed here from the immutable commit recorded in [`../pizza-domain-source.json`](../pizza-domain-source.json).
 
 ```text
-formal constraints
-    ↓ validate
-conformance report
+pizza-ontology
+    owns Pizza SHACL profile + RDF examples
+        ↓ commit-pinned fetch
+ESKA
+    defines PizzaValidationCapability
+        ↓
+    executes pySHACL
+        ↓
+    verifies + records provenance
 ```
 
-These are intentionally different operational semantics.
+The runtime materialization is written only beneath `examples/pizza/.work/pizza-domain/`; it is not a second semantic source of truth.
 
 ## Question
 
 The example asks:
 
-> **Does a concrete Pizza RDF data graph conform to an explicit Pizza data contract?**
+> **Does a concrete Pizza RDF data graph conform to the source-owned Pizza validation profile?**
 
-The initial contract is deliberately small:
+The published profile requires, for each explicit `pizza:Pizza` node:
 
-- each `pizza:Pizza` data node must have exactly one `pizza:hasBase` value;
-- the base value must be a `pizza:PizzaBase`;
-- each Pizza data node must have at least one `pizza:hasTopping` value;
-- each topping value must be a `pizza:PizzaTopping`.
-
-The constraints are represented in [`pizza-shapes.ttl`](pizza-shapes.ttl).
+- exactly one `pizza:hasBase` value;
+- the base value to be a `pizza:PizzaBase`;
+- at least one `pizza:hasTopping` value;
+- each topping value to be a `pizza:PizzaTopping`.
 
 ## Why SHACL in addition to OWL?
 
 OWL reasoning and SHACL validation answer different questions.
 
-The earlier slice asks:
+```text
+OWL
+    What follows logically from the semantic model?
 
-> **What follows from the semantic model?**
+SHACL
+    Does this explicit RDF data satisfy a validation profile?
+```
 
-The SHACL slice asks:
+The constraints remain represented in SHACL rather than duplicated as Python conditionals. ESKA's Python code invokes and verifies the executable semantic artifact; it does not own the Pizza validation semantics.
 
-> **Does this concrete RDF data graph satisfy an explicit validation contract?**
+## Source binding
 
-For example, [`invalid-pizza.ttl`](invalid-pizza.ttl) gives one Pizza node two `hasBase` values. The SHACL shape declares `sh:maxCount 1`, so validation must report non-conformance.
+The source binding identifies:
 
-This is deliberately not encoded as a Python `if` statement. The executable constraint is the SHACL graph; pySHACL evaluates that formal semantic artifact.
+- repository: `GerhardBalz/pizza-ontology`
+- immutable Git commit
+- machine-readable `artifacts/manifest.ttl`
+- reasoning, SHACL, conforming-data, and non-conforming-data paths
+
+`fetch-domain-artifacts.py` downloads the manifest and artifacts from the pinned commit and refuses an unexpected role/path contract.
 
 ## Semantic Capability
 
-[`pizza-validation-capability.ttl`](pizza-validation-capability.ttl) describes the bounded ability as `PizzaValidationCapability`.
+[`pizza-validation-capability.ttl`](pizza-validation-capability.ttl) describes the bounded ESKA ability as `PizzaValidationCapability`.
 
 ```text
 Capability
@@ -72,32 +77,21 @@ Produced relation
     sh:conforms
 
 Semantic model
-    Pizza SHACL shapes graph
+    source-owned Pizza SHACL profile
 
 Executable artifact
     SHACL validation with pySHACL
-
-Applicability
-    parseable RDF using the Pizza ontology terms
 ```
 
-The scope note explicitly excludes OWL class classification. This gives the project two different Semantic Capabilities built around different executable semantics:
-
-```text
-PizzaClassificationCapability
-    OWL entailment
-    → rdfs:subClassOf
-
-PizzaValidationCapability
-    SHACL constraint evaluation
-    → sh:ValidationReport / sh:conforms
-```
+The Capability remains ESKA-owned because it describes how semantic knowledge is operationalized. The SHACL graph remains Pizza-owned because it defines domain-specific validation knowledge.
 
 ## Data cases
 
+The source repository publishes both cases in its artifact manifest.
+
 ### Conforming
 
-[`valid-pizza.ttl`](valid-pizza.ttl) contains one Pizza with one base and two toppings. It must produce:
+The conforming graph has a valid Pizza base and toppings and must produce:
 
 ```text
 sh:conforms true
@@ -105,17 +99,26 @@ sh:conforms true
 
 ### Non-conforming
 
-[`invalid-pizza.ttl`](invalid-pizza.ttl) contains one Pizza with two base values. It must produce:
+The non-conforming graph deliberately:
+
+- omits `pizza:hasBase`;
+- points `pizza:hasTopping` at a value typed as `pizza:PizzaBase` rather than `pizza:PizzaTopping`.
+
+ESKA therefore verifies that the report contains:
 
 ```text
-sh:conforms false
+pizza:hasBase
+    sh:MinCountConstraintComponent
+
+pizza:hasTopping
+    sh:ClassConstraintComponent
 ```
 
-and a validation result whose source constraint is `sh:MaxCountConstraintComponent` on `pizza:hasBase`.
+These expectations follow the published Pizza-domain fixture instead of preserving ESKA's former local test data.
 
 ## Execute
 
-Install the pinned validation dependency:
+Install the validation dependency:
 
 ```bash
 python -m pip install -r examples/pizza/validation/requirements.txt
@@ -127,36 +130,28 @@ Run:
 python examples/pizza/validation/validate.py
 ```
 
-The script performs four checks:
+The script:
 
-1. verifies the machine-readable `PizzaValidationCapability` contract with SPARQL;
-2. validates the conforming Pizza data and requires `sh:conforms true`;
-3. validates the non-conforming Pizza data and requires the expected `hasBase` max-count violation;
-4. records validation execution provenance using PROV-O.
+1. materializes the commit-pinned Pizza SHACL/data artifacts;
+2. verifies the machine-readable `PizzaValidationCapability` contract;
+3. validates the conforming graph;
+4. validates the non-conforming graph and checks the expected source-owned violations;
+5. records validation execution provenance including the pinned Pizza source URLs.
 
-Generated reports are written to `examples/pizza/validation/results/`.
+Generated validation reports remain in `examples/pizza/validation/results/`.
 
 ## Architectural significance
 
-The second execution mode tests whether ESKA is broader than ontology reasoning.
-
-Both examples satisfy the same architectural pattern:
+The repository boundary is itself part of the example:
 
 ```text
-Semantic Model
-    ↓
-Executable Semantic Knowledge Artifact
-    ↓
-Semantic Capability
-    ↓
-Verified Result
+Domain semantics               Execution architecture
+────────────────────────       ─────────────────────────
+pizza-ontology                 ESKA
+
+OWL module          ────────►   reasoning execution
+SHACL profile       ────────►   validation capability
+example RDF data   ────────►   verification / provenance
 ```
 
-but their operational semantics differ:
-
-```text
-OWL ontology       → reason   → inferred axioms
-SHACL shapes graph → validate → validation report
-```
-
-That distinction is intentional. ESKA does not define one universal meaning of "execute"; execution depends on the semantic artifact type.
+**Execution must not sever semantics, and execution architecture should not become the accidental owner of domain semantics.**
