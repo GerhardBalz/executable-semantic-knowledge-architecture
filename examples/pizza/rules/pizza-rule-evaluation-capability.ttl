@@ -1,0 +1,50 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix eska: <urn:eska:core:> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rul: <urn:eska:example:pizza:rule:> .
+@prefix pizzaRule: <urn:pizza-ontology:rule:> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix pizza: <http://www.co-ode.org/ontologies/pizza/pizza.owl#> .
+
+rul:PizzaRuleEvaluationCapability
+    a eska:SemanticCapability ;
+    dcterms:title "Pizza Rule Evaluation"@en ;
+    dcterms:description "Evaluate the source-owned Pizza vegetarian-warning rule against explicit Pizza RDF data and produce a machine-readable derived rule result."@en ;
+    skos:scopeNote "The initial capability is bounded to deterministic evaluation of one commit-pinned SPARQL CONSTRUCT rule over explicit RDF assertions. It performs neither OWL inference nor SHACL validation and does not expose the capability through a service or agent."@en ;
+    eska:subject pizza:Pizza ;
+    eska:inputType rul:PizzaRuleDataGraph ;
+    eska:outputType rul:RuleResultGraph ;
+    eska:producesRelation pizzaRule:requiresVegetarianWarning ;
+    eska:usesSemanticModel rul:VegetarianWarningRuleModel ;
+    eska:usesExecutableArtifact rul:SPARQLRuleEvaluationArtifact ;
+    eska:requiresCondition rul:ExplicitRDFRuleInputCondition .
+
+rul:PizzaRuleDataGraph
+    a owl:Class ;
+    dcterms:description "An RDF data graph containing explicit Pizza and topping assertions consumed by the rule evaluator."@en .
+
+rul:RuleResultGraph
+    a owl:Class ;
+    dcterms:description "An RDF graph containing statements derived by evaluating the Pizza SPARQL rule."@en .
+
+rul:VegetarianWarningRuleModel
+    a eska:SemanticModel, prov:Entity ;
+    dcterms:title "Pizza vegetarian warning rule model"@en ;
+    dcterms:identifier "artifacts/rules/vegetarian-warning.rq@bba9fa883f326ebeb395140abd523dc517caf071" ;
+    dcterms:description "Commit-pinned SPARQL 1.1 CONSTRUCT rule owned and published by the companion pizza-ontology repository."@en ;
+    dcterms:source <https://github.com/GerhardBalz/pizza-ontology/blob/bba9fa883f326ebeb395140abd523dc517caf071/artifacts/rules/vegetarian-warning.rq> ;
+    dcterms:requires <https://github.com/GerhardBalz/pizza-ontology/blob/bba9fa883f326ebeb395140abd523dc517caf071/artifacts/rules/rule-vocabulary.ttl> ;
+    dcterms:relation <https://github.com/GerhardBalz/pizza-ontology/blob/bba9fa883f326ebeb395140abd523dc517caf071/artifacts/manifest.ttl> .
+
+rul:SPARQLRuleEvaluationArtifact
+    a eska:ExecutableSemanticKnowledgeArtifact, prov:Entity ;
+    dcterms:title "SPARQL rule evaluation with RDFLib"@en ;
+    dcterms:description "Executable semantic knowledge artifact that evaluates the source-owned SPARQL CONSTRUCT rule with RDFLib against explicit Pizza RDF input and produces a derived RDF graph."@en ;
+    eska:inputType rul:PizzaRuleDataGraph ;
+    eska:outputType rul:RuleResultGraph ;
+    eska:producesRelation pizzaRule:requiresVegetarianWarning .
+
+rul:ExplicitRDFRuleInputCondition
+    a eska:ApplicabilityCondition ;
+    dcterms:description "Rule evaluation uses only explicit RDF assertions in the supplied data graph; matching MeatTopping type assertions must therefore be present in the input rather than expected from OWL inference."@en .
