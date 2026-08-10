@@ -1,11 +1,11 @@
 # Pizza example provenance and license
 
-ESKA no longer stores a second source-of-truth copy of the Pizza semantic artifacts used by this example.
+ESKA does not store a second source-of-truth copy of the Pizza semantic artifacts used by this example.
 
 The domain artifacts are owned and published by the companion repository:
 
 - Source repository: <https://github.com/GerhardBalz/pizza-ontology>
-- Pinned source commit: `613ff0b6e615cbb2eac7cd92358eca9f885fbc7d`
+- Pinned source commit: `bba9fa883f326ebeb395140abd523dc517caf071`
 - Consumer manifest: `artifacts/manifest.ttl`
 - ESKA binding: [`pizza-domain-source.json`](pizza-domain-source.json)
 
@@ -41,6 +41,20 @@ artifacts/validation/data/non-conforming.ttl
 
 These are newly authored semantic-engineering artifacts. The Pizza artifact manifest identifies them under the **MIT License**.
 
+## Rule semantics and data
+
+The third execution mode consumes:
+
+```text
+artifacts/rules/vegetarian-warning.rq
+artifacts/rules/rule-vocabulary.ttl
+artifacts/rules/data/menu-pizzas.ttl
+```
+
+These source-owned SPARQL rule, vocabulary, and RDF input artifacts are also repository-authored semantic-engineering material identified as **MIT License** in the Pizza manifest.
+
+ESKA does not copy those rule semantics into its own source tree. It supplies the Semantic Capability, evaluator binding, execution, verification, result model, and provenance around the pinned external artifacts.
+
 ## ESKA material
 
 The MIT license at the root of this repository applies to newly created ESKA material such as:
@@ -59,12 +73,18 @@ The licensing/provenance chain is therefore explicit:
 Pizza Ontology-derived reasoning semantics
     CC BY 3.0
         ↓ pinned source artifact
-ESKA execution architecture
+ESKA reasoning execution architecture
     MIT
 
 Pizza repository-authored SHACL/data
     MIT
         ↓ pinned source artifact
 ESKA validation execution
+    MIT
+
+Pizza repository-authored rule/vocabulary/data
+    MIT
+        ↓ pinned source artifact
+ESKA rule evaluation execution
     MIT
 ```
