@@ -126,3 +126,6 @@ printf 'Cross-mode: classification and validation share the same provisional Ser
 printf 'Architecture: %s\n' "${RESULTS_DIR}/architecture-model.owl"
 printf 'Valid result: %s\n' "${RESULTS_DIR}/valid-agent-result.json"
 printf 'Invalid result: %s\n' "${RESULTS_DIR}/invalid-agent-result.json"
+
+printf '\nRunning generalized deterministic Knowledge Agent regression...\n'
+bash "${PIZZA_DIR}/test-generalized-agent.sh"
