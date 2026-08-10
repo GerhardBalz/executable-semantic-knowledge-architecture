@@ -1,6 +1,5 @@
 @prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix eska: <urn:eska:core:> .
-@prefix sh: <http://www.w3.org/ns/shacl#> .
 @prefix val: <urn:eska:example:pizza:validation:> .
 @prefix valsvc: <urn:eska:example:pizza:validation-service:> .
 
@@ -15,14 +14,16 @@ valsvc:PizzaValidationService
 valsvc:ValidatePizzaDataOperation
     a eska:ServiceOperation ;
     dcterms:title "Validate Pizza RDF data"@en ;
-    dcterms:description "Validate an RDF data graph against the Pizza SHACL profile and return a machine-interpretable SHACL ValidationReport serialized as JSON-LD inside the service envelope."@en ;
+    dcterms:description "Operational realization of PizzaValidationCapability. Semantic input/output/relation are taken from the Capability; HTTP/JSON representation details are delegated to the access binding."@en ;
+    eska:realizesCapability val:PizzaValidationCapability ;
+    eska:hasAccessBinding valsvc:ValidatePizzaDataHTTPBinding .
+
+valsvc:ValidatePizzaDataHTTPBinding
+    a eska:HTTPAccessBinding ;
     eska:httpMethod "POST" ;
     eska:path "/validate" ;
     eska:mediaType "application/json" ;
     eska:requestField "data" ;
     eska:resultField "report" ;
     eska:relationField "relation" ;
-    eska:capabilityField "capability" ;
-    eska:inputType val:PizzaDataGraph ;
-    eska:outputType sh:ValidationReport ;
-    eska:producesRelation sh:conforms .
+    eska:capabilityField "capability" .

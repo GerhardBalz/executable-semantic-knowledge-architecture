@@ -1,0 +1,63 @@
+PREFIX eska: <urn:eska:core:>
+PREFIX cap: <urn:eska:example:pizza:capability:>
+PREFIX multi: <urn:eska:example:pizza:multi-service:>
+PREFIX val: <urn:eska:example:pizza:validation:>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX sh: <http://www.w3.org/ns/shacl#>
+
+# ROBOT verify treats returned rows as violations.
+# Verify a single KnowledgeService can expose multiple Capabilities without ambiguous operation semantics,
+# and verify semantic contracts remain on Capabilities rather than being duplicated on ServiceOperations.
+SELECT ?problem ?operation
+WHERE {
+  {
+    VALUES (?capability ?operation ?binding ?inputType ?outputType ?relation ?path ?requestField ?resultField) {
+      (cap:PizzaClassificationCapability multi:ClassifyOperation multi:ClassifyHTTPBinding owl:Class owl:Class rdfs:subClassOf "/classify" "class" "classifications")
+      (val:PizzaValidationCapability multi:ValidateOperation multi:ValidateHTTPBinding val:PizzaDataGraph sh:ValidationReport sh:conforms "/validate" "data" "report")
+    }
+
+    FILTER NOT EXISTS {
+      multi:PizzaKnowledgeService
+          a eska:KnowledgeService ;
+          eska:exposesCapability ?capability ;
+          eska:hasOperation ?operation .
+
+      ?operation
+          a eska:ServiceOperation ;
+          eska:realizesCapability ?capability ;
+          eska:hasAccessBinding ?binding .
+
+      ?capability
+          eska:inputType ?inputType ;
+          eska:outputType ?outputType ;
+          eska:producesRelation ?relation ;
+          eska:requiresCondition ?condition .
+
+      ?binding
+          a eska:HTTPAccessBinding ;
+          eska:httpMethod "POST" ;
+          eska:path ?path ;
+          eska:mediaType "application/json" ;
+          eska:requestField ?requestField ;
+          eska:resultField ?resultField ;
+          eska:relationField "relation" ;
+          eska:capabilityField "capability" .
+    }
+    BIND("missing-or-inconsistent-contract" AS ?problem)
+  }
+  UNION
+  {
+    VALUES ?operation { multi:ClassifyOperation multi:ValidateOperation }
+    VALUES ?semanticProperty { eska:inputType eska:outputType eska:producesRelation eska:requiresCondition }
+    ?operation ?semanticProperty ?value .
+    BIND("semantic-contract-duplicated-on-operation" AS ?problem)
+  }
+  UNION
+  {
+    VALUES ?operation { multi:ClassifyOperation multi:ValidateOperation }
+    ?operation eska:realizesCapability ?capability1, ?capability2 .
+    FILTER (?capability1 != ?capability2)
+    BIND("operation-realizes-multiple-capabilities" AS ?problem)
+  }
+}

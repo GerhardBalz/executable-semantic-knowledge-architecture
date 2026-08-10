@@ -14,15 +14,22 @@ WHERE {
 
     valsvc:ValidatePizzaDataOperation
         a eska:ServiceOperation ;
+        eska:realizesCapability val:PizzaValidationCapability ;
+        eska:hasAccessBinding valsvc:ValidatePizzaDataHTTPBinding .
+
+    val:PizzaValidationCapability
+        eska:inputType val:PizzaDataGraph ;
+        eska:outputType sh:ValidationReport ;
+        eska:producesRelation sh:conforms .
+
+    valsvc:ValidatePizzaDataHTTPBinding
+        a eska:HTTPAccessBinding ;
         eska:httpMethod "POST" ;
         eska:path "/validate" ;
         eska:mediaType "application/json" ;
         eska:requestField "data" ;
         eska:resultField "report" ;
         eska:relationField "relation" ;
-        eska:capabilityField "capability" ;
-        eska:inputType val:PizzaDataGraph ;
-        eska:outputType sh:ValidationReport ;
-        eska:producesRelation sh:conforms .
+        eska:capabilityField "capability" .
   }
 }

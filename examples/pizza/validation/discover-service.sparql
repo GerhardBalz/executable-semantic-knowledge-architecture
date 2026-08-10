@@ -1,8 +1,9 @@
 PREFIX eska: <urn:eska:core:>
 PREFIX val: <urn:eska:example:pizza:validation:>
 
-# Discover the operational contract for PizzaValidationCapability.
-SELECT ?service ?operation ?method ?path ?mediaType ?inputType ?outputType ?relation
+# Discover the operational access contract for PizzaValidationCapability.
+# Semantic input/output/relation come from the Capability; HTTP/JSON details come from its access binding.
+SELECT ?service ?operation ?binding ?method ?path ?mediaType ?inputType ?outputType ?relation
        ?requestField ?resultField ?relationField ?capabilityField
 WHERE {
   ?service a eska:KnowledgeService ;
@@ -10,14 +11,20 @@ WHERE {
            eska:hasOperation ?operation .
 
   ?operation a eska:ServiceOperation ;
-             eska:httpMethod ?method ;
-             eska:path ?path ;
-             eska:mediaType ?mediaType ;
-             eska:inputType ?inputType ;
-             eska:outputType ?outputType ;
-             eska:producesRelation ?relation ;
-             eska:requestField ?requestField ;
-             eska:resultField ?resultField ;
-             eska:relationField ?relationField ;
-             eska:capabilityField ?capabilityField .
+             eska:realizesCapability val:PizzaValidationCapability ;
+             eska:hasAccessBinding ?binding .
+
+  val:PizzaValidationCapability
+      eska:inputType ?inputType ;
+      eska:outputType ?outputType ;
+      eska:producesRelation ?relation .
+
+  ?binding a eska:HTTPAccessBinding ;
+           eska:httpMethod ?method ;
+           eska:path ?path ;
+           eska:mediaType ?mediaType ;
+           eska:requestField ?requestField ;
+           eska:resultField ?resultField ;
+           eska:relationField ?relationField ;
+           eska:capabilityField ?capabilityField .
 }

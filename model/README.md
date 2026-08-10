@@ -46,19 +46,50 @@ Contains capability-specific helper terms useful in examples but not yet justifi
 
 ### `eska-service.ttl`
 
-Contains Knowledge Service and transport/representation concepts. Service exposure is now demonstrated for two different semantic modes:
+Contains the provisional Knowledge Service model. Classification and validation provide the first cross-mode evidence for separating stable Service semantics from concrete access bindings.
+
+The stable semantic structure is now:
 
 ```text
-PizzaClassificationCapability
-    → PizzaClassificationService
-
-PizzaValidationCapability
-    → PizzaValidationService
+KnowledgeService
+    ├── exposesCapability → SemanticCapability
+    └── hasOperation      → ServiceOperation
+                                ↓ realizesCapability
+                           SemanticCapability
 ```
 
-Both use the same provisional `KnowledgeService` / `ServiceOperation` structure, including semantic input/output types, result relation, operation path/method, and representation field mappings. The validation example required no change to `eska-service.ttl`.
+Semantic input/output/relation/applicability remain on the Capability:
 
-The result representation remains mode-specific: classification returns a list of semantic class IRIs, while validation returns a JSON-LD serialization of a `sh:ValidationReport`. The generic `resultField` identifies where the semantically typed result is carried; it does not prescribe one universal JSON shape.
+```text
+SemanticCapability
+    inputType
+    outputType
+    producesRelation
+    requiresCondition
+```
+
+A `ServiceOperation` no longer duplicates those assertions. This removes the hidden single-capability assumption from the earlier model and makes it possible for one Knowledge Service to expose multiple Capabilities unambiguously.
+
+Concrete access details are separated through:
+
+```text
+ServiceOperation
+    ↓ hasAccessBinding
+AccessBinding
+    ↓
+HTTPAccessBinding
+```
+
+The current HTTP bindings carry method, contract-relative path, media-type envelope, and representation-field mappings. Runtime scheme/host/port remain separate deployment bindings.
+
+The two working modes still differ in result representation:
+
+```text
+classification → list of owl:Class IRIs
+validation     → JSON-LD sh:ValidationReport graph
+```
+
+`resultField` identifies where a semantic result is carried in an access representation; it does not prescribe one universal result shape. See [Knowledge Service Generalization](../docs/knowledge-service-generalization.md).
 
 ### `eska-agent.ttl`
 
@@ -76,7 +107,7 @@ Both discover a Service operation from machine-readable ESKA contracts and combi
 
 The Agent vocabulary itself required no change, but the executable Agent implementations interpret results according to the discovered semantic output contract. Classification interprets `owl:Class` result IRIs; validation parses and checks a `sh:ValidationReport` RDF graph. This is evidence against embedding one result-shape assumption into the generic Agent model.
 
-Service and Agent remain outside core because operational exposure is still an optional layer and only two of the seven execution modes currently demonstrate it. The next generalization work should compare these two working paths before promoting or redesigning extension terms.
+Service and Agent remain outside core because operational exposure is still an optional layer and only two of the seven execution modes currently demonstrate it.
 
 ## Mode-specific semantic refinements
 

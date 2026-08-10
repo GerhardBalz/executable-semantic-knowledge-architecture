@@ -5,7 +5,6 @@ PREFIX owl: <http://www.w3.org/2002/07/owl#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
 # ROBOT verify treats returned rows as violations.
-# Return one row if any required part of the Knowledge Service contract is absent.
 SELECT ?service
 WHERE {
   BIND(svc:PizzaClassificationService AS ?service)
@@ -16,15 +15,22 @@ WHERE {
 
     svc:ClassifyPizzaClassOperation
         a eska:ServiceOperation ;
+        eska:realizesCapability cap:PizzaClassificationCapability ;
+        eska:hasAccessBinding svc:ClassifyPizzaClassHTTPBinding .
+
+    cap:PizzaClassificationCapability
+        eska:inputType owl:Class ;
+        eska:outputType owl:Class ;
+        eska:producesRelation rdfs:subClassOf .
+
+    svc:ClassifyPizzaClassHTTPBinding
+        a eska:HTTPAccessBinding ;
         eska:httpMethod "POST" ;
         eska:path "/classify" ;
         eska:mediaType "application/json" ;
         eska:requestField "class" ;
         eska:resultField "classifications" ;
         eska:relationField "relation" ;
-        eska:capabilityField "capability" ;
-        eska:inputType owl:Class ;
-        eska:outputType owl:Class ;
-        eska:producesRelation rdfs:subClassOf .
+        eska:capabilityField "capability" .
   }
 }
