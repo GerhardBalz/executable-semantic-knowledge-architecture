@@ -5,7 +5,7 @@ ESKA does not store a second source-of-truth copy of the Pizza semantic artifact
 The domain artifacts are owned and published by the companion repository:
 
 - Source repository: <https://github.com/GerhardBalz/pizza-ontology>
-- Pinned source commit: `bba9fa883f326ebeb395140abd523dc517caf071`
+- Pinned source commit: `983b691d9d2102ffad97a3ec31aa9b1435b3e547`
 - Consumer manifest: `artifacts/manifest.ttl`
 - ESKA binding: [`pizza-domain-source.json`](pizza-domain-source.json)
 
@@ -39,11 +39,11 @@ artifacts/validation/data/conforming.ttl
 artifacts/validation/data/non-conforming.ttl
 ```
 
-These are newly authored semantic-engineering artifacts. The Pizza artifact manifest identifies them under the **MIT License**.
+These are newly authored semantic-engineering artifacts identified as **MIT License** in the Pizza manifest.
 
 ## Rule semantics and data
 
-The third execution mode consumes:
+The rule-evaluation mode consumes:
 
 ```text
 artifacts/rules/vegetarian-warning.rq
@@ -51,9 +51,21 @@ artifacts/rules/rule-vocabulary.ttl
 artifacts/rules/data/menu-pizzas.ttl
 ```
 
-These source-owned SPARQL rule, vocabulary, and RDF input artifacts are also repository-authored semantic-engineering material identified as **MIT License** in the Pizza manifest.
+These source-owned rule, vocabulary, and RDF input artifacts are repository-authored semantic-engineering material identified as **MIT License**.
 
-ESKA does not copy those rule semantics into its own source tree. It supplies the Semantic Capability, evaluator binding, execution, verification, result model, and provenance around the pinned external artifacts.
+## Decision semantics and cases
+
+The Decision → decide mode consumes:
+
+```text
+artifacts/decisions/pizza-dietary-suitability.dmn
+artifacts/decisions/decision-vocabulary.ttl
+artifacts/decisions/data/cases.json
+```
+
+These source-owned DMN decision, semantic outcome vocabulary, and canonical decision-input artifacts are repository-authored semantic-engineering material identified as **MIT License** in the Pizza manifest. The manifest also identifies the decision model as conforming to DMN 1.5.
+
+ESKA does not copy the decision model or cases into its source tree. It supplies the bounded Semantic Capability, evaluator binding, Execution, Result, Verification, and PROV-O lineage around the pinned external artifacts.
 
 ## ESKA material
 
@@ -86,5 +98,11 @@ Pizza repository-authored rule/vocabulary/data
     MIT
         ↓ pinned source artifact
 ESKA rule evaluation execution
+    MIT
+
+Pizza repository-authored DMN/vocabulary/cases
+    MIT
+        ↓ pinned source artifact
+ESKA decision evaluation execution
     MIT
 ```
