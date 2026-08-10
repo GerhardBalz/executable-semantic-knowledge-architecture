@@ -1,0 +1,42 @@
+@prefix agentx: <urn:eska:example:pizza:general-agent:> .
+@prefix cap: <urn:eska:example:pizza:capability:> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix eska: <urn:eska:core:> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix val: <urn:eska:example:pizza:validation:> .
+
+agentx:PizzaGeneralizedKnowledgeAgent
+    a eska:KnowledgeAgent, prov:SoftwareAgent ;
+    dcterms:title "Generalized Pizza Knowledge Agent"@en ;
+    dcterms:description "A deterministic reference Agent that discovers operational Service contracts for multiple Semantic Capabilities and selects a semantically compatible invocation adapter from machine-readable input/output/relation metadata."@en ;
+    dcterms:identifier "examples/pizza/knowledge_agent.py" ;
+    eska:targetsCapability cap:PizzaClassificationCapability, val:PizzaValidationCapability ;
+    eska:usesDiscoveryArtifact agentx:PizzaGeneralServiceDiscovery ;
+    eska:usesInvocationAdapter agentx:IRIListInvocationAdapter, agentx:SHACLReportInvocationAdapter .
+
+agentx:PizzaGeneralServiceDiscovery
+    a eska:DiscoveryArtifact ;
+    dcterms:title "Generalized Pizza service discovery query"@en ;
+    dcterms:identifier "examples/pizza/discover-service-generic.sparql" ;
+    dcterms:description "Discovers ServiceOperation, HTTPAccessBinding, Semantic Capability contract, and compatible invocation adapter for the Agent's target Capabilities."@en .
+
+agentx:IRIListInvocationAdapter
+    a eska:SemanticInvocationAdapter ;
+    dcterms:title "IRI-list invocation adapter"@en ;
+    dcterms:identifier "iri-list" ;
+    dcterms:description "Encodes an IRI-valued semantic input in the discovered request field and interprets a returned list of semantic IRIs."@en ;
+    eska:supportsInputType owl:Class ;
+    eska:supportsOutputType owl:Class ;
+    eska:supportsRelation rdfs:subClassOf .
+
+agentx:SHACLReportInvocationAdapter
+    a eska:SemanticInvocationAdapter ;
+    dcterms:title "RDF/SHACL JSON-LD invocation adapter"@en ;
+    dcterms:identifier "rdf-jsonld-shacl-report" ;
+    dcterms:description "Serializes an RDF data graph as JSON-LD for the discovered request field and parses a returned JSON-LD SHACL ValidationReport graph."@en ;
+    eska:supportsInputType val:PizzaDataGraph ;
+    eska:supportsOutputType sh:ValidationReport ;
+    eska:supportsRelation sh:conforms .
