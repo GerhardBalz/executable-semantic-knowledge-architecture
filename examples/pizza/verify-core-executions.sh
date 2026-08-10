@@ -18,7 +18,8 @@ for required in \
   "${HERE}/rules/results/provenance.ttl" \
   "${HERE}/decisions/results/provenance.ttl" \
   "${HERE}/calculations/results/provenance.ttl" \
-  "${HERE}/mappings/results/provenance.ttl"
+  "${HERE}/mappings/results/provenance.ttl" \
+  "${HERE}/workflows/results/provenance.ttl"
 do
   if [[ ! -f "${required}" ]]; then
     echo "Required execution provenance not found: ${required}" >&2
@@ -37,6 +38,7 @@ ROBOT=(java -jar "${ROBOT_JAR}")
   --input "${HERE}/decisions/results/provenance.ttl" \
   --input "${HERE}/calculations/results/provenance.ttl" \
   --input "${HERE}/mappings/results/provenance.ttl" \
+  --input "${HERE}/workflows/results/provenance.ttl" \
   --output "${RESULTS_DIR}/core-executions.owl"
 
 "${ROBOT[@]}" verify \
@@ -44,4 +46,4 @@ ROBOT=(java -jar "${ROBOT_JAR}")
   --queries "${HERE}/verify-core-executions.sparql" \
   --output-dir "${VERIFY_DIR}"
 
-echo "SUCCESS: reasoning, validation, rule evaluation, decision evaluation, calculation, and mapping share the ESKA Execution → Result → Verification core pattern."
+echo "SUCCESS: reasoning, validation, rule evaluation, decision evaluation, calculation, mapping, and workflow share the ESKA Execution → Result → Verification core pattern across 16 concrete executions."
