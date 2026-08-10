@@ -5,9 +5,11 @@ PREFIX rul: <urn:eska:example:pizza:rule:>
 PREFIX dec: <urn:eska:example:pizza:decision:>
 PREFIX cal: <urn:eska:example:pizza:calculation:>
 PREFIX map: <urn:eska:example:pizza:mapping:>
+PREFIX wf: <urn:eska:example:pizza:workflow:>
 PREFIX pizzaRule: <urn:pizza-ontology:rule:>
 PREFIX pizzaDecision: <urn:pizza-ontology:decision:>
 PREFIX pizzaCalc: <urn:pizza-ontology:calculation:>
+PREFIX pizzaWf: <urn:pizza-ontology:workflow:>
 PREFIX menu: <urn:pizza-ontology:menu:>
 PREFIX pizza: <http://www.co-ode.org/ontologies/pizza/pizza.owl#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -24,6 +26,7 @@ WHERE {
     ("decision" dec:PizzaDietarySuitabilityCapability dec:PizzaDietarySuitabilityDecisionModel dec:DMNDecisionEvaluationArtifact pizzaDecision:dietarySuitability)
     ("calculation" cal:PizzaAreaCalculationCapability cal:PizzaAreaFormulaModel cal:OpenMathCalculationArtifact pizzaCalc:areaSquareCentimetres)
     ("mapping" map:PizzaMenuProjectionCapability map:PizzaToMenuMappingModel map:SPARQLMappingExecutionArtifact menu:displayName)
+    ("workflow" wf:PizzaMenuPublicationWorkflowCapability wf:PizzaMenuPublicationBPMNModel wf:BPMNWorkflowExecutionArtifact pizzaWf:workflowOutcome)
   }
 
   FILTER NOT EXISTS {

@@ -22,18 +22,19 @@ eska-core.ttl
 
 ## `eska-core.ttl`
 
-The core has now survived six distinct operational semantics:
+The core has now survived seven distinct operational semantics:
 
 - OWL reasoning;
 - SHACL validation;
 - SPARQL rule evaluation;
 - DMN decision evaluation;
 - OpenMath calculation;
-- semantic mapping from a Pizza source model to a Menu target model.
+- semantic mapping from a Pizza source model to a Menu target model;
+- BPMN workflow execution composing validation and mapping.
 
-All six modes use a `SemanticModel`, an `ExecutableSemanticKnowledgeArtifact`, a bounded `SemanticCapability`, an `ApplicabilityCondition`, an `Execution`, a machine-interpretable `Result`, and an explicit `Verification` activity.
+All seven modes use a `SemanticModel`, an `ExecutableSemanticKnowledgeArtifact`, a bounded `SemanticCapability`, an `ApplicabilityCondition`, an `Execution`, a machine-interpretable `Result`, and an explicit `Verification` activity.
 
-`model/eska-core.ttl` remains unchanged through the six-mode falsification sequence.
+`model/eska-core.ttl` remains unchanged through this falsification sequence.
 
 `Execution` and `Verification` specialize `prov:Activity`; `Result` specializes `prov:Entity`. ESKA continues to reuse PROV-O rather than inventing a parallel provenance model.
 
@@ -41,7 +42,7 @@ All six modes use a `SemanticModel`, an `ExecutableSemanticKnowledgeArtifact`, a
 
 ### `eska-capability.ttl`
 
-Contains capability-specific helper terms that are useful in examples but are not yet justified as ESKA core semantics, currently `exampleInput` and `exampleOutput`.
+Contains capability-specific helper terms useful in examples but not yet justified as core semantics, currently `exampleInput` and `exampleOutput`.
 
 ### `eska-service.ttl`
 
@@ -55,7 +56,7 @@ Service and Agent therefore remain deliberately outside core.
 
 ## Mode-specific semantic refinements
 
-The Mapping example exposed a useful extension pattern without requiring a new shared ontology file.
+### Mapping semantic-model roles
 
 The generic core property remains:
 
@@ -63,41 +64,69 @@ The generic core property remains:
 eska:usesSemanticModel
 ```
 
-The Mapping Capability needs three more precise roles, so its example model defines:
+Mapping refines that relationship with example-local subproperties:
 
 ```text
 map:sourceSemanticModel
-map:targetSemanticModel
 map:mappingSemanticModel
+map:targetSemanticModel
 ```
 
-with each declared:
+Only Mapping currently needs those roles, so they remain outside core. Qualified PROV-O usage provides the corresponding runtime role distinction.
+
+### Workflow operation binding
+
+Workflow creates a different adapter need. Source BPMN tasks identify source-domain semantic operation IRIs; ESKA must connect them to already established Semantic Capabilities.
+
+The Workflow example therefore defines local binding terms:
 
 ```text
-rdfs:subPropertyOf eska:usesSemanticModel
+wf:WorkflowOperationBinding
+wf:sourceOperation
+wf:boundCapability
 ```
 
-The same Capability also states the three semantic models through the generic core relation.
-
-This keeps the layering explicit:
+used to connect:
 
 ```text
-cross-mode core
-    usesSemanticModel
-        ↑
-mode-specific refinement
-    sourceSemanticModel
-    targetSemanticModel
-    mappingSemanticModel
+pizzaWf:ValidatePizzaData
+    → val:PizzaValidationCapability
+
+pizzaWf:TransformPizzaToMenu
+    → map:PizzaMenuProjectionCapability
 ```
 
-Only Mapping currently needs that distinction, so promoting these roles into `eska-core.ttl` would violate the evidence-driven rule used by this project. At runtime, PROV-O `prov:hadRole` provides the corresponding role distinction for qualified semantic-model usage.
+Only Workflow currently requires this source-operation adapter, so these terms also remain outside core.
+
+## Composite execution without composite core classes
+
+Workflow is the first mode to compose multiple semantic executions conditionally.
+
+The example still uses ordinary core `Execution` instances for both overall workflow runs and child steps:
+
+```text
+Workflow Execution
+    │ dcterms:hasPart
+    ├── Validation Execution
+    │       ↓ Result
+    └── Mapping Execution       conforming path only
+            ↑ prov:wasInformedBy
+       Validation Execution
+```
+
+The relationship between overall and child activities is represented using established vocabularies:
+
+- `dcterms:hasPart` / `dcterms:isPartOf`;
+- `prov:wasInformedBy`;
+- `prov:wasDerivedFrom` for Result lineage.
+
+This means the first composite execution case does not justify `WorkflowExecution`, `StepExecution`, or `CompositeExecution` in the ESKA core.
 
 ## Why there is no execution-type taxonomy in core
 
-The executable modes do not require core classes such as `Rule`, `Decision`, `Calculation`, `Mapping`, `Formula`, `Transformation`, or a generic `ExecutionMode`.
+The executable modes do not require core classes such as `Rule`, `Decision`, `Calculation`, `Mapping`, `Workflow`, `Formula`, `Transformation`, or a generic `ExecutionMode`.
 
-Their native semantic artifacts and bounded Capabilities already carry the mode-specific meaning:
+Their native semantic artifacts and bounded Capabilities carry the mode-specific meaning:
 
 ```text
 SPARQL rule
@@ -111,6 +140,9 @@ OpenMath formula
 
 Pizza source model + SPARQL mapping + Menu target model
     ↓ PizzaMenuProjectionCapability
+
+BPMN process + workflow vocabulary
+    ↓ PizzaMenuPublicationWorkflowCapability
 ```
 
 Each then participates in the same generic runtime pattern:
@@ -119,7 +151,7 @@ Each then participates in the same generic runtime pattern:
 Execution → Result → Verification
 ```
 
-The mapping example also shows that sharing an implementation language does not make two semantic execution modes identical: both Rule and Mapping use SPARQL `CONSTRUCT`, but Rule derives a statement inside the source semantic domain while Mapping transforms into a distinct target semantic model.
+Workflow further demonstrates that one execution can contain other ordinary executions without requiring a second runtime ontology hierarchy.
 
 ## Dependency representation
 
@@ -131,7 +163,7 @@ dcterms:requires <urn:eska:model:core>
 
 rather than `owl:imports` while the project uses provisional `urn:eska:*` identifiers that are intentionally not presented as resolvable public ontology IRIs.
 
-The executable examples explicitly merge the required model artifacts during verification.
+The executable examples explicitly merge required model artifacts during verification.
 
 ## Provisional namespace
 

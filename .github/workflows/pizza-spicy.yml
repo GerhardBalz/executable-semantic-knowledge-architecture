@@ -73,5 +73,11 @@ jobs:
       - name: Run semantic mapping example
         run: python examples/pizza/mappings/evaluate.py
 
+      - name: Install workflow evaluator
+        run: python -m pip install -r examples/pizza/workflows/requirements.txt
+
+      - name: Run semantic workflow example
+        run: python examples/pizza/workflows/evaluate.py
+
       - name: Verify ESKA core execution pattern
         run: bash examples/pizza/verify-core-executions.sh

@@ -2,7 +2,7 @@
 
 Executable Semantic Knowledge Architecture (ESKA) does not define one universal execution mechanism. Semantic artifacts are executable according to the operational semantics appropriate to their type.
 
-The Pizza reference now demonstrates six execution modes:
+The Pizza reference now demonstrates seven execution modes:
 
 | Concern | Semantic model | Operation | Primary result | Capability |
 | --- | --- | --- | --- | --- |
@@ -12,10 +12,11 @@ The Pizza reference now demonstrates six execution modes:
 | Decision evaluation | DMN 1.5 decision table | decide | semantic outcome | `PizzaDietarySuitabilityCapability` |
 | Calculation | OpenMath formula + calculation vocabulary | calculate | typed decimal value | `PizzaAreaCalculationCapability` |
 | Semantic mapping | Pizza source model + SPARQL mapping + Menu target model | transform | target RDF graph | `PizzaMenuProjectionCapability` |
+| Workflow execution | BPMN 2.0.2 process + workflow vocabulary | execute | Published / Rejected composite result | `PizzaMenuPublicationWorkflowCapability` |
 
 ## Shared provisional core
 
-All six modes fit the same unchanged cross-mode abstraction:
+All seven modes use the same unchanged cross-mode abstraction:
 
 ```text
 SemanticModel
@@ -35,7 +36,7 @@ Verification
 PROV-O provenance
 ```
 
-The generic Capability verifier checks six Capabilities. The generic runtime verifier checks eleven concrete executions:
+The generic Capability verifier checks seven Capabilities. The generic runtime verifier now checks sixteen concrete executions:
 
 ```text
 1 reasoning
@@ -44,115 +45,110 @@ The generic Capability verifier checks six Capabilities. The generic runtime ver
 3 decision
 3 calculation
 1 mapping
+5 workflow-related executions
 ```
 
-## Mapping as a stronger falsification case
+The five Workflow-related executions are two overall workflow runs plus the three child steps that actually execute across the valid and invalid paths.
 
-Mapping differs from the earlier modes because one operation must distinguish three semantic-model roles:
+## Mapping: role refinement without core expansion
 
-```text
-source semantic model
-        ↓
-mapping semantic model
-        ↓
-target semantic model
-```
-
-The canonical example transforms Pizza RDF into a distinct Menu projection vocabulary:
-
-```text
-Pizza RDF
-    pizza:Pizza
-    rdfs:label
-    pizza:hasTopping
-        ↓ SPARQL CONSTRUCT mapping
-Menu RDF
-    menu:MenuItem
-    menu:displayName
-    menu:ingredientName
-```
-
-The mapping reuses SPARQL `CONSTRUCT` operationally, but its semantic contract differs from the Rule mode:
-
-```text
-Rule
-    source model
-        ↓ derive
-    additional source-domain statement
-
-Mapping
-    source model
-        ↓ mapping model
-    target model
-        ↓
-    transformed graph
-```
-
-This is evidence that an ESKA execution mode should not be inferred solely from implementation technology.
-
-## Semantic-model role result
-
-The Mapping Capability needs machine-readable source, target, and mapping roles. The example therefore defines mapping-local properties:
+Mapping needs explicit source, mapping, and target semantic-model roles. The example defines:
 
 ```text
 map:sourceSemanticModel
-map:targetSemanticModel
 map:mappingSemanticModel
+map:targetSemanticModel
 ```
 
-Each is declared as:
+as subproperties of `eska:usesSemanticModel`, while runtime role semantics use qualified PROV-O `prov:Usage` / `prov:hadRole`.
+
+This established a reusable extension pattern: mode-specific semantic precision can refine a generic core relation without immediately becoming core vocabulary.
+
+## Workflow: composition without a new execution hierarchy
+
+Workflow introduces a different pressure: one semantic Capability coordinates existing Capabilities and makes later execution conditional on an intermediate Result.
 
 ```text
-rdfs:subPropertyOf eska:usesSemanticModel
+PizzaMenuPublicationWorkflowCapability
+        ↓
+Workflow Execution
+    │
+    ├── dcterms:hasPart → Validation Execution
+    │                         ↓ Result: sh:conforms
+    │
+    └── dcterms:hasPart → Mapping Execution        conforming case only
+                              ↑
+                      prov:wasInformedBy
+                        Validation Execution
 ```
 
-The Capability also explicitly states all three models through the generic core relation `eska:usesSemanticModel`.
+The BPMN process owns ordering, gateway semantics, and end outcomes. It does not contain the SHACL constraints or SPARQL mapping logic.
 
-This gives two layers:
+The source BPMN tasks identify Pizza workflow operation IRIs. ESKA needs to resolve those source identifiers to established Semantic Capabilities, so the Workflow example introduces a local binding layer:
 
 ```text
-ESKA core
-    eska:usesSemanticModel
-        generic cross-mode relationship
-
-Mapping-specific layer
-    sourceSemanticModel
-    targetSemanticModel
-    mappingSemanticModel
-        role-specific refinement
+wf:sourceOperation
+        ↓
+wf:boundCapability
 ```
 
-At runtime the same roles are recorded through qualified PROV-O usage using `prov:hadRole`.
+with:
 
-The result is significant: **Mapping exposed a real need for role specificity, but not a need to change the generic core.** Only one execution mode currently needs these three roles, so promoting them into `eska-core.ttl` would still be premature.
+```text
+pizzaWf:ValidatePizzaData
+    → val:PizzaValidationCapability
+
+pizzaWf:TransformPizzaToMenu
+    → map:PizzaMenuProjectionCapability
+```
+
+Only Workflow currently needs this adapter, so the binding properties remain outside `eska-core.ttl`.
+
+## Composite Result and lineage
+
+The valid case executes two child steps and produces `Published`. The invalid case executes Validation only and produces `Rejected`.
+
+```text
+valid-publication
+    Validation Execution
+        ↓ conforms true
+    Mapping Execution
+        ↓
+    Workflow Result: Published
+
+invalid-rejection
+    Validation Execution
+        ↓ conforms false
+    Workflow Result: Rejected
+```
+
+Each overall run and each step remains an ordinary `eska:Execution`; every concrete activity still produces an `eska:Result` and has an `eska:Verification`.
+
+Composition itself uses established vocabulary:
+
+- `dcterms:hasPart` / `dcterms:isPartOf` for overall/step composition;
+- `prov:wasInformedBy` for execution dependency/order;
+- `prov:wasDerivedFrom` from overall workflow Result to step Results.
+
+No ESKA-specific composite-execution hierarchy was required.
 
 ## Falsification result
 
-The sixth mode did **not** require:
+If the seventh-mode CI remains green, Workflow does **not** require any of the following additions to the ESKA core:
 
-- `Mapping` or `Transformation` as core classes;
-- `MappingExecution` or `MappingResult`;
+- `Workflow` as a core class;
+- `WorkflowExecution`;
+- `StepExecution`;
+- `CompositeExecution`;
+- a generic Workflow Result superclass;
 - a generic `ExecutionMode` taxonomy;
-- source/target semantic-model properties in core;
-- SPARQL-specific core properties;
-- a new provenance hierarchy;
-- promotion of Service or Agent semantics.
+- BPMN-specific core properties;
+- a new provenance or composition vocabulary;
+- Service or Agent promotion.
 
-It did establish an extension pattern:
+It does establish a second evidence-backed extension pattern:
 
-> **Cross-mode core relationships may be refined by mode-specific subproperties where an executable semantic contract requires additional roles.**
-
-That pattern preserves a small core without discarding semantic precision.
-
-## What remains outside core?
-
-- `KnowledgeService` and `ServiceOperation` — demonstrated only for classification;
-- `KnowledgeAgent` and `DiscoveryArtifact` — demonstrated only for classification;
-- HTTP and representation-specific properties;
-- deployment binding — supplied separately at runtime;
-- Mapping role properties — currently justified only by Mapping;
-- a dedicated `ExecutionMode` taxonomy — the six modes remain distinguishable through native semantic artifacts, Capabilities, results, and execution contracts;
-- a dedicated ESKA provenance class — PROV-O remains sufficient.
+> **Composite semantic execution can be built from ordinary core Executions plus established part/dependency relations, while Workflow-specific operation binding remains local until broader evidence exists.**
 
 ## Execution is polymorphic
 
@@ -163,6 +159,7 @@ Rule        → evaluate
 Decision    → decide
 Calculation → calculate
 Mapping     → transform
+Workflow    → execute
 ```
 
-The next strong falsification candidate is **Workflow → execute**, because workflow semantics may introduce sequencing, intermediate states, and multiple linked executions rather than one bounded computation producing one result.
+The core should change only when executable evidence demonstrates that its current concepts are too broad, too narrow, or missing—not because a technology-specific taxonomy looks attractive in advance.

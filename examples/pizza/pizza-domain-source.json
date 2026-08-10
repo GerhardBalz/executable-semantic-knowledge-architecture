@@ -1,6 +1,6 @@
 {
   "repository": "GerhardBalz/pizza-ontology",
-  "commit": "ef05531c5a362d8d1454e94e59a44f750515dd1c",
+  "commit": "715f0460a43abacb5258eedd3d722da219a25a43",
   "manifest": "artifacts/manifest.ttl",
   "artifacts": {
     "reasoning": "artifacts/reasoning/spicy-pizza.ofn",
@@ -19,6 +19,12 @@
     "mappingQuery": "artifacts/mappings/pizza-to-menu.rq",
     "mappingTargetVocabulary": "artifacts/mappings/menu-vocabulary.ttl",
     "mappingSourceData": "artifacts/mappings/data/source-pizzas.ttl",
-    "mappingExpectedOutput": "artifacts/mappings/data/expected-menu.ttl"
+    "mappingExpectedOutput": "artifacts/mappings/data/expected-menu.ttl",
+    "workflowModel": "artifacts/workflows/pizza-menu-publication.bpmn",
+    "workflowVocabulary": "artifacts/workflows/workflow-vocabulary.ttl",
+    "workflowValidData": "artifacts/workflows/data/valid-pizza.ttl",
+    "workflowInvalidData": "artifacts/workflows/data/invalid-pizza.ttl",
+    "workflowExpectedTarget": "artifacts/workflows/data/expected-valid-menu.ttl",
+    "workflowCases": "artifacts/workflows/data/cases.json"
   }
 }

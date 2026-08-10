@@ -5,7 +5,7 @@ ESKA does not store a second source-of-truth copy of the Pizza semantic artifact
 The domain artifacts are owned and published by the companion repository:
 
 - Source repository: <https://github.com/GerhardBalz/pizza-ontology>
-- Pinned source commit: `ef05531c5a362d8d1454e94e59a44f750515dd1c`
+- Pinned source commit: `715f0460a43abacb5258eedd3d722da219a25a43`
 - Consumer manifest: `artifacts/manifest.ttl`
 - ESKA binding: [`pizza-domain-source.json`](pizza-domain-source.json)
 
@@ -17,7 +17,7 @@ At runtime, [`fetch-domain-artifacts.py`](fetch-domain-artifacts.py) materialize
 
 ## Repository-authored semantic-engineering artifacts
 
-The Pizza repository identifies the following newly authored artifacts as **MIT License** material:
+The Pizza repository identifies the following newly authored artifacts as **MIT License** material.
 
 ### Validation
 
@@ -60,7 +60,20 @@ artifacts/mappings/data/source-pizzas.ttl
 artifacts/mappings/data/expected-menu.ttl
 ```
 
-The mapping artifacts separately represent the transformation semantics, target Menu semantic model, canonical source graph, and expected target graph. ESKA does not copy them into its source tree; it supplies the Mapping Semantic Capability, role-specific semantic-model refinements, execution, verification, result, and PROV-O lineage around the pinned external artifacts.
+### Workflow execution
+
+```text
+artifacts/workflows/pizza-menu-publication.bpmn
+artifacts/workflows/workflow-vocabulary.ttl
+artifacts/workflows/data/valid-pizza.ttl
+artifacts/workflows/data/invalid-pizza.ttl
+artifacts/workflows/data/expected-valid-menu.ttl
+artifacts/workflows/data/cases.json
+```
+
+The BPMN process is identified by the Pizza manifest as conforming to BPMN 2.0.2. It owns orchestration semantics while its semantic tasks remain bound to the separately published SHACL and Mapping artifacts.
+
+ESKA does not copy the BPMN process, workflow vocabulary, cases, or workflow data into its source tree. ESKA supplies the Workflow Semantic Capability, source-operation→Capability bindings, composite execution structure, Result/Verification semantics, and provenance around the pinned external artifacts.
 
 ## ESKA material
 
@@ -68,7 +81,7 @@ The MIT license at the root of this repository applies to newly created ESKA mat
 
 - `SemanticCapability`, Service, and Agent contracts;
 - runtime fetch/binding code;
-- mode-specific role refinements defined by ESKA examples;
+- mode-specific refinements and operation bindings defined by ESKA examples;
 - execution and verification code;
 - ESKA provenance records;
 - ESKA documentation.
@@ -78,10 +91,11 @@ It does not replace the license of externally consumed semantic material.
 The provenance/licensing chain is explicit:
 
 ```text
-Pizza-derived reasoning semantics      CC BY 3.0 → ESKA reasoning architecture      MIT
-Pizza SHACL/data                       MIT       → ESKA validation execution         MIT
-Pizza rule/vocabulary/data             MIT       → ESKA rule execution               MIT
-Pizza DMN/vocabulary/cases             MIT       → ESKA decision execution           MIT
-Pizza OpenMath/vocabulary/cases        MIT       → ESKA calculation execution        MIT
-Pizza mapping/target model/source data MIT       → ESKA transformation execution     MIT
+Pizza-derived reasoning semantics       CC BY 3.0 → ESKA reasoning architecture       MIT
+Pizza SHACL/data                        MIT       → ESKA validation execution          MIT
+Pizza rule/vocabulary/data              MIT       → ESKA rule execution                MIT
+Pizza DMN/vocabulary/cases              MIT       → ESKA decision execution            MIT
+Pizza OpenMath/vocabulary/cases         MIT       → ESKA calculation execution         MIT
+Pizza mapping/target model/source data  MIT       → ESKA transformation execution      MIT
+Pizza BPMN/workflow vocabulary/cases    MIT       → ESKA composite workflow execution  MIT
 ```

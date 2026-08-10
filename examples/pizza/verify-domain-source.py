@@ -29,6 +29,12 @@ FORBIDDEN_LOCAL_COPIES = (
     HERE / "mappings" / "menu-vocabulary.ttl",
     HERE / "mappings" / "data" / "source-pizzas.ttl",
     HERE / "mappings" / "data" / "expected-menu.ttl",
+    HERE / "workflows" / "pizza-menu-publication.bpmn",
+    HERE / "workflows" / "workflow-vocabulary.ttl",
+    HERE / "workflows" / "data" / "valid-pizza.ttl",
+    HERE / "workflows" / "data" / "invalid-pizza.ttl",
+    HERE / "workflows" / "data" / "expected-valid-menu.ttl",
+    HERE / "workflows" / "data" / "cases.json",
 )
 
 EXPECTED_ARTIFACTS = {
@@ -49,6 +55,12 @@ EXPECTED_ARTIFACTS = {
     "mappingTargetVocabulary": "artifacts/mappings/menu-vocabulary.ttl",
     "mappingSourceData": "artifacts/mappings/data/source-pizzas.ttl",
     "mappingExpectedOutput": "artifacts/mappings/data/expected-menu.ttl",
+    "workflowModel": "artifacts/workflows/pizza-menu-publication.bpmn",
+    "workflowVocabulary": "artifacts/workflows/workflow-vocabulary.ttl",
+    "workflowValidData": "artifacts/workflows/data/valid-pizza.ttl",
+    "workflowInvalidData": "artifacts/workflows/data/invalid-pizza.ttl",
+    "workflowExpectedTarget": "artifacts/workflows/data/expected-valid-menu.ttl",
+    "workflowCases": "artifacts/workflows/data/cases.json",
 }
 
 EXPECTED_MATERIALIZED = (
@@ -70,6 +82,12 @@ EXPECTED_MATERIALIZED = (
     "mapping-target-vocabulary.ttl",
     "mapping-source-data.ttl",
     "mapping-expected-output.ttl",
+    "workflow.bpmn",
+    "workflow-vocabulary.ttl",
+    "workflow-valid-data.ttl",
+    "workflow-invalid-data.ttl",
+    "workflow-expected-target.ttl",
+    "workflow-cases.json",
     "source.json",
 )
 
@@ -81,7 +99,6 @@ def require(condition: bool, message: str) -> None:
 
 def main() -> None:
     source = json.loads(CONFIG.read_text(encoding="utf-8"))
-
     require(source.get("repository") == "GerhardBalz/pizza-ontology", "Pizza domain semantics must be sourced from the companion pizza-ontology repository")
     commit = source.get("commit")
     require(isinstance(commit, str) and re.fullmatch(r"[0-9a-f]{40}", commit) is not None, "Pizza domain source must be an immutable 40-character Git commit SHA")
@@ -90,7 +107,6 @@ def main() -> None:
 
     for path in FORBIDDEN_LOCAL_COPIES:
         require(not path.exists(), f"ESKA must not regain ownership of Pizza domain semantic copy: {path.relative_to(HERE)}")
-
     for name in EXPECTED_MATERIALIZED:
         require((DOMAIN_DIR / name).is_file(), f"Pinned Pizza artifact was not materialized during execution: {name}")
 
