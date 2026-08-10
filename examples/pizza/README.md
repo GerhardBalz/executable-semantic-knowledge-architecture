@@ -1,8 +1,8 @@
 # Pizza: executable semantic knowledge reference
 
-This directory contains the executable reference examples for **Executable Semantic Knowledge Architecture (ESKA)**.
+This directory contains the executable Pizza reference examples for **Executable Semantic Knowledge Architecture (ESKA)**.
 
-The Pizza domain demonstrates different formal execution semantics while also testing an important repository boundary:
+The Pizza domain demonstrates different formal execution semantics while testing a strict repository boundary:
 
 ```text
 pizza-ontology
@@ -12,9 +12,45 @@ ESKA
     operationalizes those semantics
 ```
 
-ESKA does not store copies of the Pizza reasoning module, SHACL profile, validation data, rule query, rule vocabulary, or rule data used by this example. [`pizza-domain-source.json`](pizza-domain-source.json) pins `GerhardBalz/pizza-ontology` to an immutable Git commit, and [`fetch-domain-artifacts.py`](fetch-domain-artifacts.py) materializes the published artifacts under `.work/pizza-domain/` at execution time.
+ESKA does not maintain source copies of the Pizza OWL module, SHACL profile/data, SPARQL rule/vocabulary/data, or DMN decision artifacts used here. [`pizza-domain-source.json`](pizza-domain-source.json) pins `GerhardBalz/pizza-ontology` to an immutable Git commit, and [`fetch-domain-artifacts.py`](fetch-domain-artifacts.py) materializes the published artifacts under `.work/pizza-domain/` at execution time.
 
-Three execution modes are implemented:
+## Semantic source binding
+
+```text
+Repository
+    GerhardBalz/pizza-ontology
+
+Commit
+    983b691d9d2102ffad97a3ec31aa9b1435b3e547
+
+Manifest
+    artifacts/manifest.ttl
+```
+
+The manifest publishes ten source-owned semantic distributions consumed by this reference:
+
+- coherent Pizza OWL reasoning module;
+- Pizza instance SHACL profile;
+- conforming RDF validation example;
+- non-conforming RDF validation example;
+- vegetarian-warning SPARQL rule;
+- rule-result vocabulary;
+- rule-evaluation RDF data;
+- DMN 1.5 dietary-suitability decision table;
+- decision outcome vocabulary;
+- canonical decision-input cases.
+
+```text
+artifact role/path
+        +
+pinned Git commit
+        ↓
+immutable semantic input
+```
+
+Runtime copies beneath `.work/` are disposable execution inputs, not a second semantic source of truth.
+
+## Four execution modes
 
 ```text
 source-owned OWL module
@@ -28,46 +64,13 @@ semantic conformance report
 source-owned SPARQL rule + RDF data
     ↓ evaluate
 rule-derived RDF statement
+
+source-owned DMN decision + explicit context
+    ↓ decide
+semantic decision outcome
 ```
 
-The OWL path is developed end-to-end through Capability, Service, and Agent. The SHACL and rule paths are developed through semantic execution, bounded Semantic Capabilities, verification, and provenance without adding Service or Agent layers.
-
-## Semantic source binding
-
-The current binding records:
-
-```text
-Repository
-    GerhardBalz/pizza-ontology
-
-Commit
-    bba9fa883f326ebeb395140abd523dc517caf071
-
-Manifest
-    artifacts/manifest.ttl
-```
-
-The manifest publishes seven domain artifacts used here:
-
-- coherent Pizza reasoning module;
-- Pizza instance SHACL profile;
-- conforming RDF validation example;
-- non-conforming RDF validation example;
-- vegetarian-warning SPARQL rule;
-- rule result vocabulary;
-- rule evaluation RDF data.
-
-The combination of a stable role/path contract and immutable Git commit creates the actual execution binding:
-
-```text
-artifact role/path
-        +
-pinned Git commit
-        ↓
-immutable semantic input
-```
-
-Runtime copies beneath `.work/` are disposable materializations, not a second semantic source of truth.
+The OWL path is developed end-to-end through Capability, Service, and Agent. The SHACL, Rule, and Decision paths stay at the Semantic Capability / Execution / Result / Verification level so Service and Agent are not promoted by symmetry.
 
 ## 1. OWL classification path
 
@@ -75,7 +78,7 @@ The classification example asks:
 
 > **Can `AmericanHot` be inferred to be a `SpicyPizza`, and can that inference remain machine-traceable as it is exposed and invoked?**
 
-The domain-owned coherent module contains the relevant Pizza axioms but does **not** assert:
+The source-owned coherent module contains the relevant Pizza axioms but does **not** assert:
 
 ```text
 AmericanHot SubClassOf SpicyPizza
@@ -97,14 +100,9 @@ PizzaClassificationService
 PizzaKnowledgeAgent
 ```
 
-### Semantic Capability
-
-[`pizza-classification-capability.ttl`](pizza-classification-capability.ttl) defines the bounded ESKA ability:
+[`pizza-classification-capability.ttl`](pizza-classification-capability.ttl) describes the bounded ability:
 
 ```text
-Capability
-    Pizza Classification
-
 Input / output
     owl:Class → owl:Class
 
@@ -121,64 +119,32 @@ Applicability
     coherent OWL model
 ```
 
-The **Semantic Model is source-owned by `pizza-ontology`**. The Capability and executable classification mechanism are ESKA architecture.
-
 ### Knowledge Service
 
 [`pizza-classification-service.ttl`](pizza-classification-service.ttl) describes `PizzaClassificationService`; [`service.py`](service.py) implements it.
 
-The service exposes `PizzaClassificationCapability` without reimplementing Pizza classification semantics. It reads the reasoned output produced from the pinned OWL artifact.
-
-```text
-Capability
-    defines what ability exists
-
-Knowledge Service
-    defines how the ability is accessed
-
-OWL semantic artifact + reasoner
-    remain the source of classification behavior
-```
+The Service exposes the Capability without reimplementing Pizza classification semantics. It reads the reasoned output produced from the pinned semantic artifact.
 
 ### Knowledge Agent
 
 [`pizza-knowledge-agent.ttl`](pizza-knowledge-agent.ttl) describes the deterministic `PizzaKnowledgeAgent`; [`agent.py`](agent.py) implements it.
 
-The agent knows the Capability it wants but does not hard-code the Service, path, HTTP method, result relation, representation fields, or expected `SpicyPizza` answer. [`discover-service.sparql`](discover-service.sparql) discovers the operation from the machine-readable architecture model.
+The Agent knows the Capability it wants but does not hard-code the Service, path, HTTP method, result relation, representation fields, or expected `SpicyPizza` answer. [`discover-service.sparql`](discover-service.sparql) discovers the operation from the machine-readable architecture model.
 
-This keeps semantic discovery separate from runtime deployment binding:
-
-```text
-machine-readable ESKA architecture
-        ↓ discover
-Knowledge Agent
-        +
-runtime service base URL
-        ↓ bind
-service invocation
-```
+This keeps semantic discovery separate from runtime deployment binding.
 
 ## 2. SHACL validation path
 
-The second execution mode is documented in [`validation/README.md`](validation/README.md).
-
-It asks:
+The validation mode is documented in [`validation/README.md`](validation/README.md).
 
 > **Does concrete Pizza RDF data conform to the Pizza validation profile published by the domain repository?**
 
-The SHACL profile requires an explicit Pizza node to have exactly one Pizza base and at least one correctly typed Pizza topping.
+The source-owned non-conforming fixture deliberately:
 
-The source-owned non-conforming fixture deliberately omits a base and references a non-topping value through `hasTopping`, so ESKA verifies:
+- omits `pizza:hasBase`, producing a `sh:MinCountConstraintComponent` result;
+- references a value not typed as `pizza:PizzaTopping`, producing a `sh:ClassConstraintComponent` result.
 
-```text
-pizza:hasBase
-    sh:MinCountConstraintComponent
-
-pizza:hasTopping
-    sh:ClassConstraintComponent
-```
-
-[`validation/pizza-validation-capability.ttl`](validation/pizza-validation-capability.ttl) describes the bounded execution ability:
+[`validation/pizza-validation-capability.ttl`](validation/pizza-validation-capability.ttl) describes:
 
 ```text
 PizzaValidationCapability
@@ -199,22 +165,13 @@ Executable artifact
     SHACL validation with pySHACL
 ```
 
-This is intentionally different from OWL classification:
-
-```text
-OWL entailment              → inferred semantic relation
-SHACL constraint evaluation → conformance report
-```
-
 ## 3. SPARQL rule evaluation path
 
-The third execution mode is documented in [`rules/README.md`](rules/README.md).
-
-It asks:
+The Rule mode is documented in [`rules/README.md`](rules/README.md).
 
 > **Can a source-owned semantic rule be evaluated deterministically and produce a machine-traceable derived result?**
 
-The Pizza repository publishes a SPARQL 1.1 `CONSTRUCT` rule, a result vocabulary, and explicit RDF data. The rule evaluates:
+The source-owned SPARQL 1.1 `CONSTRUCT` rule evaluates:
 
 ```text
 Pizza
@@ -224,9 +181,7 @@ Pizza
 requiresVegetarianWarning true
 ```
 
-The published data contains a matching meat-topping Pizza and a vegetable-only control. ESKA requires exactly one warning result and verifies that the vegetable control produces none.
-
-[`rules/pizza-rule-evaluation-capability.ttl`](rules/pizza-rule-evaluation-capability.ttl) describes the bounded ability:
+[`rules/pizza-rule-evaluation-capability.ttl`](rules/pizza-rule-evaluation-capability.ttl) describes:
 
 ```text
 PizzaRuleEvaluationCapability
@@ -250,82 +205,116 @@ Applicability
     explicit RDF assertions; no implicit OWL entailment
 ```
 
-The mode deliberately performs neither OWL inference nor SHACL validation:
+The mode performs neither OWL inference nor SHACL validation.
+
+## 4. DMN decision path
+
+The Decision mode is documented in [`decisions/README.md`](decisions/README.md).
+
+> **Can a source-owned formal decision model select semantic outcomes while remaining inside the same ESKA execution architecture?**
+
+The source-owned OMG DMN 1.5 `UNIQUE` decision table consumes explicit boolean inputs:
 
 ```text
-OWL ontology     → reason   → inferred axiom
-SHACL constraint → validate → validation report
-SPARQL rule      → evaluate → derived RDF statement
+containsMeat  containsFish  → dietarySuitability
+true          -             → NotVegetarian
+false         true          → PescatarianOnly
+false         false         → Vegetarian
 ```
+
+[`decisions/pizza-dietary-suitability-capability.ttl`](decisions/pizza-dietary-suitability-capability.ttl) describes:
+
+```text
+PizzaDietarySuitabilityCapability
+
+Input
+    explicit decision context
+
+Output
+    decision:DietarySuitabilityOutcome
+
+Produced relation
+    decision:dietarySuitability
+
+Semantic model
+    commit-pinned DMN 1.5 decision table
+
+Executable artifact
+    canonical DMN decision evaluator
+
+Applicability
+    explicit containsMeat / containsFish booleans
+```
+
+The three canonical decision contexts produce:
+
+```text
+meatyPizza       → decision:NotVegetarian
+fishPizza        → decision:PescatarianOnly
+vegetarianPizza  → decision:Vegetarian
+```
+
+Each case produces a separate semantic `Result` and its own `Execution → Result → Verification` provenance chain.
 
 ## Execute
 
-Requirements for the classification path:
+Requirements:
 
-- Java 17 or newer;
+- Java 17 or newer for the OWL/ROBOT path;
 - Python 3;
 - network access to retrieve the commit-pinned public Pizza artifacts;
 - `curl` for the pinned ROBOT download.
 
-### Build and verify the OWL architecture
+### OWL architecture
 
 ```bash
 bash examples/pizza/run.sh
 ```
 
-The script:
-
-1. fetches the pinned Pizza artifact contract and semantic inputs;
-2. classifies the source-owned reasoning module with HermiT;
-3. verifies `AmericanHot → SpicyPizza`;
-4. generates a reasoner explanation;
-5. verifies the Semantic Capability contract;
-6. verifies the Knowledge Service contract;
-7. builds and verifies the Knowledge Agent architecture;
-8. records reasoning provenance including the pinned Pizza source artifact.
-
-### Run the complete Knowledge Agent path
+### Complete Knowledge Agent path
 
 ```bash
 bash examples/pizza/test-agent.sh
 ```
 
-This runs semantic reasoning, starts the service, discovers the service operation, invokes it, validates semantic continuity, checks the result, and records agent invocation provenance.
-
-### Run SHACL validation
+### SHACL validation
 
 ```bash
 python -m pip install -r examples/pizza/validation/requirements.txt
 python examples/pizza/validation/validate.py
 ```
 
-The validation script fetches the same pinned Pizza contract, verifies `PizzaValidationCapability`, evaluates the source-owned positive/negative data, and records source-aware validation provenance.
-
-### Run SPARQL rule evaluation
+### SPARQL rule evaluation
 
 ```bash
 python -m pip install -r examples/pizza/rules/requirements.txt
 python examples/pizza/rules/evaluate.py
 ```
 
-The rule runner materializes the same pinned domain contract, verifies `PizzaRuleEvaluationCapability`, evaluates the source-owned SPARQL rule, checks the positive/control outcomes, and records rule execution and verification provenance.
+### DMN decision evaluation
+
+```bash
+python -m pip install -r examples/pizza/decisions/requirements.txt
+python examples/pizza/decisions/evaluate.py
+```
+
+The Decision runner materializes the pinned domain contract, verifies `PizzaDietarySuitabilityCapability`, evaluates all three canonical DMN contexts, validates the selected semantic outcomes, writes the RDF result graph, and records source-aware PROV-O provenance.
 
 ## Cross-mode core verification
 
-The third mode was introduced as a falsification test for the provisional ESKA core.
-
-[`verify-core.sparql`](verify-core.sparql) now verifies the same Capability contract across:
+The generic Capability verifier now checks the same contract across **four Capabilities**:
 
 - `PizzaClassificationCapability`;
 - `PizzaValidationCapability`;
-- `PizzaRuleEvaluationCapability`.
+- `PizzaRuleEvaluationCapability`;
+- `PizzaDietarySuitabilityCapability`.
 
-[`verify-core-executions.sparql`](verify-core-executions.sparql) verifies the same runtime pattern across four concrete executions:
+The generic runtime verifier checks the same pattern across **seven concrete executions**:
 
-- OWL reasoning;
-- conforming SHACL validation;
-- non-conforming SHACL validation;
-- SPARQL rule evaluation.
+- one OWL reasoning execution;
+- two SHACL validation executions;
+- one SPARQL rule execution;
+- three DMN decision executions.
 
 The shared abstraction remains:
 
@@ -339,45 +328,46 @@ SemanticModel
 → Verification
 ```
 
-`model/eska-core.ttl` required **no change** for the third mode. No `Rule`, `RuleExecution`, `ExecutionMode`, rule-specific result superclass, or new ESKA provenance hierarchy was introduced.
+`model/eska-core.ttl` required **no change** for either the Rule or Decision falsification modes.
 
-## Verification
+No `Rule`, `RuleExecution`, `Decision`, `DecisionExecution`, `DecisionResult`, generic `ExecutionMode`, or new ESKA provenance hierarchy was introduced into core.
 
-The reference verifies both **semantic execution** and **semantic source ownership**:
+## Verification questions
+
+The reference now checks:
 
 ```text
 Is the domain artifact pinned to an immutable Pizza commit?
 
 Does the pinned Pizza manifest still publish the expected role/path contract?
 
-Does OWL reasoning produce the expected result?
+Does OWL reasoning produce the expected inference?
 
-Does the classification Capability remain explicit and agent-accessible?
+Does the classification Capability remain agent-accessible through the Service?
 
-Does SHACL validation distinguish the published positive and negative data?
+Does SHACL validation distinguish the positive and negative data?
 
-Does rule evaluation produce the published rule outcome while preserving the control case?
+Does SPARQL rule evaluation produce the expected derived statement and preserve its control case?
 
-Do all three Capabilities satisfy the same generic core contract?
+Does DMN select exactly one expected semantic outcome per decision context?
 
-Do all concrete executions satisfy the same Execution → Result → Verification pattern?
+Do all four Capabilities satisfy the same generic core contract?
 
-Do execution provenance records retain the source artifact identity?
+Do all seven executions satisfy the same Execution → Result → Verification pattern?
+
+Do provenance records retain the source artifact identity?
 ```
 
 ## Ownership boundary
-
-The architecture after this integration is:
 
 ```text
 GerhardBalz/pizza-ontology
 │
 ├── Pizza Ontology 2.0 preservation source
-├── coherent reasoning module
-├── Pizza SHACL validation profile
-├── Pizza validation example data
-├── SPARQL rule + result vocabulary
-├── Pizza rule evaluation data
+├── coherent OWL reasoning module
+├── SHACL validation profile + RDF cases
+├── SPARQL rule + result vocabulary + RDF data
+├── DMN decision + outcome vocabulary + decision cases
 └── semantic artifact manifest
           │
           │ pinned commit
@@ -391,7 +381,7 @@ GerhardBalz/executable-semantic-knowledge-architecture
 └── execution provenance
 ```
 
-This makes two central ESKA principles concrete:
+Two principles are executable rather than merely documented:
 
 > **Execution must not sever semantics.**
 
