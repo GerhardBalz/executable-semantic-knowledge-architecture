@@ -1,6 +1,6 @@
 {
   "repository": "GerhardBalz/pizza-ontology",
-  "commit": "5b993ed9321f3dc5889f6e111d933feddbcd13d3",
+  "commit": "715f0460a43abacb5258eedd3d722da219a25a43",
   "manifest": "artifacts/manifest.ttl",
   "artifacts": {
     "reasoning": "artifacts/reasoning/spicy-pizza.ofn",
