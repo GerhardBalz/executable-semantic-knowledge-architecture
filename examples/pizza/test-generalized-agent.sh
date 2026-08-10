@@ -20,6 +20,14 @@ AMERICAN_HOT="http://www.co-ode.org/ontologies/pizza/pizza.owl#AmericanHot"
 SPICY_PIZZA="http://www.co-ode.org/ontologies/pizza/pizza.owl#SpicyPizza"
 
 mkdir -p "${RESULTS_DIR}" "${VERIFY_DIR}" "${WORK_DIR}"
+
+# Make the regression runnable both inside CI and standalone.
+# run.sh materializes the pinned Pizza artifacts, downloads ROBOT when needed,
+# and creates the classified ontology consumed by the Classification Service.
+if [[ ! -s "${ROBOT_JAR}" || ! -s "${RESULTS_DIR}/reasoned.owl" || ! -s "${DOMAIN_DIR}/shapes.ttl" ]]; then
+  bash "${HERE}/run.sh"
+fi
+
 test -s "${ROBOT_JAR}"
 test -s "${RESULTS_DIR}/reasoned.owl"
 test -s "${DOMAIN_DIR}/shapes.ttl"
