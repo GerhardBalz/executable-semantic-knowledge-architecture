@@ -19,6 +19,9 @@ EXPECTED_ARTIFACTS = {
     "shapes": "artifacts/validation/pizza-instance-shapes.ttl",
     "validData": "artifacts/validation/data/conforming.ttl",
     "invalidData": "artifacts/validation/data/non-conforming.ttl",
+    "ruleQuery": "artifacts/rules/vegetarian-warning.rq",
+    "ruleVocabulary": "artifacts/rules/rule-vocabulary.ttl",
+    "ruleData": "artifacts/rules/data/menu-pizzas.ttl",
 }
 
 LOCAL_NAMES = {
@@ -26,6 +29,9 @@ LOCAL_NAMES = {
     "shapes": "shapes.ttl",
     "validData": "valid-data.ttl",
     "invalidData": "invalid-data.ttl",
+    "ruleQuery": "rule.rq",
+    "ruleVocabulary": "rule-vocabulary.ttl",
+    "ruleData": "rule-data.ttl",
 }
 
 
