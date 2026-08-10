@@ -1,0 +1,61 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix eska: <urn:eska:core:> .
+@prefix map: <urn:eska:example:pizza:mapping:> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix pizza: <http://www.co-ode.org/ontologies/pizza/pizza.owl#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix val: <urn:eska:example:pizza:validation:> .
+@prefix wf: <urn:eska:example:pizza:workflow:> .
+@prefix pizzaWf: <urn:pizza-ontology:workflow:> .
+
+wf:PizzaMenuPublicationWorkflowCapability
+    a eska:SemanticCapability ;
+    dcterms:title "Pizza Menu Publication Workflow"@en ;
+    dcterms:description "Execute the source-owned BPMN workflow that validates Pizza RDF and conditionally transforms conforming data into the Menu projection."@en ;
+    skos:scopeNote "The Capability is composite: BPMN owns orchestration while the validation and mapping step semantics remain in their established Semantic Capabilities and source-owned artifacts. Composition is represented with established dependency/part relations rather than Workflow-specific ESKA core classes."@en ;
+    dcterms:requires val:PizzaValidationCapability, map:PizzaMenuProjectionCapability ;
+    eska:subject pizza:Pizza ;
+    eska:inputType wf:PizzaWorkflowInputGraph ;
+    eska:outputType wf:PizzaWorkflowResult ;
+    eska:producesRelation pizzaWf:workflowOutcome ;
+    eska:usesSemanticModel wf:PizzaMenuPublicationBPMNModel, wf:PizzaWorkflowOutcomeModel ;
+    eska:usesExecutableArtifact wf:BPMNWorkflowExecutionArtifact ;
+    eska:requiresCondition wf:WorkflowInputCondition .
+
+wf:PizzaWorkflowInputGraph
+    a owl:Class ;
+    dcterms:description "An explicit Pizza RDF graph supplied to the menu-publication workflow."@en .
+
+wf:PizzaWorkflowResult
+    a owl:Class ;
+    dcterms:description "A machine-interpretable overall workflow result whose outcome is Published or Rejected."@en .
+
+wf:PizzaMenuPublicationBPMNModel
+    a eska:SemanticModel, prov:Entity ;
+    dcterms:title "Pizza menu-publication BPMN model"@en ;
+    dcterms:identifier "artifacts/workflows/pizza-menu-publication.bpmn@5b993ed9321f3dc5889f6e111d933feddbcd13d3" ;
+    dcterms:description "Commit-pinned BPMN 2.0.2 process owned and published by the companion pizza-ontology repository."@en ;
+    dcterms:conformsTo <https://www.omg.org/spec/BPMN/2.0.2/> ;
+    dcterms:source <https://github.com/GerhardBalz/pizza-ontology/blob/5b993ed9321f3dc5889f6e111d933feddbcd13d3/artifacts/workflows/pizza-menu-publication.bpmn> ;
+    dcterms:relation <https://github.com/GerhardBalz/pizza-ontology/blob/5b993ed9321f3dc5889f6e111d933feddbcd13d3/artifacts/manifest.ttl> .
+
+wf:PizzaWorkflowOutcomeModel
+    a eska:SemanticModel, prov:Entity ;
+    dcterms:title "Pizza workflow semantic vocabulary"@en ;
+    dcterms:identifier "artifacts/workflows/workflow-vocabulary.ttl@5b993ed9321f3dc5889f6e111d933feddbcd13d3" ;
+    dcterms:description "Commit-pinned workflow vocabulary defining semantic operations and Published/Rejected outcomes."@en ;
+    dcterms:source <https://github.com/GerhardBalz/pizza-ontology/blob/5b993ed9321f3dc5889f6e111d933feddbcd13d3/artifacts/workflows/workflow-vocabulary.ttl> ;
+    dcterms:relation <https://github.com/GerhardBalz/pizza-ontology/blob/5b993ed9321f3dc5889f6e111d933feddbcd13d3/artifacts/manifest.ttl> .
+
+wf:BPMNWorkflowExecutionArtifact
+    a eska:ExecutableSemanticKnowledgeArtifact, prov:Entity ;
+    dcterms:title "BPMN workflow execution"@en ;
+    dcterms:description "Executable artifact that interprets the source-owned BPMN control flow and invokes the established Pizza Validation and Menu Projection semantic capabilities for workflow steps."@en ;
+    eska:inputType wf:PizzaWorkflowInputGraph ;
+    eska:outputType wf:PizzaWorkflowResult ;
+    eska:producesRelation pizzaWf:workflowOutcome .
+
+wf:WorkflowInputCondition
+    a eska:ApplicabilityCondition ;
+    dcterms:description "The workflow input must be parseable Pizza RDF. The validation step determines at runtime whether the mapping step is applicable."@en .
