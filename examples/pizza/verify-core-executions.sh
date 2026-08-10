@@ -55,3 +55,6 @@ echo "SUCCESS: reasoning, validation, rule evaluation, decision evaluation, calc
 
 printf '\nVerifying provenance, evidence, and Result lineage profiles...\n'
 python3 "${HERE}/verify-provenance-lineage.py"
+
+printf '\nVerifying namespace, publication, and versioning governance contract...\n'
+python3 "${ROOT_DIR}/model/verify-publication-contract.py"
