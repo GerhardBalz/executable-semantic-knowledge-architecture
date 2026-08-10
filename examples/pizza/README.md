@@ -12,7 +12,7 @@ ESKA
     operationalizes those semantics
 ```
 
-ESKA does not maintain source copies of the Pizza OWL, SHACL, SPARQL, DMN, or OpenMath semantic artifacts used here. [`pizza-domain-source.json`](pizza-domain-source.json) pins `GerhardBalz/pizza-ontology` to an immutable Git commit, and [`fetch-domain-artifacts.py`](fetch-domain-artifacts.py) materializes the published artifacts under `.work/pizza-domain/` at execution time.
+ESKA does not maintain source copies of the Pizza OWL, SHACL, SPARQL, DMN, OpenMath, or semantic-mapping artifacts used here. [`pizza-domain-source.json`](pizza-domain-source.json) pins `GerhardBalz/pizza-ontology` to an immutable Git commit, and [`fetch-domain-artifacts.py`](fetch-domain-artifacts.py) materializes the published artifacts under `.work/pizza-domain/` at execution time.
 
 ## Semantic Source Binding
 
@@ -21,27 +21,21 @@ Repository
     GerhardBalz/pizza-ontology
 
 Commit
-    fcefdc7acddf2ca9a9dc4dad9e410cea992011ff
+    ef05531c5a362d8d1454e94e59a44f750515dd1c
 
 Manifest
     artifacts/manifest.ttl
 ```
 
-The manifest publishes **thirteen** source-owned semantic distributions consumed by this reference:
+The manifest publishes **seventeen** source-owned semantic distributions consumed by this reference:
 
 - coherent Pizza OWL reasoning module;
 - Pizza instance SHACL profile;
-- conforming RDF validation example;
-- non-conforming RDF validation example;
-- vegetarian-warning SPARQL rule;
-- rule-result vocabulary;
-- rule-evaluation RDF data;
-- DMN 1.5 dietary-suitability decision table;
-- decision outcome vocabulary;
-- canonical decision-input cases;
-- OpenMath Pizza-area formula;
-- calculation vocabulary;
-- canonical calculation cases.
+- conforming and non-conforming RDF validation examples;
+- vegetarian-warning SPARQL rule, result vocabulary, and rule RDF data;
+- DMN 1.5 dietary-suitability decision, decision vocabulary, and canonical contexts;
+- OpenMath Pizza-area formula, calculation vocabulary, and canonical calculation cases;
+- Pizza-to-Menu SPARQL mapping, Menu target vocabulary, canonical source graph, and expected target graph.
 
 ```text
 artifact role/path
@@ -53,7 +47,7 @@ immutable semantic input
 
 Runtime copies beneath `.work/` are disposable execution inputs, not a second semantic source of truth.
 
-## Five Execution Modes
+## Six Execution Modes
 
 ```text
 source-owned OWL module
@@ -75,9 +69,13 @@ semantic decision outcome
 source-owned OpenMath formula + numeric context
     ↓ calculate
 typed decimal numeric result
+
+source-owned Pizza graph + mapping + target model
+    ↓ transform
+target Menu RDF graph
 ```
 
-The OWL path is developed end-to-end through Capability, Service, and Agent. Validation, Rule, Decision, and Calculation remain at the Semantic Capability / Execution / Result / Verification level so operational exposure concepts are not promoted by symmetry.
+The OWL path is developed end-to-end through Capability, Service, and Agent. Validation, Rule, Decision, Calculation, and Mapping remain at the Semantic Capability / Execution / Result / Verification level so operational exposure concepts are not promoted by symmetry.
 
 ## 1. OWL Classification — reason
 
@@ -154,15 +152,7 @@ false         false         → Vegetarian
 
 `PizzaDietarySuitabilityCapability` produces semantic outcomes through `decision:dietarySuitability`.
 
-Canonical results:
-
-```text
-meatyPizza       → decision:NotVegetarian
-fishPizza        → decision:PescatarianOnly
-vegetarianPizza  → decision:Vegetarian
-```
-
-Each case has its own `Execution → Result → Verification` PROV-O chain.
+Each canonical context has its own `Execution → Result → Verification` PROV-O chain.
 
 ## 5. OpenMath Calculation — calculate
 
@@ -178,15 +168,77 @@ areaSquareCentimetres = π × (diameterCm / 2)²
 
 The actual calculated value is represented as an `xsd:decimal` literal. The OpenMath evaluator implements the supported arithmetic semantics but does not contain the Pizza area formula itself.
 
-Canonical results:
+## 6. Semantic Mapping — transform
+
+See [`mappings/README.md`](mappings/README.md).
+
+The source-owned mapping artifacts distinguish:
 
 ```text
-20 cm → 314.159265 cm²
-30 cm → 706.858347 cm²
-40 cm → 1256.637061 cm²
+Pizza source semantic model
+        ↓
+SPARQL mapping semantic model
+        ↓
+Menu target semantic model
 ```
 
-Each case has its own `Execution → Result → Verification` provenance chain.
+`PizzaMenuProjectionCapability` transforms explicit Pizza RDF:
+
+```text
+pizza:Pizza
+rdfs:label
+pizza:hasTopping
+```
+
+into the target Menu projection:
+
+```text
+menu:MenuItem
+menu:displayName
+menu:ingredientName
+```
+
+The transformed graph is compared isomorphically with the source-owned canonical target graph, and Pizza source predicates/classes are rejected from the target graph.
+
+### Mapping semantic-model roles
+
+Mapping is the first mode that needs several semantic models with distinct machine-readable roles. The example defines:
+
+```text
+map:sourceSemanticModel
+map:mappingSemanticModel
+map:targetSemanticModel
+```
+
+as mapping-local subproperties of:
+
+```text
+eska:usesSemanticModel
+```
+
+The Capability also states all three semantic models through the generic core relation. Runtime provenance represents the same roles with qualified PROV-O usage and `prov:hadRole`.
+
+These properties remain outside `model/eska-core.ttl` because only Mapping currently justifies them.
+
+### Rule versus Mapping
+
+Both Rule and Mapping use SPARQL `CONSTRUCT`, but their semantic contracts differ:
+
+```text
+Rule
+    source semantic model
+        ↓ derive
+    source-domain statement
+
+Mapping
+    source semantic model
+        ↓ mapping semantic model
+    target semantic model
+        ↓
+    transformed target graph
+```
+
+Execution semantics therefore cannot be inferred solely from implementation technology.
 
 ## Execute
 
@@ -237,23 +289,32 @@ python -m pip install -r examples/pizza/calculations/requirements.txt
 python examples/pizza/calculations/evaluate.py
 ```
 
+Semantic mapping:
+
+```bash
+python -m pip install -r examples/pizza/mappings/requirements.txt
+python examples/pizza/mappings/evaluate.py
+```
+
 ## Cross-Mode Core Verification
 
-The generic Capability verifier checks one common contract across **five Capabilities**:
+The generic Capability verifier checks one common contract across **six Capabilities**:
 
 - `PizzaClassificationCapability`;
 - `PizzaValidationCapability`;
 - `PizzaRuleEvaluationCapability`;
 - `PizzaDietarySuitabilityCapability`;
-- `PizzaAreaCalculationCapability`.
+- `PizzaAreaCalculationCapability`;
+- `PizzaMenuProjectionCapability`.
 
-The generic runtime verifier checks the same pattern across **ten concrete Executions**:
+The generic runtime verifier checks the same pattern across **eleven concrete Executions**:
 
 - one OWL reasoning execution;
 - two SHACL validation executions;
 - one SPARQL rule execution;
 - three DMN decision executions;
-- three OpenMath calculation executions.
+- three OpenMath calculation executions;
+- one semantic mapping execution.
 
 The shared abstraction remains:
 
@@ -267,9 +328,9 @@ SemanticModel
 → Verification
 ```
 
-`model/eska-core.ttl` required **no change** for the Rule, Decision, or Calculation falsification modes.
+`model/eska-core.ttl` required **no change** for the Rule, Decision, Calculation, or Mapping falsification modes.
 
-The fifth mode therefore did not require `Calculation`, `Formula`, `CalculationExecution`, `CalculationResult`, `ExecutionMode`, OpenMath-specific core properties, or numeric-specific provenance classes.
+Mapping did expose a genuine role distinction, but the executable result supports refining the generic `usesSemanticModel` relation below core rather than promoting source/target/mapping properties prematurely.
 
 ## Verification Questions
 
@@ -292,11 +353,13 @@ Does DMN select exactly one expected semantic outcome per context?
 
 Does OpenMath calculate the expected typed numeric values?
 
-Do all five Capabilities satisfy the same generic core contract?
+Does Mapping produce exactly the target semantic graph without leaking source vocabulary?
 
-Do all ten Executions satisfy the same Execution → Result → Verification pattern?
+Do all six Capabilities satisfy the same generic core contract?
 
-Do provenance records retain the source artifact identity?
+Do all eleven Executions satisfy the same Execution → Result → Verification pattern?
+
+Do provenance records retain source artifact identity and Mapping semantic-model roles?
 ```
 
 ## Ownership Boundary
@@ -310,6 +373,7 @@ GerhardBalz/pizza-ontology
 ├── SPARQL rule + vocabulary + RDF data
 ├── DMN decision + vocabulary + cases
 ├── OpenMath formula + calculation vocabulary + cases
+├── SPARQL mapping + Menu target vocabulary + source/target RDF
 └── semantic artifact manifest
           │
           │ pinned commit
@@ -318,6 +382,7 @@ GerhardBalz/executable-semantic-knowledge-architecture
 │
 ├── Semantic Capability
 ├── Execution / Result / Verification
+├── mode-specific semantic refinements where required
 ├── Knowledge Service         classification only
 ├── Knowledge Agent           classification only
 └── execution provenance
