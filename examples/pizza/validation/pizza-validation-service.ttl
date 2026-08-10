@@ -1,0 +1,28 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix eska: <urn:eska:core:> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix val: <urn:eska:example:pizza:validation:> .
+@prefix valsvc: <urn:eska:example:pizza:validation-service:> .
+
+valsvc:PizzaValidationService
+    a eska:KnowledgeService ;
+    dcterms:title "Pizza Validation Knowledge Service"@en ;
+    dcterms:description "HTTP access to PizzaValidationCapability. The service executes the source-owned SHACL profile through pySHACL and returns the resulting SHACL ValidationReport; it does not encode Pizza validation constraints in transport code."@en ;
+    dcterms:identifier "examples/pizza/validation/service.py" ;
+    eska:exposesCapability val:PizzaValidationCapability ;
+    eska:hasOperation valsvc:ValidatePizzaDataOperation .
+
+valsvc:ValidatePizzaDataOperation
+    a eska:ServiceOperation ;
+    dcterms:title "Validate Pizza RDF data"@en ;
+    dcterms:description "Validate an RDF data graph against the Pizza SHACL profile and return a machine-interpretable SHACL ValidationReport serialized as JSON-LD inside the service envelope."@en ;
+    eska:httpMethod "POST" ;
+    eska:path "/validate" ;
+    eska:mediaType "application/json" ;
+    eska:requestField "data" ;
+    eska:resultField "report" ;
+    eska:relationField "relation" ;
+    eska:capabilityField "capability" ;
+    eska:inputType val:PizzaDataGraph ;
+    eska:outputType sh:ValidationReport ;
+    eska:producesRelation sh:conforms .
