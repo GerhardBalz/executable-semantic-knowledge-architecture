@@ -1,0 +1,44 @@
+PREFIX agentx: <urn:eska:example:pizza:general-agent:>
+PREFIX cap: <urn:eska:example:pizza:capability:>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX eska: <urn:eska:core:>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX sh: <http://www.w3.org/ns/shacl#>
+PREFIX val: <urn:eska:example:pizza:validation:>
+
+# ROBOT verify treats returned rows as violations.
+# The generalized Agent must have exactly the two expected semantic adapters,
+# each matching one target Capability's input/output/relation contract.
+SELECT ?capability
+WHERE {
+  VALUES (?capability ?adapter ?adapterKey ?inputType ?outputType ?relation) {
+    (cap:PizzaClassificationCapability agentx:IRIListInvocationAdapter "iri-list" owl:Class owl:Class rdfs:subClassOf)
+    (val:PizzaValidationCapability agentx:SHACLReportInvocationAdapter "rdf-jsonld-shacl-report" val:PizzaDataGraph sh:ValidationReport sh:conforms)
+  }
+
+  FILTER NOT EXISTS {
+    agentx:PizzaGeneralizedKnowledgeAgent
+        a eska:KnowledgeAgent ;
+        eska:targetsCapability ?capability ;
+        eska:usesDiscoveryArtifact agentx:PizzaGeneralServiceDiscovery ;
+        eska:usesInvocationAdapter ?adapter .
+
+    agentx:PizzaGeneralServiceDiscovery
+        a eska:DiscoveryArtifact ;
+        dcterms:identifier "examples/pizza/discover-service-generic.sparql" .
+
+    ?adapter
+        a eska:SemanticInvocationAdapter ;
+        dcterms:identifier ?adapterKey ;
+        eska:supportsInputType ?inputType ;
+        eska:supportsOutputType ?outputType ;
+        eska:supportsRelation ?relation .
+
+    ?capability
+        a eska:SemanticCapability ;
+        eska:inputType ?inputType ;
+        eska:outputType ?outputType ;
+        eska:producesRelation ?relation .
+  }
+}
