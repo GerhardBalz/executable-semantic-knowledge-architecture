@@ -85,7 +85,7 @@ Supporting concepts include `Capability` and the semantic contract properties `s
 
 ### Key concepts
 
-A **Semantic Model** is a formal representation that gives knowledge explicit machine-interpretable meaning through concepts, relationships, constraints, axioms, rules, decisions, formulae, mappings, or equivalent semantic structures.
+A **Semantic Model** is a formal representation that gives knowledge explicit machine-interpretable meaning through concepts, relationships, constraints, axioms, rules, decisions, formulae, mappings, workflows, or equivalent semantic structures.
 
 An **Executable Semantic Knowledge Artifact** is a machine-executable artifact whose behavior remains explicitly connected to semantic knowledge.
 
@@ -129,9 +129,9 @@ The provisional Agent extension is in [`model/eska-agent.ttl`](model/eska-agent.
 
 Service and Agent remain outside the core because they are currently demonstrated only on the classification path.
 
-## Six Executable-Semantic Modes
+## Seven Executable-Semantic Modes
 
-The provisional core now has executable evidence across six different semantic operations:
+The provisional core now has executable evidence across seven different semantic operations:
 
 ```text
 Ontology    → reason
@@ -140,9 +140,10 @@ Rule        → evaluate
 Decision    → decide
 Calculation → calculate
 Mapping     → transform
+Workflow    → execute
 ```
 
-The generic Capability verifier covers **six Capabilities**. The generic runtime verifier covers **eleven concrete Executions**:
+The generic Capability verifier covers **seven Capabilities**. The generic runtime verifier covers **sixteen concrete Executions**:
 
 ```text
 1 OWL reasoning execution
@@ -151,13 +152,15 @@ The generic Capability verifier covers **six Capabilities**. The generic runtime
 3 DMN decision executions
 3 OpenMath calculation executions
 1 semantic mapping execution
+2 overall Workflow executions
+3 actually executed Workflow child steps
 ```
 
-Rule, Decision, Calculation, and Mapping were introduced as deliberate falsification tests. **None required a change to `model/eska-core.ttl`.**
+Rule, Decision, Calculation, Mapping, and Workflow were introduced as deliberate falsification tests. **None required a change to `model/eska-core.ttl`.**
 
-### Mapping exposed a real refinement need
+### Mapping: role refinement below core
 
-Mapping is the first mode that needs several semantic models with distinct roles:
+Mapping needs several semantic models with distinct roles:
 
 ```text
 source semantic model
@@ -167,7 +170,7 @@ mapping semantic model
 target semantic model
 ```
 
-The Mapping example therefore defines role-specific properties:
+The Mapping example therefore defines:
 
 ```text
 map:sourceSemanticModel
@@ -175,28 +178,57 @@ map:mappingSemanticModel
 map:targetSemanticModel
 ```
 
-as mapping-local subproperties of the generic core relation:
+as mapping-local subproperties of the generic `eska:usesSemanticModel` relation. Runtime role semantics use qualified PROV-O usage and `prov:hadRole`.
 
-```text
-eska:usesSemanticModel
-```
-
-At runtime the same distinctions are represented with qualified PROV-O usage and `prov:hadRole`.
-
-This establishes an evidence-driven extension pattern:
+This established one extension pattern:
 
 > **Generic core relationships can be refined by mode-specific subproperties when an executable semantic contract requires additional role precision.**
 
-Only Mapping currently requires these three role properties, so they remain outside `model/eska-core.ttl`.
+### Workflow: composition below core
 
-The six-mode evidence has therefore not justified technology-shaped core concepts such as:
+Workflow creates a different pressure: one semantic Capability orchestrates already established Capabilities and makes later execution conditional on an intermediate Result.
 
-- `Rule`, `Decision`, `Calculation`, `Formula`, `Mapping`, or `Transformation`;
-- mode-specific Execution or Result subclasses;
+```text
+PizzaMenuPublicationWorkflowCapability
+        ↓
+Workflow Execution
+    │
+    ├── Validation Execution
+    │       ↓ sh:conforms
+    │
+    └── Mapping Execution       conforming path only
+            ↑
+       prov:wasInformedBy
+       Validation Execution
+```
+
+Overall and child activities remain ordinary `eska:Execution` instances. Composition uses established vocabularies:
+
+- `dcterms:hasPart` / `dcterms:isPartOf` for whole/step composition;
+- `prov:wasInformedBy` for step dependency;
+- `prov:wasDerivedFrom` for overall Result lineage from step Results.
+
+The source BPMN model identifies source-domain semantic operation IRIs. ESKA connects them to established Capabilities with Workflow-local `sourceOperation` / `boundCapability` bindings. Those adapter terms remain outside core because only Workflow currently requires them.
+
+This establishes a second extension pattern:
+
+> **Composite semantic execution can be built from ordinary core Executions plus established part/dependency relations, while Workflow-specific operation binding remains local until broader evidence exists.**
+
+### Cross-repository verification matters
+
+The first Workflow integration run independently detected a source binding mismatch: the Pizza workflow vocabulary referenced an artifact name different from the mapping distribution actually published by the manifest. Pizza's first regression had repeated the same mistaken identifier and was therefore internally consistent.
+
+Pizza PR #41 corrected the source before ESKA Workflow was merged. This is direct evidence that consumer-side verification of a semantic artifact contract adds value beyond source-side tests alone.
+
+The seven-mode evidence still does **not** justify technology-shaped core concepts such as:
+
+- `Rule`, `Decision`, `Calculation`, `Mapping`, `Workflow`, `Formula`, or `Transformation`;
+- `WorkflowExecution`, `StepExecution`, `CompositeExecution`, or other mode-specific Execution subclasses;
+- mode-specific Result superclasses;
 - a generic `ExecutionMode` taxonomy;
-- source/target semantic-model properties in core;
-- DMN-, OpenMath-, or SPARQL-specific core properties;
-- a second ESKA provenance hierarchy;
+- source/target or workflow-operation adapter properties in core;
+- BPMN-, DMN-, OpenMath-, or SPARQL-specific core properties;
+- a second ESKA provenance/composition hierarchy;
 - Service or Agent promotion into core.
 
 The namespace remains deliberately provisional:
@@ -246,14 +278,14 @@ See:
 
 The companion repository [GerhardBalz/pizza-ontology](https://github.com/GerhardBalz/pizza-ontology) owns the Pizza semantic artifacts used by ESKA.
 
-The current binding in [`examples/pizza/pizza-domain-source.json`](examples/pizza/pizza-domain-source.json) pins:
+The current binding in [`examples/pizza/pizza-domain-source.json`](examples/pizza/pizza-domain-source.json) pins the corrected source commit:
 
 ```text
 GerhardBalz/pizza-ontology
-@ef05531c5a362d8d1454e94e59a44f750515dd1c
+@715f0460a43abacb5258eedd3d722da219a25a43
 ```
 
-The Pizza repository publishes **seventeen source-owned semantic distributions**:
+The Pizza repository publishes **twenty-three source-owned semantic distributions**:
 
 ```text
 OWL reasoning module
@@ -262,6 +294,7 @@ SPARQL rule + rule-result vocabulary + rule RDF data
 DMN decision + decision vocabulary + decision cases
 OpenMath formula + calculation vocabulary + calculation cases
 SPARQL mapping + Menu target vocabulary + source RDF + expected target RDF
+BPMN workflow + workflow vocabulary + valid/invalid inputs + expected target + cases
 ```
 
 ESKA materializes those artifacts only at runtime. CI fails if ESKA reintroduces source copies.
@@ -324,48 +357,52 @@ Execution → Result → Verification
 
 ### 4. DMN Decision Evaluation — decide
 
-```text
-containsMeat  containsFish  → dietarySuitability
-true          -             → NotVegetarian
-false         true          → PescatarianOnly
-false         false         → Vegetarian
-```
-
-`PizzaDietarySuitabilityCapability` produces semantic decision outcomes through `decision:dietarySuitability`.
+`PizzaDietarySuitabilityCapability` maps explicit decision contexts to semantic dietary-suitability outcomes through a source-owned DMN 1.5 model.
 
 ### 5. OpenMath Calculation — calculate
 
-The source-owned mathematical expression represents:
+The source-owned formula represents:
 
 ```text
 areaSquareCentimetres = π × (diameterCm / 2)²
 ```
 
-`PizzaAreaCalculationCapability` produces a `PizzaAreaResult`; the computed value is carried as an `xsd:decimal` through `calc:areaSquareCentimetres`.
+`PizzaAreaCalculationCapability` produces typed decimal area Results without introducing numeric-specific core classes.
 
 ### 6. Semantic Mapping — transform
 
-`PizzaMenuProjectionCapability` transforms an explicit Pizza source graph into a target Menu graph:
+`PizzaMenuProjectionCapability` transforms explicit Pizza RDF into a separate target Menu semantic model. Its output is verified against a canonical target graph and source Pizza predicates/classes must not leak into the projection.
+
+### 7. BPMN Workflow — execute
+
+`PizzaMenuPublicationWorkflowCapability` composes Validation and Mapping:
 
 ```text
-Pizza source semantic model
-    pizza:Pizza
-    rdfs:label
-    pizza:hasTopping
-        ↓ source-owned SPARQL mapping
-Menu target semantic model
-    menu:MenuItem
-    menu:displayName
-    menu:ingredientName
+Start
+  ↓
+Validation
+  ↓
+conforms?
+  ├── false → Rejected
+  └── true
+        ↓
+Mapping
+        ↓
+      Published
 ```
 
-The output is verified against a source-owned canonical target graph and must not leak Pizza source predicates/classes.
+Canonical behavior:
 
-The Mapping mode also demonstrates that execution semantics are not determined solely by implementation technology: Rule and Mapping both use SPARQL `CONSTRUCT`, but Rule derives a statement within the source semantic domain while Mapping transforms between distinct semantic models.
+```text
+valid-publication   → conforms=True  → 2 child steps → Published
+invalid-rejection   → conforms=False → 1 child step  → Rejected
+```
 
-## Six-Mode Falsification Result
+The invalid path proves conditional composition: the Mapping Capability is not executed when Validation fails.
 
-All six modes fit the unchanged abstraction:
+## Seven-Mode Falsification Result
+
+All seven modes fit the unchanged abstraction:
 
 ```text
 SemanticModel
@@ -377,7 +414,7 @@ SemanticModel
 → Verification
 ```
 
-Mapping adds role-specific semantic precision without forcing those roles into core. That is stronger evidence for the current architecture than simply adding another technology-specific class hierarchy.
+Mapping and Workflow also demonstrate how additional semantic precision can live below the core rather than forcing premature generalization into it.
 
 ## Initial Scope
 
@@ -393,23 +430,21 @@ Mapping adds role-specific semantic precision without forcing those roles into c
 - [x] Add SPARQL Rule → evaluate and re-test the core.
 - [x] Add DMN Decision → decide and re-test the core.
 - [x] Add OpenMath Calculation → calculate and re-test the core.
-- [x] Add Mapping → transform and re-test the core across six Capabilities / eleven Executions.
-- [x] Demonstrate mapping-specific semantic-model role refinements without changing the core.
-- [ ] Continue falsifying the core with Workflow → execute where useful.
+- [x] Add Mapping → transform and demonstrate semantic-model role refinement.
+- [x] Add BPMN Workflow → execute and demonstrate composite execution across seven Capabilities / sixteen Executions.
+- [ ] Generalize Knowledge Service semantics beyond classification using cross-mode evidence.
+- [ ] Generalize deterministic Knowledge Agent discovery/invocation beyond classification.
 - [ ] Add richer provenance/evidence concepts only where executable use cases require them.
 - [ ] Formalize deployment binding separately from semantic service contracts.
-- [ ] Decide whether Validation should be exposed through Service and Agent layers.
 - [ ] Decide on a permanent ESKA namespace and publication strategy after further stabilization.
 
 The project intentionally does **not** begin as a general software framework, agent platform, or large meta-ontology.
 
 ## Status
 
-The executable reference now demonstrates six distinct semantic operations with one shared core Capability abstraction and one shared runtime pattern. Mapping additionally demonstrates how a mode-specific semantic contract can refine a generic core relation without forcing premature vocabulary into the core itself.
+The executable reference now demonstrates seven distinct semantic operations with one shared provisional core Capability abstraction and one shared runtime `Execution → Result → Verification` pattern, including the first composite/conditional workflow.
 
-Source ownership remains an executable invariant, while Service and Agent remain deliberately narrower classification extensions.
-
-The next strong architectural falsification candidate is **Workflow → execute**, because workflow semantics may introduce sequencing, intermediate state, and multiple linked executions rather than one bounded computation producing one result.
+After seven distinct execution modes, the next strongest test is no longer simply adding an eighth mode. The existing backlog now has enough execution evidence to test whether the **Knowledge Service and Knowledge Agent extensions generalize across modes**, starting with Validation.
 
 ## License
 

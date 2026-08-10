@@ -12,7 +12,7 @@ ESKA
     operationalizes those semantics
 ```
 
-ESKA does not maintain source copies of the Pizza OWL, SHACL, SPARQL, DMN, OpenMath, or semantic-mapping artifacts used here. [`pizza-domain-source.json`](pizza-domain-source.json) pins `GerhardBalz/pizza-ontology` to an immutable Git commit, and [`fetch-domain-artifacts.py`](fetch-domain-artifacts.py) materializes the published artifacts under `.work/pizza-domain/` at execution time.
+ESKA does not maintain source copies of the Pizza OWL, SHACL, SPARQL, DMN, OpenMath, Mapping, or BPMN semantic artifacts used here. [`pizza-domain-source.json`](pizza-domain-source.json) pins `GerhardBalz/pizza-ontology` to an immutable Git commit, and [`fetch-domain-artifacts.py`](fetch-domain-artifacts.py) materializes the published artifacts under `.work/pizza-domain/` at execution time.
 
 ## Semantic Source Binding
 
@@ -21,13 +21,13 @@ Repository
     GerhardBalz/pizza-ontology
 
 Commit
-    ef05531c5a362d8d1454e94e59a44f750515dd1c
+    715f0460a43abacb5258eedd3d722da219a25a43
 
 Manifest
     artifacts/manifest.ttl
 ```
 
-The manifest publishes **seventeen** source-owned semantic distributions consumed by this reference:
+The manifest publishes **twenty-three** source-owned semantic distributions consumed by this reference:
 
 - coherent Pizza OWL reasoning module;
 - Pizza instance SHACL profile;
@@ -35,7 +35,8 @@ The manifest publishes **seventeen** source-owned semantic distributions consume
 - vegetarian-warning SPARQL rule, result vocabulary, and rule RDF data;
 - DMN 1.5 dietary-suitability decision, decision vocabulary, and canonical contexts;
 - OpenMath Pizza-area formula, calculation vocabulary, and canonical calculation cases;
-- Pizza-to-Menu SPARQL mapping, Menu target vocabulary, canonical source graph, and expected target graph.
+- Pizza-to-Menu SPARQL mapping, Menu target vocabulary, canonical source graph, and expected target graph;
+- BPMN 2.0.2 menu-publication workflow, workflow vocabulary, valid/invalid workflow inputs, expected valid target graph, and workflow cases.
 
 ```text
 artifact role/path
@@ -47,7 +48,7 @@ immutable semantic input
 
 Runtime copies beneath `.work/` are disposable execution inputs, not a second semantic source of truth.
 
-## Six Execution Modes
+## Seven Execution Modes
 
 ```text
 source-owned OWL module
@@ -73,9 +74,13 @@ typed decimal numeric result
 source-owned Pizza graph + mapping + target model
     ↓ transform
 target Menu RDF graph
+
+source-owned BPMN process + workflow vocabulary
+    ↓ execute
+composite Published / Rejected result
 ```
 
-The OWL path is developed end-to-end through Capability, Service, and Agent. Validation, Rule, Decision, Calculation, and Mapping remain at the Semantic Capability / Execution / Result / Verification level so operational exposure concepts are not promoted by symmetry.
+The OWL path is developed end-to-end through Capability, Service, and Agent. Validation, Rule, Decision, Calculation, Mapping, and Workflow remain at the Semantic Capability / Execution / Result / Verification level so operational exposure concepts are not promoted by symmetry.
 
 ## 1. OWL Classification — reason
 
@@ -115,11 +120,9 @@ PizzaKnowledgeAgent
 
 See [`validation/README.md`](validation/README.md).
 
-> **Does concrete Pizza RDF data conform to the Pizza validation profile published by the domain repository?**
+`PizzaValidationCapability` consumes a Pizza RDF graph, uses the commit-pinned SHACL profile, and produces a `sh:ValidationReport` through `sh:conforms`.
 
 The source-owned non-conforming fixture deliberately produces both a missing-base violation and a wrongly typed topping violation.
-
-`PizzaValidationCapability` consumes a Pizza RDF graph, uses the commit-pinned SHACL profile, and produces a `sh:ValidationReport` through `sh:conforms`.
 
 ## 3. SPARQL Rule Evaluation — evaluate
 
@@ -141,16 +144,7 @@ requiresVegetarianWarning true
 
 See [`decisions/README.md`](decisions/README.md).
 
-The source-owned DMN 1.5 `UNIQUE` decision table consumes explicit boolean inputs:
-
-```text
-containsMeat  containsFish  → dietarySuitability
-true          -             → NotVegetarian
-false         true          → PescatarianOnly
-false         false         → Vegetarian
-```
-
-`PizzaDietarySuitabilityCapability` produces semantic outcomes through `decision:dietarySuitability`.
+The source-owned DMN 1.5 `UNIQUE` decision table consumes explicit boolean inputs and produces one semantic dietary-suitability outcome through `PizzaDietarySuitabilityCapability`.
 
 Each canonical context has its own `Execution → Result → Verification` PROV-O chain.
 
@@ -164,9 +158,7 @@ The source-owned OpenMath expression represents:
 areaSquareCentimetres = π × (diameterCm / 2)²
 ```
 
-`PizzaAreaCalculationCapability` consumes an explicit positive Pizza diameter context and produces a `PizzaAreaResult` through `calc:areaSquareCentimetres`.
-
-The actual calculated value is represented as an `xsd:decimal` literal. The OpenMath evaluator implements the supported arithmetic semantics but does not contain the Pizza area formula itself.
+`PizzaAreaCalculationCapability` produces a `PizzaAreaResult`; the actual value is represented as an `xsd:decimal` literal through `calc:areaSquareCentimetres`.
 
 ## 6. Semantic Mapping — transform
 
@@ -182,27 +174,11 @@ SPARQL mapping semantic model
 Menu target semantic model
 ```
 
-`PizzaMenuProjectionCapability` transforms explicit Pizza RDF:
-
-```text
-pizza:Pizza
-rdfs:label
-pizza:hasTopping
-```
-
-into the target Menu projection:
-
-```text
-menu:MenuItem
-menu:displayName
-menu:ingredientName
-```
-
-The transformed graph is compared isomorphically with the source-owned canonical target graph, and Pizza source predicates/classes are rejected from the target graph.
+`PizzaMenuProjectionCapability` transforms explicit Pizza RDF into a target Menu graph. The output is compared isomorphically with the source-owned canonical target graph, and Pizza source predicates/classes are rejected from the target graph.
 
 ### Mapping semantic-model roles
 
-Mapping is the first mode that needs several semantic models with distinct machine-readable roles. The example defines:
+Mapping defines example-local:
 
 ```text
 map:sourceSemanticModel
@@ -210,19 +186,13 @@ map:mappingSemanticModel
 map:targetSemanticModel
 ```
 
-as mapping-local subproperties of:
-
-```text
-eska:usesSemanticModel
-```
-
-The Capability also states all three semantic models through the generic core relation. Runtime provenance represents the same roles with qualified PROV-O usage and `prov:hadRole`.
+as subproperties of `eska:usesSemanticModel`. Runtime provenance represents the same roles with qualified PROV-O usage and `prov:hadRole`.
 
 These properties remain outside `model/eska-core.ttl` because only Mapping currently justifies them.
 
 ### Rule versus Mapping
 
-Both Rule and Mapping use SPARQL `CONSTRUCT`, but their semantic contracts differ:
+Both use SPARQL `CONSTRUCT`, but their semantic contracts differ:
 
 ```text
 Rule
@@ -239,6 +209,73 @@ Mapping
 ```
 
 Execution semantics therefore cannot be inferred solely from implementation technology.
+
+## 7. BPMN Workflow — execute
+
+See [`workflows/README.md`](workflows/README.md).
+
+The source-owned BPMN 2.0.2 process composes the existing Validation and Mapping Capabilities:
+
+```text
+Start
+  ↓
+Validate Pizza RDF
+  ↓
+validationConforms?
+  ├── false → Rejected
+  └── true
+        ↓
+Transform Pizza → Menu
+        ↓
+      Published
+```
+
+BPMN owns control flow only. It does not duplicate the SHACL constraints or SPARQL Mapping semantics.
+
+### Workflow operation binding
+
+Source BPMN tasks identify semantic operation IRIs. ESKA maps those identifiers to existing Capabilities through workflow-local bindings:
+
+```text
+pizzaWf:ValidatePizzaData
+    → val:PizzaValidationCapability
+
+pizzaWf:TransformPizzaToMenu
+    → map:PizzaMenuProjectionCapability
+```
+
+`sourceOperation` and `boundCapability` remain Workflow-local terms rather than core vocabulary.
+
+### Composite execution
+
+Overall Workflow runs and their child steps remain ordinary `eska:Execution` instances:
+
+```text
+Workflow Execution
+    │ dcterms:hasPart
+    ├── Validation Execution
+    │       ↓ sh:conforms
+    │
+    └── Mapping Execution       conforming path only
+            ↑
+       prov:wasInformedBy
+       Validation Execution
+```
+
+Overall Results are derived from step Results with PROV-O. No `WorkflowExecution`, `StepExecution`, or `CompositeExecution` core classes are introduced.
+
+Canonical behavior:
+
+```text
+valid-publication   → conforms=True  → Validation + Mapping → Published
+invalid-rejection   → conforms=False → Validation only      → Rejected
+```
+
+The rejected path proves that the Workflow is conditional composition rather than a fixed sequence of calls.
+
+### Independent contract verification
+
+The first ESKA Workflow integration detected a source artifact-name mismatch that Pizza's first internally consistent regression had not caught. Pizza PR #41 corrected the source before the Workflow increment was merged. This provides concrete evidence for independent consumer-side verification of semantic artifact contracts.
 
 ## Execute
 
@@ -296,25 +333,35 @@ python -m pip install -r examples/pizza/mappings/requirements.txt
 python examples/pizza/mappings/evaluate.py
 ```
 
+BPMN workflow:
+
+```bash
+python -m pip install -r examples/pizza/workflows/requirements.txt
+python examples/pizza/workflows/evaluate.py
+```
+
 ## Cross-Mode Core Verification
 
-The generic Capability verifier checks one common contract across **six Capabilities**:
+The generic Capability verifier checks one common contract across **seven Capabilities**:
 
 - `PizzaClassificationCapability`;
 - `PizzaValidationCapability`;
 - `PizzaRuleEvaluationCapability`;
 - `PizzaDietarySuitabilityCapability`;
 - `PizzaAreaCalculationCapability`;
-- `PizzaMenuProjectionCapability`.
+- `PizzaMenuProjectionCapability`;
+- `PizzaMenuPublicationWorkflowCapability`.
 
-The generic runtime verifier checks the same pattern across **eleven concrete Executions**:
+The generic runtime verifier checks the same core pattern across **sixteen concrete Executions**:
 
 - one OWL reasoning execution;
 - two SHACL validation executions;
 - one SPARQL rule execution;
 - three DMN decision executions;
 - three OpenMath calculation executions;
-- one semantic mapping execution.
+- one semantic mapping execution;
+- two overall Workflow executions;
+- three actually executed Workflow child steps.
 
 The shared abstraction remains:
 
@@ -328,18 +375,21 @@ SemanticModel
 → Verification
 ```
 
-`model/eska-core.ttl` required **no change** for the Rule, Decision, Calculation, or Mapping falsification modes.
+`model/eska-core.ttl` required **no change** for the Rule, Decision, Calculation, Mapping, or Workflow falsification modes.
 
-Mapping did expose a genuine role distinction, but the executable result supports refining the generic `usesSemanticModel` relation below core rather than promoting source/target/mapping properties prematurely.
+Mapping and Workflow exposed real refinements, but the executable evidence supports keeping those refinements below core:
+
+- Mapping refines semantic-model roles;
+- Workflow adds source-operation→Capability bindings and composite part/dependency relations.
 
 ## Verification Questions
 
-The reference checks:
+The reference now checks:
 
 ```text
 Is the Pizza domain source pinned to an immutable commit?
 
-Does the manifest still publish the complete role/path contract?
+Does the manifest still publish the complete 23-artifact role/path contract?
 
 Does OWL reasoning produce the expected inference?
 
@@ -355,11 +405,13 @@ Does OpenMath calculate the expected typed numeric values?
 
 Does Mapping produce exactly the target semantic graph without leaking source vocabulary?
 
-Do all six Capabilities satisfy the same generic core contract?
+Does Workflow execute Mapping only after a conforming Validation result?
 
-Do all eleven Executions satisfy the same Execution → Result → Verification pattern?
+Do all seven Capabilities satisfy the same generic core contract?
 
-Do provenance records retain source artifact identity and Mapping semantic-model roles?
+Do all sixteen Executions satisfy the same Execution → Result → Verification pattern?
+
+Do provenance records retain source artifact identity, Mapping roles, Workflow composition, and step dependency?
 ```
 
 ## Ownership Boundary
@@ -374,6 +426,7 @@ GerhardBalz/pizza-ontology
 ├── DMN decision + vocabulary + cases
 ├── OpenMath formula + calculation vocabulary + cases
 ├── SPARQL mapping + Menu target vocabulary + source/target RDF
+├── BPMN workflow + workflow vocabulary + cases
 └── semantic artifact manifest
           │
           │ pinned commit
@@ -383,6 +436,7 @@ GerhardBalz/executable-semantic-knowledge-architecture
 ├── Semantic Capability
 ├── Execution / Result / Verification
 ├── mode-specific semantic refinements where required
+├── composite execution using established part/dependency relations
 ├── Knowledge Service         classification only
 ├── Knowledge Agent           classification only
 └── execution provenance
