@@ -5,33 +5,19 @@ ESKA does not store a second source-of-truth copy of the Pizza semantic artifact
 The domain artifacts are owned and published by the companion repository:
 
 - Source repository: <https://github.com/GerhardBalz/pizza-ontology>
-- Pinned source commit: `fcefdc7acddf2ca9a9dc4dad9e410cea992011ff`
+- Pinned source commit: `ef05531c5a362d8d1454e94e59a44f750515dd1c`
 - Consumer manifest: `artifacts/manifest.ttl`
 - ESKA binding: [`pizza-domain-source.json`](pizza-domain-source.json)
 
 At runtime, [`fetch-domain-artifacts.py`](fetch-domain-artifacts.py) materializes the pinned files under `.work/pizza-domain/`. These runtime copies are disposable execution inputs, not ESKA-owned semantic sources.
 
-## Reasoning module
+## Historical Pizza-derived reasoning material
 
-The coherent reasoning module:
-
-```text
-artifacts/reasoning/spicy-pizza.ofn
-```
-
-contains selected semantic content derived from the historical Pizza Ontology 2.0. The Pizza source repository records its upstream provenance and identifies the reasoning module as **Creative Commons Attribution 3.0 (CC BY 3.0)** material.
-
-The historical Pizza ontology credits:
-
-- Alan Rector
-- Chris Wroe
-- Matthew Horridge
-- Nick Drummond
-- Robert Stevens
+`artifacts/reasoning/spicy-pizza.ofn` contains selected semantic content derived from Pizza Ontology 2.0 and retains the upstream **CC BY 3.0** boundary and historical contributor attribution.
 
 ## Repository-authored semantic-engineering artifacts
 
-The source repository publishes the following newly authored artifacts under the **MIT License**:
+The Pizza repository identifies the following newly authored artifacts as **MIT License** material:
 
 ### Validation
 
@@ -57,8 +43,6 @@ artifacts/decisions/decision-vocabulary.ttl
 artifacts/decisions/data/cases.json
 ```
 
-The manifest identifies the decision model as conforming to DMN 1.5.
-
 ### Calculation
 
 ```text
@@ -67,7 +51,16 @@ artifacts/calculations/calculation-vocabulary.ttl
 artifacts/calculations/data/cases.json
 ```
 
-The manifest identifies the mathematical formula as conforming to OpenMath 2.0 Revision 2. ESKA does not copy the formula, vocabulary, or calculation cases into its source tree. It supplies the bounded Semantic Capability, OpenMath evaluator binding, Execution, Result, Verification, and PROV-O lineage around the pinned artifacts.
+### Semantic mapping
+
+```text
+artifacts/mappings/pizza-to-menu.rq
+artifacts/mappings/menu-vocabulary.ttl
+artifacts/mappings/data/source-pizzas.ttl
+artifacts/mappings/data/expected-menu.ttl
+```
+
+The mapping artifacts separately represent the transformation semantics, target Menu semantic model, canonical source graph, and expected target graph. ESKA does not copy them into its source tree; it supplies the Mapping Semantic Capability, role-specific semantic-model refinements, execution, verification, result, and PROV-O lineage around the pinned external artifacts.
 
 ## ESKA material
 
@@ -75,42 +68,20 @@ The MIT license at the root of this repository applies to newly created ESKA mat
 
 - `SemanticCapability`, Service, and Agent contracts;
 - runtime fetch/binding code;
+- mode-specific role refinements defined by ESKA examples;
 - execution and verification code;
 - ESKA provenance records;
 - ESKA documentation.
 
 It does not replace the license of externally consumed semantic material.
 
-The licensing/provenance chain is therefore explicit:
+The provenance/licensing chain is explicit:
 
 ```text
-Pizza Ontology-derived reasoning semantics
-    CC BY 3.0
-        ↓ pinned source artifact
-ESKA reasoning execution architecture
-    MIT
-
-Pizza repository-authored SHACL/data
-    MIT
-        ↓ pinned source artifact
-ESKA validation execution
-    MIT
-
-Pizza repository-authored rule/vocabulary/data
-    MIT
-        ↓ pinned source artifact
-ESKA rule evaluation execution
-    MIT
-
-Pizza repository-authored DMN/vocabulary/cases
-    MIT
-        ↓ pinned source artifact
-ESKA decision evaluation execution
-    MIT
-
-Pizza repository-authored OpenMath/vocabulary/cases
-    MIT
-        ↓ pinned source artifact
-ESKA calculation execution
-    MIT
+Pizza-derived reasoning semantics      CC BY 3.0 → ESKA reasoning architecture      MIT
+Pizza SHACL/data                       MIT       → ESKA validation execution         MIT
+Pizza rule/vocabulary/data             MIT       → ESKA rule execution               MIT
+Pizza DMN/vocabulary/cases             MIT       → ESKA decision execution           MIT
+Pizza OpenMath/vocabulary/cases        MIT       → ESKA calculation execution        MIT
+Pizza mapping/target model/source data MIT       → ESKA transformation execution     MIT
 ```
