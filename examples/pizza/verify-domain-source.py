@@ -22,6 +22,9 @@ FORBIDDEN_LOCAL_COPIES = (
     HERE / "decisions" / "pizza-dietary-suitability.dmn",
     HERE / "decisions" / "decision-vocabulary.ttl",
     HERE / "decisions" / "data" / "cases.json",
+    HERE / "calculations" / "pizza-area.openmath.xml",
+    HERE / "calculations" / "calculation-vocabulary.ttl",
+    HERE / "calculations" / "data" / "cases.json",
 )
 
 EXPECTED_ARTIFACTS = {
@@ -35,6 +38,9 @@ EXPECTED_ARTIFACTS = {
     "decisionModel": "artifacts/decisions/pizza-dietary-suitability.dmn",
     "decisionVocabulary": "artifacts/decisions/decision-vocabulary.ttl",
     "decisionCases": "artifacts/decisions/data/cases.json",
+    "calculationFormula": "artifacts/calculations/pizza-area.openmath.xml",
+    "calculationVocabulary": "artifacts/calculations/calculation-vocabulary.ttl",
+    "calculationCases": "artifacts/calculations/data/cases.json",
 }
 
 EXPECTED_MATERIALIZED = (
@@ -49,6 +55,9 @@ EXPECTED_MATERIALIZED = (
     "decision.dmn",
     "decision-vocabulary.ttl",
     "decision-cases.json",
+    "calculation.openmath.xml",
+    "calculation-vocabulary.ttl",
+    "calculation-cases.json",
     "source.json",
 )
 
