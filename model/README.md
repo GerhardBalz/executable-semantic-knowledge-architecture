@@ -46,13 +46,37 @@ Contains capability-specific helper terms useful in examples but not yet justifi
 
 ### `eska-service.ttl`
 
-Contains Knowledge Service and transport/representation concepts. Service exposure is currently demonstrated on the Pizza classification path only.
+Contains Knowledge Service and transport/representation concepts. Service exposure is now demonstrated for two different semantic modes:
+
+```text
+PizzaClassificationCapability
+    → PizzaClassificationService
+
+PizzaValidationCapability
+    → PizzaValidationService
+```
+
+Both use the same provisional `KnowledgeService` / `ServiceOperation` structure, including semantic input/output types, result relation, operation path/method, and representation field mappings. The validation example required no change to `eska-service.ttl`.
+
+The result representation remains mode-specific: classification returns a list of semantic class IRIs, while validation returns a JSON-LD serialization of a `sh:ValidationReport`. The generic `resultField` identifies where the semantically typed result is carried; it does not prescribe one universal JSON shape.
 
 ### `eska-agent.ttl`
 
-Contains Knowledge Agent and discovery concepts. Agent discovery/invocation is currently demonstrated on the Pizza classification path only.
+Contains Knowledge Agent and discovery concepts. Deterministic Agent discovery/invocation is now demonstrated for both classification and validation:
 
-Service and Agent therefore remain deliberately outside core.
+```text
+PizzaKnowledgeAgent
+    targets PizzaClassificationCapability
+
+PizzaValidationAgent
+    targets PizzaValidationCapability
+```
+
+Both discover a Service operation from machine-readable ESKA contracts and combine that semantic contract with a runtime deployment binding.
+
+The Agent vocabulary itself required no change, but the executable Agent implementations interpret results according to the discovered semantic output contract. Classification interprets `owl:Class` result IRIs; validation parses and checks a `sh:ValidationReport` RDF graph. This is evidence against embedding one result-shape assumption into the generic Agent model.
+
+Service and Agent remain outside core because operational exposure is still an optional layer and only two of the seven execution modes currently demonstrate it. The next generalization work should compare these two working paths before promoting or redesigning extension terms.
 
 ## Mode-specific semantic refinements
 

@@ -46,6 +46,9 @@ jobs:
       - name: Install SHACL validator
         run: python -m pip install -r examples/pizza/validation/requirements.txt
 
+      - name: Run validation Knowledge Service and Knowledge Agent integration
+        run: bash examples/pizza/validation/test-agent.sh
+
       - name: Run semantic validation example
         run: python examples/pizza/validation/validate.py
 

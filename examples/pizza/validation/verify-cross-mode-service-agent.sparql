@@ -1,0 +1,44 @@
+PREFIX eska: <urn:eska:core:>
+PREFIX cap: <urn:eska:example:pizza:capability:>
+PREFIX svc: <urn:eska:example:pizza:service:>
+PREFIX agent: <urn:eska:example:pizza:agent:>
+PREFIX val: <urn:eska:example:pizza:validation:>
+PREFIX valsvc: <urn:eska:example:pizza:validation-service:>
+PREFIX valagent: <urn:eska:example:pizza:validation-agent:>
+
+# ROBOT verify treats returned rows as violations.
+# Both classification and validation must fit the same provisional Service/Agent extension pattern.
+SELECT ?mode ?capability
+WHERE {
+  VALUES (?mode ?capability ?service ?operation ?knowledgeAgent ?discovery) {
+    ("classification" cap:PizzaClassificationCapability svc:PizzaClassificationService svc:ClassifyPizzaClassOperation agent:PizzaKnowledgeAgent agent:PizzaClassificationServiceDiscovery)
+    ("validation" val:PizzaValidationCapability valsvc:PizzaValidationService valsvc:ValidatePizzaDataOperation valagent:PizzaValidationAgent valagent:PizzaValidationServiceDiscovery)
+  }
+
+  FILTER NOT EXISTS {
+    ?service
+        a eska:KnowledgeService ;
+        eska:exposesCapability ?capability ;
+        eska:hasOperation ?operation .
+
+    ?operation
+        a eska:ServiceOperation ;
+        eska:httpMethod ?method ;
+        eska:path ?path ;
+        eska:mediaType ?mediaType ;
+        eska:requestField ?requestField ;
+        eska:resultField ?resultField ;
+        eska:relationField ?relationField ;
+        eska:capabilityField ?capabilityField ;
+        eska:inputType ?inputType ;
+        eska:outputType ?outputType ;
+        eska:producesRelation ?relation .
+
+    ?knowledgeAgent
+        a eska:KnowledgeAgent ;
+        eska:targetsCapability ?capability ;
+        eska:usesDiscoveryArtifact ?discovery .
+
+    ?discovery a eska:DiscoveryArtifact .
+  }
+}
