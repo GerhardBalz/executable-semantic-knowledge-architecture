@@ -25,10 +25,10 @@ cap:PizzaClassificationCapability
 cap:SpicyPizzaSemanticModel
     a eska:SemanticModel, prov:Entity ;
     dcterms:title "Spicy Pizza semantic model slice"@en ;
-    dcterms:identifier "artifacts/reasoning/spicy-pizza.ofn@613ff0b6e615cbb2eac7cd92358eca9f885fbc7d" ;
+    dcterms:identifier "artifacts/reasoning/spicy-pizza.ofn@bba9fa883f326ebeb395140abd523dc517caf071" ;
     dcterms:description "Commit-pinned coherent OWL module owned and published by the companion pizza-ontology repository for the SpicyPizza classification example."@en ;
-    dcterms:source <https://github.com/GerhardBalz/pizza-ontology/blob/613ff0b6e615cbb2eac7cd92358eca9f885fbc7d/artifacts/reasoning/spicy-pizza.ofn> ;
-    dcterms:relation <https://github.com/GerhardBalz/pizza-ontology/blob/613ff0b6e615cbb2eac7cd92358eca9f885fbc7d/artifacts/manifest.ttl> .
+    dcterms:source <https://github.com/GerhardBalz/pizza-ontology/blob/bba9fa883f326ebeb395140abd523dc517caf071/artifacts/reasoning/spicy-pizza.ofn> ;
+    dcterms:relation <https://github.com/GerhardBalz/pizza-ontology/blob/bba9fa883f326ebeb395140abd523dc517caf071/artifacts/manifest.ttl> .
 
 cap:OWLClassificationArtifact
     a eska:ExecutableSemanticKnowledgeArtifact, prov:Entity ;
