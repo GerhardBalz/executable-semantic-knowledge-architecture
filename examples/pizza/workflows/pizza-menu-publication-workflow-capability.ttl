@@ -59,19 +59,19 @@ wf:PizzaWorkflowResult
 wf:PizzaMenuPublicationBPMNModel
     a eska:SemanticModel, prov:Entity ;
     dcterms:title "Pizza menu-publication BPMN model"@en ;
-    dcterms:identifier "artifacts/workflows/pizza-menu-publication.bpmn@5b993ed9321f3dc5889f6e111d933feddbcd13d3" ;
+    dcterms:identifier "artifacts/workflows/pizza-menu-publication.bpmn@715f0460a43abacb5258eedd3d722da219a25a43" ;
     dcterms:description "Commit-pinned BPMN 2.0.2 process owned and published by the companion pizza-ontology repository."@en ;
     dcterms:conformsTo <https://www.omg.org/spec/BPMN/2.0.2/> ;
-    dcterms:source <https://github.com/GerhardBalz/pizza-ontology/blob/5b993ed9321f3dc5889f6e111d933feddbcd13d3/artifacts/workflows/pizza-menu-publication.bpmn> ;
-    dcterms:relation <https://github.com/GerhardBalz/pizza-ontology/blob/5b993ed9321f3dc5889f6e111d933feddbcd13d3/artifacts/manifest.ttl> .
+    dcterms:source <https://github.com/GerhardBalz/pizza-ontology/blob/715f0460a43abacb5258eedd3d722da219a25a43/artifacts/workflows/pizza-menu-publication.bpmn> ;
+    dcterms:relation <https://github.com/GerhardBalz/pizza-ontology/blob/715f0460a43abacb5258eedd3d722da219a25a43/artifacts/manifest.ttl> .
 
 wf:PizzaWorkflowOutcomeModel
     a eska:SemanticModel, prov:Entity ;
     dcterms:title "Pizza workflow semantic vocabulary"@en ;
-    dcterms:identifier "artifacts/workflows/workflow-vocabulary.ttl@5b993ed9321f3dc5889f6e111d933feddbcd13d3" ;
+    dcterms:identifier "artifacts/workflows/workflow-vocabulary.ttl@715f0460a43abacb5258eedd3d722da219a25a43" ;
     dcterms:description "Commit-pinned workflow vocabulary defining semantic operations and Published/Rejected outcomes."@en ;
-    dcterms:source <https://github.com/GerhardBalz/pizza-ontology/blob/5b993ed9321f3dc5889f6e111d933feddbcd13d3/artifacts/workflows/workflow-vocabulary.ttl> ;
-    dcterms:relation <https://github.com/GerhardBalz/pizza-ontology/blob/5b993ed9321f3dc5889f6e111d933feddbcd13d3/artifacts/manifest.ttl> .
+    dcterms:source <https://github.com/GerhardBalz/pizza-ontology/blob/715f0460a43abacb5258eedd3d722da219a25a43/artifacts/workflows/workflow-vocabulary.ttl> ;
+    dcterms:relation <https://github.com/GerhardBalz/pizza-ontology/blob/715f0460a43abacb5258eedd3d722da219a25a43/artifacts/manifest.ttl> .
 
 wf:BPMNWorkflowExecutionArtifact
     a eska:ExecutableSemanticKnowledgeArtifact, prov:Entity ;
