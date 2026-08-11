@@ -376,6 +376,7 @@ The project intentionally does **not** begin as a general software framework, LL
 ## Documentation
 
 - [Semantic models](model/README.md)
+- [Related Work and ESKA Positioning](docs/related-work.md)
 - [Knowledge Service Generalization](docs/knowledge-service-generalization.md)
 - [Knowledge Agent Generalization](docs/knowledge-agent-generalization.md)
 - [Deployment Binding](docs/deployment-binding.md)
