@@ -1,40 +1,23 @@
 {
-  "status": "w3id-active",
+  "status": "w3id-active-versioned",
   "repository": "GerhardBalz/executable-semantic-knowledge-architecture",
   "branch": "main",
+  "releaseTag": "eska-v0.1.0",
   "humanDocumentation": "https://github.com/GerhardBalz/executable-semantic-knowledge-architecture",
   "namespaceDocumentation": "https://github.com/GerhardBalz/executable-semantic-knowledge-architecture/blob/main/docs/namespace-publication-versioning.md",
   "combinedRdf": "https://raw.githubusercontent.com/GerhardBalz/executable-semantic-knowledge-architecture/main/dist/eska.ttl",
   "modules": {
-    "core": {
-      "rdf": "https://raw.githubusercontent.com/GerhardBalz/executable-semantic-knowledge-architecture/main/model/eska-core.ttl",
-      "human": "https://github.com/GerhardBalz/executable-semantic-knowledge-architecture/blob/main/model/eska-core.ttl",
-      "iri": "https://w3id.org/eska/model/core"
-    },
-    "capability": {
-      "rdf": "https://raw.githubusercontent.com/GerhardBalz/executable-semantic-knowledge-architecture/main/model/eska-capability.ttl",
-      "human": "https://github.com/GerhardBalz/executable-semantic-knowledge-architecture/blob/main/model/eska-capability.ttl",
-      "iri": "https://w3id.org/eska/model/capability"
-    },
-    "service": {
-      "rdf": "https://raw.githubusercontent.com/GerhardBalz/executable-semantic-knowledge-architecture/main/model/eska-service.ttl",
-      "human": "https://github.com/GerhardBalz/executable-semantic-knowledge-architecture/blob/main/model/eska-service.ttl",
-      "iri": "https://w3id.org/eska/model/service"
-    },
-    "agent": {
-      "rdf": "https://raw.githubusercontent.com/GerhardBalz/executable-semantic-knowledge-architecture/main/model/eska-agent.ttl",
-      "human": "https://github.com/GerhardBalz/executable-semantic-knowledge-architecture/blob/main/model/eska-agent.ttl",
-      "iri": "https://w3id.org/eska/model/agent"
-    },
-    "deployment": {
-      "rdf": "https://raw.githubusercontent.com/GerhardBalz/executable-semantic-knowledge-architecture/main/model/eska-deployment.ttl",
-      "human": "https://github.com/GerhardBalz/executable-semantic-knowledge-architecture/blob/main/model/eska-deployment.ttl",
-      "iri": "https://w3id.org/eska/model/deployment"
-    }
+    "core": {"rdf":"https://raw.githubusercontent.com/GerhardBalz/executable-semantic-knowledge-architecture/main/model/eska-core.ttl","human":"https://github.com/GerhardBalz/executable-semantic-knowledge-architecture/blob/main/model/eska-core.ttl","iri":"https://w3id.org/eska/model/core","version":"0.1.0","versionIri":"https://w3id.org/eska/model/core/0.1.0","versionRdf":"https://raw.githubusercontent.com/GerhardBalz/executable-semantic-knowledge-architecture/eska-v0.1.0/model/eska-core.ttl","versionHuman":"https://github.com/GerhardBalz/executable-semantic-knowledge-architecture/blob/eska-v0.1.0/model/eska-core.ttl","versionDistribution":"https://w3id.org/eska/dist/0.1.0/eska-core.ttl"},
+    "capability": {"rdf":"https://raw.githubusercontent.com/GerhardBalz/executable-semantic-knowledge-architecture/main/model/eska-capability.ttl","human":"https://github.com/GerhardBalz/executable-semantic-knowledge-architecture/blob/main/model/eska-capability.ttl","iri":"https://w3id.org/eska/model/capability","version":"0.2.0","versionIri":"https://w3id.org/eska/model/capability/0.2.0","versionRdf":"https://raw.githubusercontent.com/GerhardBalz/executable-semantic-knowledge-architecture/eska-v0.1.0/model/eska-capability.ttl","versionHuman":"https://github.com/GerhardBalz/executable-semantic-knowledge-architecture/blob/eska-v0.1.0/model/eska-capability.ttl","versionDistribution":"https://w3id.org/eska/dist/0.2.0/eska-capability.ttl"},
+    "service": {"rdf":"https://raw.githubusercontent.com/GerhardBalz/executable-semantic-knowledge-architecture/main/model/eska-service.ttl","human":"https://github.com/GerhardBalz/executable-semantic-knowledge-architecture/blob/main/model/eska-service.ttl","iri":"https://w3id.org/eska/model/service","version":"0.4.0","versionIri":"https://w3id.org/eska/model/service/0.4.0","versionRdf":"https://raw.githubusercontent.com/GerhardBalz/executable-semantic-knowledge-architecture/eska-v0.1.0/model/eska-service.ttl","versionHuman":"https://github.com/GerhardBalz/executable-semantic-knowledge-architecture/blob/eska-v0.1.0/model/eska-service.ttl","versionDistribution":"https://w3id.org/eska/dist/0.4.0/eska-service.ttl"},
+    "agent": {"rdf":"https://raw.githubusercontent.com/GerhardBalz/executable-semantic-knowledge-architecture/main/model/eska-agent.ttl","human":"https://github.com/GerhardBalz/executable-semantic-knowledge-architecture/blob/main/model/eska-agent.ttl","iri":"https://w3id.org/eska/model/agent","version":"0.3.0","versionIri":"https://w3id.org/eska/model/agent/0.3.0","versionRdf":"https://raw.githubusercontent.com/GerhardBalz/executable-semantic-knowledge-architecture/eska-v0.1.0/model/eska-agent.ttl","versionHuman":"https://github.com/GerhardBalz/executable-semantic-knowledge-architecture/blob/eska-v0.1.0/model/eska-agent.ttl","versionDistribution":"https://w3id.org/eska/dist/0.3.0/eska-agent.ttl"},
+    "deployment": {"rdf":"https://raw.githubusercontent.com/GerhardBalz/executable-semantic-knowledge-architecture/main/model/eska-deployment.ttl","human":"https://github.com/GerhardBalz/executable-semantic-knowledge-architecture/blob/main/model/eska-deployment.ttl","iri":"https://w3id.org/eska/model/deployment","version":"0.1.0","versionIri":"https://w3id.org/eska/model/deployment/0.1.0","versionRdf":"https://raw.githubusercontent.com/GerhardBalz/executable-semantic-knowledge-architecture/eska-v0.1.0/model/eska-deployment.ttl","versionHuman":"https://github.com/GerhardBalz/executable-semantic-knowledge-architecture/blob/eska-v0.1.0/model/eska-deployment.ttl","versionDistribution":"https://w3id.org/eska/dist/0.1.0/eska-deployment.ttl"}
   },
   "w3idPayload": "publication/w3id/eska",
-  "note": "W3ID IRIs are the persistent semantic/publication identifiers. GitHub URLs remain replaceable backend locations.",
+  "note": "Unversioned W3ID routes represent current governed main. Version IRIs and version distributions resolve only to the immutable eska-v0.1.0 release tag.",
   "persistentVocabulary": "https://w3id.org/eska",
   "persistentCombinedRdf": "https://w3id.org/eska/dist/eska.ttl",
-  "w3idPullRequest": "https://github.com/perma-id/w3id.org/pull/6530"
+  "w3idActivationPullRequest": "https://github.com/perma-id/w3id.org/pull/6530",
+  "w3idVersionRoutesPullRequest": "https://github.com/perma-id/w3id.org/pull/6535",
+  "w3idVersionRoutesMergeCommit": "bf72939d8d6a15d78f2be16a87eaca494e72882b"
 }
