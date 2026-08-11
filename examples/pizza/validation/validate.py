@@ -19,7 +19,7 @@ RESULTS = HERE / "results"
 DOMAIN_DIR = PIZZA_EXAMPLE / ".work" / "pizza-domain"
 SOURCE_CONFIG = PIZZA_EXAMPLE / "pizza-domain-source.json"
 
-ESKA = Namespace("urn:eska:core:")
+ESKA = Namespace("https://w3id.org/eska#")
 SH = Namespace("http://www.w3.org/ns/shacl#")
 PROV = Namespace("http://www.w3.org/ns/prov#")
 DCTERMS = Namespace("http://purl.org/dc/terms/")

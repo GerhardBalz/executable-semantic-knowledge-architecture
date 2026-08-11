@@ -167,7 +167,7 @@ from rdflib import Graph, Namespace, RDF, URIRef
 results = Path(sys.argv[1])
 spicy = sys.argv[2]
 AGENT = "urn:eska:example:pizza:general-agent:PizzaGeneralizedKnowledgeAgent"
-ESKA = Namespace("urn:eska:core:")
+ESKA = Namespace("https://w3id.org/eska#")
 PROV = Namespace("http://www.w3.org/ns/prov#")
 SH = Namespace("http://www.w3.org/ns/shacl#")
 DEP = "urn:eska:example:pizza:deployment:"

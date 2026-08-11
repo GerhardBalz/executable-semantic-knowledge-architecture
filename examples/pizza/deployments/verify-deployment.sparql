@@ -1,6 +1,6 @@
 PREFIX dcterms: <http://purl.org/dc/terms/>
 PREFIX dep: <urn:eska:example:pizza:deployment:>
-PREFIX eska: <urn:eska:core:>
+PREFIX eska: <https://w3id.org/eska#>
 PREFIX svc: <urn:eska:example:pizza:service:>
 PREFIX valsvc: <urn:eska:example:pizza:validation-service:>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>

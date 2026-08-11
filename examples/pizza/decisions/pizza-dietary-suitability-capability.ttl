@@ -1,5 +1,5 @@
 @prefix dcterms: <http://purl.org/dc/terms/> .
-@prefix eska: <urn:eska:core:> .
+@prefix eska: <https://w3id.org/eska#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix prov: <http://www.w3.org/ns/prov#> .
 @prefix dec: <urn:eska:example:pizza:decision:> .

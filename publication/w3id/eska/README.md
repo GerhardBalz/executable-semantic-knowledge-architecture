@@ -19,7 +19,7 @@ Project:
 The authoritative ESKA ontology source still uses the provisional term namespace:
 
 ```text
-urn:eska:core:
+https://w3id.org/eska#
 ```
 
 The adopted permanent target namespace is:

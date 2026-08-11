@@ -16,7 +16,7 @@ dist/eska.ttl
 `dist/eska.ttl` currently preserves the provisional namespace:
 
 ```text
-urn:eska:core:
+https://w3id.org/eska#
 ```
 
 The permanent target namespace defined by `model/publication-contract.json` is:

@@ -1,0 +1,84 @@
+{
+  "migration": "urn-to-w3id-2026-08-11",
+  "predecessorTermNamespace": "urn:eska:core:",
+  "successorTermNamespace": "https://w3id.org/eska#",
+  "relation": "historical-predecessor-to-successor",
+  "owlSameAsUsed": false,
+  "ontologyIris": [
+    {
+      "predecessor": "urn:eska:model:core",
+      "successor": "https://w3id.org/eska/model/core"
+    },
+    {
+      "predecessor": "urn:eska:model:capability",
+      "successor": "https://w3id.org/eska/model/capability"
+    },
+    {
+      "predecessor": "urn:eska:model:service",
+      "successor": "https://w3id.org/eska/model/service"
+    },
+    {
+      "predecessor": "urn:eska:model:agent",
+      "successor": "https://w3id.org/eska/model/agent"
+    },
+    {
+      "predecessor": "urn:eska:model:deployment",
+      "successor": "https://w3id.org/eska/model/deployment"
+    }
+  ],
+  "terms": [
+    "AccessBinding",
+    "ApplicabilityCondition",
+    "Capability",
+    "DeploymentBinding",
+    "DeploymentEnvironment",
+    "DiscoveryArtifact",
+    "ExecutableSemanticKnowledgeArtifact",
+    "Execution",
+    "HTTPAccessBinding",
+    "HTTPDeploymentBinding",
+    "KnowledgeAgent",
+    "KnowledgeService",
+    "Result",
+    "SemanticCapability",
+    "SemanticInvocationAdapter",
+    "SemanticModel",
+    "ServiceDeployment",
+    "ServiceOperation",
+    "Verification",
+    "baseURL",
+    "capabilityField",
+    "deploysService",
+    "exampleInput",
+    "exampleOutput",
+    "executesCapability",
+    "exposesCapability",
+    "generatesResult",
+    "hasAccessBinding",
+    "hasDeploymentBinding",
+    "hasOperation",
+    "httpMethod",
+    "inEnvironment",
+    "inputType",
+    "mediaType",
+    "outputType",
+    "path",
+    "producesRelation",
+    "realizesCapability",
+    "relationField",
+    "requestField",
+    "requiresCondition",
+    "resultField",
+    "subject",
+    "supportsInputType",
+    "supportsOutputType",
+    "supportsRelation",
+    "targetsCapability",
+    "usesDiscoveryArtifact",
+    "usesExecutableArtifact",
+    "usesInvocationAdapter",
+    "usesSemanticModel",
+    "verifiesExecution",
+    "verifiesResult"
+  ]
+}

@@ -290,7 +290,7 @@ The executable examples explicitly merge required model artifacts during verific
 All ESKA core terms currently use:
 
 ```text
-urn:eska:core:
+https://w3id.org/eska#
 ```
 
 This is deliberate. The project should stabilize the concepts before choosing a permanent public namespace and publication policy.

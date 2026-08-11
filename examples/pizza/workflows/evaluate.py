@@ -26,7 +26,7 @@ BPMN_NS = "http://www.omg.org/spec/BPMN/20100524/MODEL"
 WF_SOURCE_NS = "urn:pizza-ontology:workflow:"
 BPMN = {"bpmn": BPMN_NS, "wf": WF_SOURCE_NS}
 
-ESKA = Namespace("urn:eska:core:")
+ESKA = Namespace("https://w3id.org/eska#")
 WF = Namespace("urn:eska:example:pizza:workflow:")
 WF_SOURCE = Namespace(WF_SOURCE_NS)
 VAL = Namespace("urn:eska:example:pizza:validation:")

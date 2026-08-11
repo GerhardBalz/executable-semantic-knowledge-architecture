@@ -112,7 +112,7 @@ EXECUTED_AT="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
 cat > "${RESULTS_DIR}/provenance.ttl" <<EOF
 @prefix cap: <urn:eska:example:pizza:capability:> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
-@prefix eska: <urn:eska:core:> .
+@prefix eska: <https://w3id.org/eska#> .
 @prefix prov: <http://www.w3.org/ns/prov#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .

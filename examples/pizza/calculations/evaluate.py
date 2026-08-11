@@ -24,7 +24,7 @@ RESULTS = HERE / "results"
 OM_NS = "http://www.openmath.org/OpenMath"
 OM = f"{{{OM_NS}}}"
 
-ESKA = Namespace("urn:eska:core:")
+ESKA = Namespace("https://w3id.org/eska#")
 CAL = Namespace("urn:eska:example:pizza:calculation:")
 CALC = Namespace("urn:pizza-ontology:calculation:")
 PROV = Namespace("http://www.w3.org/ns/prov#")

@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 import urllib.error
 import urllib.request
@@ -40,10 +41,7 @@ def fetch(route: str, accept: str, expected_final: str, *, expect_text: str | No
     opener = urllib.request.build_opener(handler)
     request = urllib.request.Request(
         route,
-        headers={
-            "Accept": accept,
-            "User-Agent": USER_AGENT,
-        },
+        headers={"Accept": accept, "User-Agent": USER_AGENT},
     )
     try:
         with opener.open(request, timeout=30) as response:
@@ -56,15 +54,9 @@ def fetch(route: str, accept: str, expected_final: str, *, expect_text: str | No
         raise AssertionError(f"{route} could not be resolved/fetched: {exc.reason}") from exc
 
     require(status == 200, f"{route}: final response was HTTP {status}, expected 200")
-    require(
-        normalize(final_url) == normalize(expected_final),
-        f"{route}: resolved to {final_url}, expected {expected_final}",
-    )
+    require(normalize(final_url) == normalize(expected_final), f"{route}: resolved to {final_url}, expected {expected_final}")
     require(handler.chain, f"{route}: W3ID route did not redirect")
-    require(
-        any(code == 303 for code, _ in handler.chain),
-        f"{route}: redirect chain contains no HTTP 303: {handler.chain}",
-    )
+    require(any(code == 303 for code, _ in handler.chain), f"{route}: redirect chain contains no HTTP 303: {handler.chain}")
     if expect_text is not None:
         require(expect_text in content, f"{route}: resolved representation lacks expected marker {expect_text!r}")
     return handler.chain
@@ -75,37 +67,43 @@ def main() -> None:
     targets = json.loads(TARGETS_PATH.read_text(encoding="utf-8"))
 
     term = contract["termNamespace"]
-    require(term["target"] == "https://w3id.org/eska#", "unexpected permanent ESKA namespace")
-    require(
-        term["activationStatus"] in {"planned-not-active", "resolver-active-source-provisional"},
-        "live resolver verifier is running in an unexpected activation state",
-    )
+    require(term["current"] == "https://w3id.org/eska#", "unexpected permanent ESKA namespace")
+    require(term["predecessor"] == "urn:eska:core:", "unexpected predecessor ESKA namespace")
+    require(term["activationStatus"] == "active", "live resolver verifier is running in an unexpected activation state")
+
+    # W3ID intentionally redirects to the governed main branch. During a pull request
+    # that performs the atomic migration, the live backend still contains predecessor
+    # IRIs until the PR merges. On main, CI must require the permanent W3ID source.
+    pull_request_run = os.environ.get("GITHUB_EVENT_NAME") == "pull_request"
+    live_term_marker = term["predecessor"] if pull_request_run else term["current"]
 
     checks: list[tuple[str, str, str, str | None]] = [
         (W3ID_BASE, "text/html", targets["humanDocumentation"], None),
-        (W3ID_BASE, "text/turtle", targets["combinedRdf"], term["current"]),
+        (W3ID_BASE, "text/turtle", targets["combinedRdf"], live_term_marker),
         (f"{W3ID_BASE}/docs", "text/html", targets["namespaceDocumentation"], None),
-        (f"{W3ID_BASE}/dist/eska.ttl", "text/turtle", targets["combinedRdf"], term["current"]),
+        (f"{W3ID_BASE}/dist/eska.ttl", "text/turtle", targets["combinedRdf"], live_term_marker),
     ]
 
     for module in contract["modules"]:
         name = str(module["name"])
         target = targets["modules"][name]
+        live_module_marker = str(module["predecessorOntologyIri"] if pull_request_run else module["ontologyIri"])
         checks.append((f"{W3ID_BASE}/model/{name}", "text/html", target["human"], None))
-        checks.append((f"{W3ID_BASE}/model/{name}", "text/turtle", target["rdf"], str(module["currentOntologyIri"])))
+        checks.append((f"{W3ID_BASE}/model/{name}", "text/turtle", target["rdf"], live_module_marker))
 
-    print("Verifying live W3ID routes from the GitHub-hosted runner...")
+    mode = "pre-merge migration PR" if pull_request_run else "post-merge main"
+    print(f"Verifying live W3ID routes from the GitHub-hosted runner ({mode})...")
     for route, accept, expected_final, marker in checks:
         chain = fetch(route, accept, expected_final, expect_text=marker)
         rendered = " -> ".join(f"{code} {url}" for code, url in chain)
         print(f"PASS {route} [{accept}] -> {expected_final}")
         print(f"     redirects: {rendered}")
 
-    print("SUCCESS: live W3ID resolver routes are externally reachable and match the ESKA publication contract.")
+    print("SUCCESS: live W3ID resolver routes are externally reachable and match the expected publication phase.")
     print(f"Routes checked:       {len(checks)}")
-    print(f"Permanent namespace:  {term['target']}")
-    print(f"Source namespace:     {term['current']}")
-    print("Semantic migration:   not performed by this verifier")
+    print(f"Permanent namespace:  {term['current']}")
+    print(f"Predecessor namespace:{term['predecessor']}")
+    print(f"Verification phase:   {mode}")
 
 
 if __name__ == "__main__":

@@ -1,17 +1,14 @@
 {
-  "contractVersion": "1.0",
-  "status": "provisional-publication-strategy",
+  "contractVersion": "1.1",
+  "status": "permanent-namespace-active",
   "repository": "GerhardBalz/executable-semantic-knowledge-architecture",
   "termNamespace": {
-    "current": "urn:eska:core:",
-    "target": "https://w3id.org/eska#",
-    "activationStatus": "resolver-active-source-provisional",
-    "activationPrerequisites": [
-      "The W3ID redirect namespace has been accepted and resolves successfully.",
-      "Human-readable and RDF publication targets are deployed and verified.",
-      "A one-to-one predecessor mapping from every provisional ESKA term to its permanent IRI has been generated and verified.",
-      "The complete ESKA reference workflow is green at the migration commit."
-    ]
+    "current": "https://w3id.org/eska#",
+    "predecessor": "urn:eska:core:",
+    "activationStatus": "active",
+    "resolver": "https://w3id.org/eska",
+    "resolverContribution": "https://github.com/perma-id/w3id.org/pull/6530",
+    "migrationMap": "model/namespace-migration.json"
   },
   "publicationRoutes": {
     "vocabulary": "https://w3id.org/eska",
@@ -32,48 +29,54 @@
     "patch": "Documentation, annotations, metadata, or corrections that do not change the intended machine-interpretable contract.",
     "minor": "Backward-compatible additive semantic changes, including new terms or axioms that preserve existing intended use.",
     "major": "Breaking semantic contract changes. Materially incompatible term meaning should be deprecated and replaced rather than silently redefined.",
-    "termIrisUnversioned": true
+    "termIrisUnversioned": true,
+    "namespaceMigration": "The provisional URN identifiers are historical predecessors of the permanent W3ID identifiers. They are not asserted owl:sameAs."
   },
   "modules": [
     {
       "name": "core",
       "path": "model/eska-core.ttl",
-      "currentOntologyIri": "urn:eska:model:core",
-      "currentVersion": "0.1-provisional",
-      "targetOntologyIri": "https://w3id.org/eska/model/core",
-      "firstPublishedVersion": "0.1.0"
+      "ontologyIri": "https://w3id.org/eska/model/core",
+      "versionIri": "https://w3id.org/eska/model/core/0.1.0",
+      "version": "0.1.0",
+      "predecessorOntologyIri": "urn:eska:model:core",
+      "predecessorVersion": "0.1-provisional"
     },
     {
       "name": "capability",
       "path": "model/eska-capability.ttl",
-      "currentOntologyIri": "urn:eska:model:capability",
-      "currentVersion": "0.2-provisional",
-      "targetOntologyIri": "https://w3id.org/eska/model/capability",
-      "firstPublishedVersion": "0.2.0"
+      "ontologyIri": "https://w3id.org/eska/model/capability",
+      "versionIri": "https://w3id.org/eska/model/capability/0.2.0",
+      "version": "0.2.0",
+      "predecessorOntologyIri": "urn:eska:model:capability",
+      "predecessorVersion": "0.2-provisional"
     },
     {
       "name": "service",
       "path": "model/eska-service.ttl",
-      "currentOntologyIri": "urn:eska:model:service",
-      "currentVersion": "0.4-provisional",
-      "targetOntologyIri": "https://w3id.org/eska/model/service",
-      "firstPublishedVersion": "0.4.0"
+      "ontologyIri": "https://w3id.org/eska/model/service",
+      "versionIri": "https://w3id.org/eska/model/service/0.4.0",
+      "version": "0.4.0",
+      "predecessorOntologyIri": "urn:eska:model:service",
+      "predecessorVersion": "0.4-provisional"
     },
     {
       "name": "agent",
       "path": "model/eska-agent.ttl",
-      "currentOntologyIri": "urn:eska:model:agent",
-      "currentVersion": "0.3-provisional",
-      "targetOntologyIri": "https://w3id.org/eska/model/agent",
-      "firstPublishedVersion": "0.3.0"
+      "ontologyIri": "https://w3id.org/eska/model/agent",
+      "versionIri": "https://w3id.org/eska/model/agent/0.3.0",
+      "version": "0.3.0",
+      "predecessorOntologyIri": "urn:eska:model:agent",
+      "predecessorVersion": "0.3-provisional"
     },
     {
       "name": "deployment",
       "path": "model/eska-deployment.ttl",
-      "currentOntologyIri": "urn:eska:model:deployment",
-      "currentVersion": "0.1-provisional",
-      "targetOntologyIri": "https://w3id.org/eska/model/deployment",
-      "firstPublishedVersion": "0.1.0"
+      "ontologyIri": "https://w3id.org/eska/model/deployment",
+      "versionIri": "https://w3id.org/eska/model/deployment/0.1.0",
+      "version": "0.1.0",
+      "predecessorOntologyIri": "urn:eska:model:deployment",
+      "predecessorVersion": "0.1-provisional"
     }
   ]
 }

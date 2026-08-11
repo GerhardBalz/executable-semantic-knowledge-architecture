@@ -1,6 +1,6 @@
 PREFIX dec: <urn:eska:example:pizza:decision:>
 PREFIX decision: <urn:pizza-ontology:decision:>
-PREFIX eska: <urn:eska:core:>
+PREFIX eska: <https://w3id.org/eska#>
 PREFIX pizza: <http://www.co-ode.org/ontologies/pizza/pizza.owl#>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 

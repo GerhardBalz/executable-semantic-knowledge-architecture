@@ -88,7 +88,7 @@ baseURL
 The deployment ontology requires the provisional Service model:
 
 ```turtle
-dcterms:requires <urn:eska:model:service>
+dcterms:requires <https://w3id.org/eska/model/service>
 ```
 
 It remains outside `eska-core.ttl` because deployment is an optional operational concern rather than a prerequisite for executable semantic knowledge.

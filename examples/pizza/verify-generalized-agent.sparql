@@ -1,7 +1,7 @@
 PREFIX agentx: <urn:eska:example:pizza:general-agent:>
 PREFIX cap: <urn:eska:example:pizza:capability:>
 PREFIX dcterms: <http://purl.org/dc/terms/>
-PREFIX eska: <urn:eska:core:>
+PREFIX eska: <https://w3id.org/eska#>
 PREFIX owl: <http://www.w3.org/2002/07/owl#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX sh: <http://www.w3.org/ns/shacl#>

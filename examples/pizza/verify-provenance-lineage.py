@@ -15,7 +15,7 @@ from rdflib import Graph, Literal, Namespace, RDF, URIRef
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
 
-ESKA = Namespace("urn:eska:core:")
+ESKA = Namespace("https://w3id.org/eska#")
 PROV = Namespace("http://www.w3.org/ns/prov#")
 DCTERMS = Namespace("http://purl.org/dc/terms/")
 XSD = Namespace("http://www.w3.org/2001/XMLSchema#")

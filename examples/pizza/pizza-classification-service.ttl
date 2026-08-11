@@ -1,6 +1,6 @@
 @prefix cap: <urn:eska:example:pizza:capability:> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
-@prefix eska: <urn:eska:core:> .
+@prefix eska: <https://w3id.org/eska#> .
 @prefix svc: <urn:eska:example:pizza:service:> .
 
 svc:PizzaClassificationService

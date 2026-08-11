@@ -19,7 +19,7 @@ ROOT = HERE.parents[2]
 DOMAIN = PIZZA / ".work" / "pizza-domain"
 RESULTS = HERE / "results"
 
-ESKA = Namespace("urn:eska:core:")
+ESKA = Namespace("https://w3id.org/eska#")
 MAP = Namespace("urn:eska:example:pizza:mapping:")
 MENU = Namespace("urn:pizza-ontology:menu:")
 PIZZA_NS = Namespace("http://www.co-ode.org/ontologies/pizza/pizza.owl#")

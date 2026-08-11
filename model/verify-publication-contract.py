@@ -1,117 +1,56 @@
 #!/usr/bin/env python3
-"""Verify the machine-readable ESKA namespace/publication/versioning contract."""
-
+"""Verify the active ESKA namespace/publication/versioning contract."""
 from __future__ import annotations
-
-import json
+import json, re
 from pathlib import Path
-import re
 
 ROOT = Path(__file__).resolve().parents[1]
-MODEL = ROOT / "model"
-CONTRACT = MODEL / "publication-contract.json"
-
-ONTOLOGY_RE = re.compile(r"<([^>]+)>\s*\n\s*a owl:Ontology\s*;", re.MULTILINE)
+CONTRACT = ROOT / 'model/publication-contract.json'
+MIGRATION = ROOT / 'model/namespace-migration.json'
+ONTOLOGY_RE = re.compile(r'<([^>]+)>\s*\n\s*a owl:Ontology\s*;', re.MULTILINE)
+VERSION_IRI_RE = re.compile(r'owl:versionIRI\s+<([^>]+)>')
 VERSION_RE = re.compile(r'owl:versionInfo\s+"([^"]+)"')
-TERM_DECL_RE = re.compile(
-    r"^eska:([A-Za-z][A-Za-z0-9_-]*)\s*\n\s+a owl:(?:Class|ObjectProperty|DatatypeProperty)\s*;",
-    re.MULTILINE,
-)
-
+TERM_DECL_RE = re.compile(r'^eska:([A-Za-z][A-Za-z0-9_-]*)\s*\n\s+a owl:(?:Class|ObjectProperty|DatatypeProperty)\s*;', re.MULTILINE)
+SEMVER_RE = re.compile(r'^(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)$')
 
 def require(condition: bool, message: str) -> None:
-    if not condition:
-        raise AssertionError(message)
-
+    if not condition: raise AssertionError(message)
 
 def main() -> None:
-    contract = json.loads(CONTRACT.read_text(encoding="utf-8"))
-
-    require(contract["contractVersion"] == "1.0", "unexpected publication contract version")
-    require(
-        contract["status"] == "provisional-publication-strategy",
-        "publication strategy remains provisional until the source namespace migration is complete",
-    )
-
-    term = contract["termNamespace"]
-    require(term["current"] == "urn:eska:core:", "unexpected current ESKA term namespace")
-    require(term["target"] == "https://w3id.org/eska#", "unexpected target ESKA term namespace")
-    require(
-        term["activationStatus"] == "resolver-active-source-provisional",
-        "resolver must be recorded active while the semantic source remains provisional",
-    )
-    require(len(term["activationPrerequisites"]) >= 4, "activation prerequisites are incomplete")
-
-    routes = contract["publicationRoutes"]
-    require(routes["vocabulary"] == "https://w3id.org/eska", "unexpected vocabulary publication route")
-    require(routes["combinedRdf"].startswith("https://w3id.org/eska/"), "combined RDF route must use the persistent namespace")
-    require(routes["combinedDocumentation"].startswith("https://w3id.org/eska/"), "documentation route must use the persistent namespace")
-
-    release = contract["releaseVersioning"]
-    require(release["repositoryTagPattern"] == "eska-v{version}", "unexpected ESKA release tag pattern")
-    require(
-        bool(re.match(r"^(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)$", release["initialRepositoryVersion"])),
-        "initial repository version is not SemVer",
-    )
-    require(release["semanticModuleVersionsIndependent"] is True, "module versions must remain independent from repository release versions")
-
-    modules = contract["modules"]
-    require(
-        [module["name"] for module in modules] == ["core", "capability", "service", "agent", "deployment"],
-        "module publication order/identity changed unexpectedly",
-    )
-
-    current_iris: set[str] = set()
-    target_iris: set[str] = set()
-    declared_terms: dict[str, str] = {}
-
+    contract = json.loads(CONTRACT.read_text(encoding='utf-8'))
+    migration = json.loads(MIGRATION.read_text(encoding='utf-8'))
+    require(contract['contractVersion'] == '1.1', 'unexpected publication contract version')
+    require(contract['status'] == 'permanent-namespace-active', 'permanent publication contract is not active')
+    term = contract['termNamespace']
+    require(term['current'] == 'https://w3id.org/eska#', 'unexpected active ESKA term namespace')
+    require(term['predecessor'] == 'urn:eska:core:', 'unexpected predecessor term namespace')
+    require(term['activationStatus'] == 'active', 'permanent namespace must be active')
+    modules = contract['modules']
+    require([m['name'] for m in modules] == ['core','capability','service','agent','deployment'], 'module identity/order changed')
+    declared = {}
+    ontology_pairs = set()
     for module in modules:
-        path = ROOT / module["path"]
-        require(path.is_file(), f"missing module: {path}")
-        text = path.read_text(encoding="utf-8")
-
-        ontology_match = ONTOLOGY_RE.search(text)
-        require(ontology_match is not None, f"{path}: ontology IRI not found")
-        require(ontology_match.group(1) == module["currentOntologyIri"], f"{path}: current ontology IRI differs from publication contract")
-
-        version_match = VERSION_RE.search(text)
-        require(version_match is not None, f"{path}: owl:versionInfo not found")
-        require(version_match.group(1) == module["currentVersion"], f"{path}: current module version differs from publication contract")
-
-        # The resolver is live, but semantic source identity has deliberately not migrated yet.
-        require(module["currentOntologyIri"].startswith("urn:eska:model:"), f"{path}: ontology IRI migrated before the atomic migration increment")
-        require(module["targetOntologyIri"] == f"https://w3id.org/eska/model/{module['name']}", f"{path}: unexpected target ontology IRI")
-        require(
-            bool(re.match(r"^(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)$", module["firstPublishedVersion"])),
-            f"{path}: first published version is not SemVer",
-        )
-        require("https://w3id.org/eska" not in text, f"{path}: permanent semantic IRIs introduced before the atomic migration")
-
-        current_iris.add(module["currentOntologyIri"])
-        target_iris.add(module["targetOntologyIri"])
-
-        for local_name in TERM_DECL_RE.findall(text):
-            require(local_name not in declared_terms, f"ESKA term {local_name} is declared in both {declared_terms.get(local_name)} and {module['name']}")
-            declared_terms[local_name] = module["name"]
-
-    require(len(current_iris) == len(modules), "current ontology IRIs are not unique")
-    require(len(target_iris) == len(modules), "target ontology IRIs are not unique")
-    require(len(declared_terms) >= 20, f"unexpectedly few ESKA vocabulary terms discovered: {len(declared_terms)}")
-
-    migration_pairs = {
-        f"{term['current']}{local}": f"{term['target']}{local}"
-        for local in declared_terms
-    }
-    require(len(migration_pairs) == len(declared_terms), "term namespace migration is not one-to-one")
-    require(len(set(migration_pairs.values())) == len(migration_pairs), "target term IRIs collide")
-
-    print("SUCCESS: ESKA governance records a live persistent resolver while preserving the provisional semantic source until atomic migration.")
-    print(f"Current term namespace: {term['current']}")
-    print(f"Target term namespace:  {term['target']} ({term['activationStatus']})")
-    print(f"Ontology modules:       {len(modules)}")
-    print(f"Declared ESKA terms:    {len(declared_terms)}")
-    print(f"Initial repo release:   eska-v{release['initialRepositoryVersion']}")
-
-
-if __name__ == "__main__":
-    main()
+        path = ROOT / module['path']; text = path.read_text(encoding='utf-8')
+        require('@prefix eska: <https://w3id.org/eska#>' in text, f'{path}: active term namespace missing')
+        require('urn:eska:core:' not in text, f'{path}: provisional term namespace remains')
+        om = ONTOLOGY_RE.search(text); require(om and om.group(1) == module['ontologyIri'], f'{path}: ontology IRI mismatch')
+        vim = VERSION_IRI_RE.search(text); require(vim and vim.group(1) == module['versionIri'], f'{path}: version IRI mismatch')
+        vm = VERSION_RE.search(text); require(vm and vm.group(1) == module['version'], f'{path}: versionInfo mismatch')
+        require(bool(SEMVER_RE.match(module['version'])), f'{path}: module version is not SemVer')
+        ontology_pairs.add((module['predecessorOntologyIri'], module['ontologyIri']))
+        for local in TERM_DECL_RE.findall(text):
+            require(local not in declared, f'term {local} declared twice'); declared[local] = module['name']
+    require(len(declared) == 53, f'expected 53 ESKA terms, found {len(declared)}')
+    require(set(migration['terms']) == set(declared), 'migration term inventory differs from modules')
+    require(migration['predecessorTermNamespace'] == term['predecessor'], 'migration predecessor mismatch')
+    require(migration['successorTermNamespace'] == term['current'], 'migration successor mismatch')
+    require(migration['owlSameAsUsed'] is False, 'namespace migration must not use owl:sameAs')
+    mapped = {(x['predecessor'], x['successor']) for x in migration['ontologyIris']}
+    require(mapped == ontology_pairs, 'ontology predecessor mapping incomplete')
+    print('SUCCESS: ESKA permanent namespace and predecessor mapping are machine-verifiable.')
+    print(f"Active term namespace:      {term['current']}")
+    print(f"Predecessor term namespace: {term['predecessor']}")
+    print(f"Ontology modules:           {len(modules)}")
+    print(f"Declared ESKA terms:        {len(declared)}")
+    print(f"Next repository release:    eska-v{contract['releaseVersioning']['initialRepositoryVersion']}")
+if __name__ == '__main__': main()

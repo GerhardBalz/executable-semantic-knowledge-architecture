@@ -47,9 +47,13 @@ Capability      → invoke
 - **Agent accessibility** — agents can discover and invoke machine-described capabilities rather than reconstructing meaning from prompts alone.
 - **Explicit semantic-source ownership** — execution architecture should not become the accidental owner of domain semantics.
 
-## Provisional ESKA core
+## ESKA core
 
-The cross-mode core lives in [`model/eska-core.ttl`](model/eska-core.ttl):
+The cross-mode core lives in [`model/eska-core.ttl`](model/eska-core.ttl), published as module version **0.1.0** under the permanent ESKA namespace:
+
+```text
+https://w3id.org/eska#
+```
 
 ```text
 SemanticModel
@@ -85,7 +89,7 @@ Seven materially different execution modes have been used as falsification tests
 
 Operational exposure and runtime location are optional layers, so they remain outside core.
 
-### Knowledge Service — `eska-service.ttl` 0.4-provisional
+### Knowledge Service — `eska-service.ttl` 0.4.0
 
 A **Knowledge Service** exposes one or more Semantic Capabilities operationally.
 
@@ -113,7 +117,7 @@ One executable `PizzaKnowledgeService` specimen exposes both Classification and 
 
 See [Knowledge Service Generalization](docs/knowledge-service-generalization.md).
 
-### Knowledge Agent — `eska-agent.ttl` 0.3-provisional
+### Knowledge Agent — `eska-agent.ttl` 0.3.0
 
 The generalized deterministic reference Agent targets Classification and Validation and selects semantically compatible request/result adapters from the discovered Capability contract.
 
@@ -140,7 +144,7 @@ The baseline remains deterministic and non-LLM. Agent accessibility is therefore
 
 See [Knowledge Agent Generalization](docs/knowledge-agent-generalization.md).
 
-### Deployment — `eska-deployment.ttl` 0.1-provisional
+### Deployment — `eska-deployment.ttl` 0.1.0
 
 Runtime location is modeled separately from stable Service meaning:
 
@@ -272,19 +276,13 @@ See [Provenance, Evidence, and Result Lineage](docs/provenance-evidence-lineage.
 
 ## Namespace, publication, and versioning
 
-The current authoritative ESKA term namespace remains:
-
-```text
-urn:eska:core:
-```
-
-The adopted permanent target is:
+The authoritative ESKA term namespace is:
 
 ```text
 https://w3id.org/eska#
 ```
 
-**The W3ID namespace is planned, not active.** No source ontology terms have migrated yet and the repository does not claim that `https://w3id.org/eska` currently resolves.
+The W3ID resolver is active. The provisional `urn:eska:core:` term namespace and `urn:eska:model:*` ontology IRIs are retained only as historical predecessors in the machine-readable migration record; the migration does **not** assert `owl:sameAs`.
 
 The publication contract separates stable term identity, independently versioned ontology modules, and repository releases:
 
@@ -304,9 +302,9 @@ Repository release
 
 The first publication preserves the existing module evolution rather than flattening every module to the repository release version.
 
-`model/publication-contract.json` and `model/verify-publication-contract.py` currently verify **5 modules and 53 declared ESKA terms** and fail if permanent W3ID IRIs leak into ontology source before activation.
+`model/publication-contract.json`, `model/namespace-migration.json`, and the publication verifiers cover **5 modules and 53 declared ESKA terms**. During this migration PR, the live resolver still serves the predecessor representation from `main`; after merge, the same verifier requires the permanent W3ID representation from `main`.
 
-See [Namespace, Publication, and Versioning](docs/namespace-publication-versioning.md). Actual activation and the atomic namespace migration are tracked in **#53**.
+See [Namespace, Publication, and Versioning](docs/namespace-publication-versioning.md). The namespace migration is tracked in **#53**; the repository tag/release `eska-v0.1.0` remains the separate governed publication step.
 
 ## Pizza as the reference domain
 
@@ -343,7 +341,7 @@ See [Pizza executable reference](examples/pizza/README.md).
 
 The repository now demonstrates:
 
-- seven executable-semantic modes over one unchanged provisional core;
+- seven executable-semantic modes over one unchanged cross-mode core;
 - sixteen verified semantic Executions, including composite Workflow child steps;
 - twenty-three source-owned Pizza semantic distributions consumed from an immutable commit;
 - generalized multi-capability Knowledge Service semantics;
@@ -351,7 +349,7 @@ The repository now demonstrates:
 - blue/green Service deployments resolved separately from semantic discovery;
 - five distinct operational Agent invocation lineages;
 - immutable source/result lineage through PROV-O without a parallel ESKA provenance ontology;
-- a machine-verifiable namespace/publication/versioning contract for five modules and 53 declared ESKA terms.
+- an active permanent W3ID namespace with a machine-verifiable predecessor map for five modules and 53 declared ESKA terms.
 
 The architecture intentionally does **not** claim that Service, Agent, Deployment, mode-specific role refinements, or technology-specific execution concepts belong in core.
 
@@ -359,7 +357,7 @@ The architecture intentionally does **not** claim that Service, Agent, Deploymen
 
 Completed foundations:
 
-- [x] ESKA terminology and provisional core.
+- [x] ESKA terminology and cross-mode core.
 - [x] Seven executable-semantic modes and sixteen core Executions.
 - [x] Commit-pinned Pizza semantic-source ownership boundary.
 - [x] Generalized Knowledge Service semantics across Classification + Validation.
@@ -367,10 +365,11 @@ Completed foundations:
 - [x] Deployment binding separated from semantic Service contracts with blue/green evidence.
 - [x] Cross-cutting provenance/evidence/Result lineage verification across 16 semantic + 5 operational Executions.
 - [x] Namespace/publication/versioning strategy and machine-readable governance contract.
+- [x] W3ID resolver established and permanent ESKA IRIs migrated in #53.
 
 Next governed publication step:
 
-- [ ] **#53 — establish real W3ID publication targets/resolver, verify resolvability, then perform one atomic permanent-IRI migration and prepare `eska-v0.1.0`.**
+- [ ] Create and verify the immutable repository tag/release `eska-v0.1.0` after the namespace migration is merged.
 
 The project intentionally does **not** begin as a general software framework, LLM-agent platform, or large meta-ontology.
 

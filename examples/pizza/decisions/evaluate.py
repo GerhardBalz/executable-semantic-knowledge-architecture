@@ -23,7 +23,7 @@ DMN_NS = "https://www.omg.org/spec/DMN/20230324/MODEL/"
 DMN = {"dmn": DMN_NS}
 EXPECTED_INPUTS = ["containsMeat", "containsFish"]
 
-ESKA = Namespace("urn:eska:core:")
+ESKA = Namespace("https://w3id.org/eska#")
 DEC = Namespace("urn:eska:example:pizza:decision:")
 DECISION = Namespace("urn:pizza-ontology:decision:")
 PROV = Namespace("http://www.w3.org/ns/prov#")
