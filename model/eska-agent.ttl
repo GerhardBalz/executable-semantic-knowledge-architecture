@@ -7,9 +7,10 @@
 <https://w3id.org/eska/model/agent>
     a owl:Ontology ;
     dcterms:title "ESKA agent model"@en ;
-    dcterms:description "A deliberately small, provisional extension containing terms needed to describe and test Knowledge Agents, semantic service discovery, and semantically typed invocation adaptation."@en ;
+    dcterms:description "A deliberately small extension containing terms needed to describe and test Knowledge Agents, semantic service discovery, and semantically typed invocation adaptation."@en ;
     dcterms:requires <https://w3id.org/eska/model/core> ;
-    owl:versionInfo "0.3-provisional" .
+    owl:versionIRI <https://w3id.org/eska/model/agent/0.3.0> ;
+    owl:versionInfo "0.3.0" .
 
 eska:KnowledgeAgent
     a owl:Class ;

@@ -7,9 +7,10 @@
 <https://w3id.org/eska/model/service>
     a owl:Ontology ;
     dcterms:title "ESKA service model"@en ;
-    dcterms:description "A deliberately small, provisional extension containing stable Knowledge Service semantics plus separate access-binding terms."@en ;
+    dcterms:description "A deliberately small extension containing stable Knowledge Service semantics plus separate access-binding terms."@en ;
     dcterms:requires <https://w3id.org/eska/model/core> ;
-    owl:versionInfo "0.4-provisional" .
+    owl:versionIRI <https://w3id.org/eska/model/service/0.4.0> ;
+    owl:versionInfo "0.4.0" .
 
 eska:KnowledgeService
     a owl:Class ;

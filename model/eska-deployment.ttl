@@ -9,9 +9,10 @@
 <https://w3id.org/eska/model/deployment>
     a owl:Ontology ;
     dcterms:title "ESKA deployment binding model"@en ;
-    dcterms:description "A deliberately small, provisional extension for binding a stable Knowledge Service contract to concrete runtime deployments without embedding environment-specific locations in semantic Service or Capability contracts."@en ;
+    dcterms:description "A deliberately small extension for binding a stable Knowledge Service contract to concrete runtime deployments without embedding environment-specific locations in semantic Service or Capability contracts."@en ;
     dcterms:requires <https://w3id.org/eska/model/service> ;
-    owl:versionInfo "0.1-provisional" .
+    owl:versionIRI <https://w3id.org/eska/model/deployment/0.1.0> ;
+    owl:versionInfo "0.1.0" .
 
 eska:ServiceDeployment
     a owl:Class ;

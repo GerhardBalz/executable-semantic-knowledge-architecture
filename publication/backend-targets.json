@@ -1,5 +1,5 @@
 {
-  "status": "w3id-resolver-active-source-provisional",
+  "status": "w3id-active",
   "repository": "GerhardBalz/executable-semantic-knowledge-architecture",
   "branch": "main",
   "humanDocumentation": "https://github.com/GerhardBalz/executable-semantic-knowledge-architecture",
@@ -8,25 +8,33 @@
   "modules": {
     "core": {
       "rdf": "https://raw.githubusercontent.com/GerhardBalz/executable-semantic-knowledge-architecture/main/model/eska-core.ttl",
-      "human": "https://github.com/GerhardBalz/executable-semantic-knowledge-architecture/blob/main/model/eska-core.ttl"
+      "human": "https://github.com/GerhardBalz/executable-semantic-knowledge-architecture/blob/main/model/eska-core.ttl",
+      "iri": "https://w3id.org/eska/model/core"
     },
     "capability": {
       "rdf": "https://raw.githubusercontent.com/GerhardBalz/executable-semantic-knowledge-architecture/main/model/eska-capability.ttl",
-      "human": "https://github.com/GerhardBalz/executable-semantic-knowledge-architecture/blob/main/model/eska-capability.ttl"
+      "human": "https://github.com/GerhardBalz/executable-semantic-knowledge-architecture/blob/main/model/eska-capability.ttl",
+      "iri": "https://w3id.org/eska/model/capability"
     },
     "service": {
       "rdf": "https://raw.githubusercontent.com/GerhardBalz/executable-semantic-knowledge-architecture/main/model/eska-service.ttl",
-      "human": "https://github.com/GerhardBalz/executable-semantic-knowledge-architecture/blob/main/model/eska-service.ttl"
+      "human": "https://github.com/GerhardBalz/executable-semantic-knowledge-architecture/blob/main/model/eska-service.ttl",
+      "iri": "https://w3id.org/eska/model/service"
     },
     "agent": {
       "rdf": "https://raw.githubusercontent.com/GerhardBalz/executable-semantic-knowledge-architecture/main/model/eska-agent.ttl",
-      "human": "https://github.com/GerhardBalz/executable-semantic-knowledge-architecture/blob/main/model/eska-agent.ttl"
+      "human": "https://github.com/GerhardBalz/executable-semantic-knowledge-architecture/blob/main/model/eska-agent.ttl",
+      "iri": "https://w3id.org/eska/model/agent"
     },
     "deployment": {
       "rdf": "https://raw.githubusercontent.com/GerhardBalz/executable-semantic-knowledge-architecture/main/model/eska-deployment.ttl",
-      "human": "https://github.com/GerhardBalz/executable-semantic-knowledge-architecture/blob/main/model/eska-deployment.ttl"
+      "human": "https://github.com/GerhardBalz/executable-semantic-knowledge-architecture/blob/main/model/eska-deployment.ttl",
+      "iri": "https://w3id.org/eska/model/deployment"
     }
   },
   "w3idPayload": "publication/w3id/eska",
-  "note": "W3ID publication routes are live and externally verified. The semantic source still uses provisional urn:eska:* identifiers until the atomic namespace migration. Backend URLs remain publication locations, not ESKA semantic identifiers."
+  "note": "W3ID IRIs are the persistent semantic/publication identifiers. GitHub URLs remain replaceable backend locations.",
+  "persistentVocabulary": "https://w3id.org/eska",
+  "persistentCombinedRdf": "https://w3id.org/eska/dist/eska.ttl",
+  "w3idPullRequest": "https://github.com/perma-id/w3id.org/pull/6530"
 }

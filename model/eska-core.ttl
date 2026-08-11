@@ -8,8 +8,9 @@
 <https://w3id.org/eska/model/core>
     a owl:Ontology ;
     dcterms:title "ESKA core model"@en ;
-    dcterms:description "A deliberately small, provisional core model containing concepts demonstrated across more than one executable-semantic mode."@en ;
-    owl:versionInfo "0.1-provisional" .
+    dcterms:description "A deliberately small core model containing concepts demonstrated across more than one executable-semantic mode."@en ;
+    owl:versionIRI <https://w3id.org/eska/model/core/0.1.0> ;
+    owl:versionInfo "0.1.0" .
 
 eska:SemanticModel
     a owl:Class ;

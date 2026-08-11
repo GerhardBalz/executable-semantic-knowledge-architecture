@@ -75,9 +75,9 @@ def main() -> None:
     targets = json.loads(TARGETS_PATH.read_text(encoding="utf-8"))
 
     term = contract["termNamespace"]
-    require(term["target"] == "https://w3id.org/eska#", "unexpected permanent ESKA namespace")
+    require(term["current"] == "https://w3id.org/eska#", "unexpected permanent ESKA namespace")
     require(
-        term["activationStatus"] in {"planned-not-active", "resolver-active-source-provisional"},
+        term["activationStatus"] == "active",
         "live resolver verifier is running in an unexpected activation state",
     )
 
@@ -92,7 +92,7 @@ def main() -> None:
         name = str(module["name"])
         target = targets["modules"][name]
         checks.append((f"{W3ID_BASE}/model/{name}", "text/html", target["human"], None))
-        checks.append((f"{W3ID_BASE}/model/{name}", "text/turtle", target["rdf"], str(module["currentOntologyIri"])))
+        checks.append((f"{W3ID_BASE}/model/{name}", "text/turtle", target["rdf"], str(module["ontologyIri"])))
 
     print("Verifying live W3ID routes from the GitHub-hosted runner...")
     for route, accept, expected_final, marker in checks:
@@ -103,9 +103,9 @@ def main() -> None:
 
     print("SUCCESS: live W3ID resolver routes are externally reachable and match the ESKA publication contract.")
     print(f"Routes checked:       {len(checks)}")
-    print(f"Permanent namespace:  {term['target']}")
+    print(f"Permanent namespace:  {term['current']}")
     print(f"Source namespace:     {term['current']}")
-    print("Semantic migration:   not performed by this verifier")
+    print("Semantic migration:   active permanent W3ID source")
 
 
 if __name__ == "__main__":
