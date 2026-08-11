@@ -24,6 +24,7 @@ jobs:
               Path('docs/w3id-namespace-migration.md'),
               Path('.github/workflows/namespace-migration-audit.yml'),
               Path('.github/workflows/apply-namespace-migration.yml'),
+              Path('.github/workflows/apply-stage3-governance.yml'),
           }
           hits = []
           for path in Path('.').rglob('*'):
