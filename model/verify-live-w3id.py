@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import json
-import os
 from pathlib import Path
 import urllib.error
 import urllib.request
@@ -62,22 +61,6 @@ def fetch(route: str, accept: str, expected_final: str, *, expect_text: str | No
     return handler.chain
 
 
-def running_against_main() -> bool:
-    """Return true only when Actions is validating the repository main branch.
-
-    Feature-branch pushes are not pull_request events, so GITHUB_EVENT_NAME alone
-    cannot distinguish them from post-merge main. GITHUB_HEAD_REF covers PR runs;
-    GITHUB_REF_NAME covers ordinary branch pushes.
-    """
-    head_ref = os.environ.get("GITHUB_HEAD_REF", "").strip()
-    ref_name = os.environ.get("GITHUB_REF_NAME", "").strip()
-    if head_ref:
-        return False
-    if ref_name:
-        return ref_name == "main"
-    return os.environ.get("GITHUB_EVENT_NAME") == "push" and os.environ.get("GITHUB_REF") == "refs/heads/main"
-
-
 def main() -> None:
     contract = json.loads(CONTRACT_PATH.read_text(encoding="utf-8"))
     targets = json.loads(TARGETS_PATH.read_text(encoding="utf-8"))
@@ -87,40 +70,33 @@ def main() -> None:
     require(term["predecessor"] == "urn:eska:core:", "unexpected predecessor ESKA namespace")
     require(term["activationStatus"] == "active", "live resolver verifier is running in an unexpected activation state")
 
-    # W3ID intentionally redirects to the governed main branch. Any feature/PR
-    # validation must therefore inspect the representation currently on main.
-    # Only a run executing on main itself may require the permanent post-migration
-    # representation.
-    main_run = running_against_main()
-    live_term_marker = term["current"] if main_run else term["predecessor"]
-
+    # The atomic migration is now merged. W3ID points to governed main, so every
+    # CI context must observe the permanent namespace from the live backend.
     checks: list[tuple[str, str, str, str | None]] = [
         (W3ID_BASE, "text/html", targets["humanDocumentation"], None),
-        (W3ID_BASE, "text/turtle", targets["combinedRdf"], live_term_marker),
+        (W3ID_BASE, "text/turtle", targets["combinedRdf"], term["current"]),
         (f"{W3ID_BASE}/docs", "text/html", targets["namespaceDocumentation"], None),
-        (f"{W3ID_BASE}/dist/eska.ttl", "text/turtle", targets["combinedRdf"], live_term_marker),
+        (f"{W3ID_BASE}/dist/eska.ttl", "text/turtle", targets["combinedRdf"], term["current"]),
     ]
 
     for module in contract["modules"]:
         name = str(module["name"])
         target = targets["modules"][name]
-        live_module_marker = str(module["ontologyIri"] if main_run else module["predecessorOntologyIri"])
         checks.append((f"{W3ID_BASE}/model/{name}", "text/html", target["human"], None))
-        checks.append((f"{W3ID_BASE}/model/{name}", "text/turtle", target["rdf"], live_module_marker))
+        checks.append((f"{W3ID_BASE}/model/{name}", "text/turtle", target["rdf"], str(module["ontologyIri"])))
 
-    mode = "post-merge main" if main_run else "feature/PR validation against current main backend"
-    print(f"Verifying live W3ID routes from the GitHub-hosted runner ({mode})...")
+    print("Verifying live W3ID routes from the GitHub-hosted runner (active permanent namespace)...")
     for route, accept, expected_final, marker in checks:
         chain = fetch(route, accept, expected_final, expect_text=marker)
         rendered = " -> ".join(f"{code} {url}" for code, url in chain)
         print(f"PASS {route} [{accept}] -> {expected_final}")
         print(f"     redirects: {rendered}")
 
-    print("SUCCESS: live W3ID resolver routes are externally reachable and match the expected publication phase.")
+    print("SUCCESS: live W3ID resolver routes expose the active permanent ESKA namespace.")
     print(f"Routes checked:       {len(checks)}")
     print(f"Permanent namespace:  {term['current']}")
     print(f"Predecessor namespace:{term['predecessor']}")
-    print(f"Verification phase:   {mode}")
+    print("Verification phase:   active permanent namespace")
 
 
 if __name__ == "__main__":
