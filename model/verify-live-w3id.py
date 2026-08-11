@@ -62,6 +62,22 @@ def fetch(route: str, accept: str, expected_final: str, *, expect_text: str | No
     return handler.chain
 
 
+def running_against_main() -> bool:
+    """Return true only when Actions is validating the repository main branch.
+
+    Feature-branch pushes are not pull_request events, so GITHUB_EVENT_NAME alone
+    cannot distinguish them from post-merge main. GITHUB_HEAD_REF covers PR runs;
+    GITHUB_REF_NAME covers ordinary branch pushes.
+    """
+    head_ref = os.environ.get("GITHUB_HEAD_REF", "").strip()
+    ref_name = os.environ.get("GITHUB_REF_NAME", "").strip()
+    if head_ref:
+        return False
+    if ref_name:
+        return ref_name == "main"
+    return os.environ.get("GITHUB_EVENT_NAME") == "push" and os.environ.get("GITHUB_REF") == "refs/heads/main"
+
+
 def main() -> None:
     contract = json.loads(CONTRACT_PATH.read_text(encoding="utf-8"))
     targets = json.loads(TARGETS_PATH.read_text(encoding="utf-8"))
@@ -71,11 +87,12 @@ def main() -> None:
     require(term["predecessor"] == "urn:eska:core:", "unexpected predecessor ESKA namespace")
     require(term["activationStatus"] == "active", "live resolver verifier is running in an unexpected activation state")
 
-    # W3ID intentionally redirects to the governed main branch. During a pull request
-    # that performs the atomic migration, the live backend still contains predecessor
-    # IRIs until the PR merges. On main, CI must require the permanent W3ID source.
-    pull_request_run = os.environ.get("GITHUB_EVENT_NAME") == "pull_request"
-    live_term_marker = term["predecessor"] if pull_request_run else term["current"]
+    # W3ID intentionally redirects to the governed main branch. Any feature/PR
+    # validation must therefore inspect the representation currently on main.
+    # Only a run executing on main itself may require the permanent post-migration
+    # representation.
+    main_run = running_against_main()
+    live_term_marker = term["current"] if main_run else term["predecessor"]
 
     checks: list[tuple[str, str, str, str | None]] = [
         (W3ID_BASE, "text/html", targets["humanDocumentation"], None),
@@ -87,11 +104,11 @@ def main() -> None:
     for module in contract["modules"]:
         name = str(module["name"])
         target = targets["modules"][name]
-        live_module_marker = str(module["predecessorOntologyIri"] if pull_request_run else module["ontologyIri"])
+        live_module_marker = str(module["ontologyIri"] if main_run else module["predecessorOntologyIri"])
         checks.append((f"{W3ID_BASE}/model/{name}", "text/html", target["human"], None))
         checks.append((f"{W3ID_BASE}/model/{name}", "text/turtle", target["rdf"], live_module_marker))
 
-    mode = "pre-merge migration PR" if pull_request_run else "post-merge main"
+    mode = "post-merge main" if main_run else "feature/PR validation against current main backend"
     print(f"Verifying live W3ID routes from the GitHub-hosted runner ({mode})...")
     for route, accept, expected_final, marker in checks:
         chain = fetch(route, accept, expected_final, expect_text=marker)
