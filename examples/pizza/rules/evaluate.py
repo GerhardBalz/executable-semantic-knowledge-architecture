@@ -18,7 +18,7 @@ ROOT = HERE.parents[2]
 DOMAIN = PIZZA / ".work" / "pizza-domain"
 RESULTS = HERE / "results"
 
-ESKA = Namespace("urn:eska:core:")
+ESKA = Namespace("https://w3id.org/eska#")
 RUL = Namespace("urn:eska:example:pizza:rule:")
 RULE = Namespace("urn:pizza-ontology:rule:")
 DATA = Namespace("urn:pizza-ontology:rule:example:")

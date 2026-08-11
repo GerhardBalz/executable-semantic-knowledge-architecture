@@ -1,6 +1,6 @@
 PREFIX agentx: <urn:eska:example:pizza:general-agent:>
 PREFIX dcterms: <http://purl.org/dc/terms/>
-PREFIX eska: <urn:eska:core:>
+PREFIX eska: <https://w3id.org/eska#>
 
 # Discover all operational contracts targeted by the generalized Pizza Agent,
 # including one semantically compatible invocation adapter per Capability.

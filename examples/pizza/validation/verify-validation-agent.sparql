@@ -1,5 +1,5 @@
 PREFIX dcterms: <http://purl.org/dc/terms/>
-PREFIX eska: <urn:eska:core:>
+PREFIX eska: <https://w3id.org/eska#>
 PREFIX prov: <http://www.w3.org/ns/prov#>
 PREFIX val: <urn:eska:example:pizza:validation:>
 PREFIX valagent: <urn:eska:example:pizza:validation-agent:>

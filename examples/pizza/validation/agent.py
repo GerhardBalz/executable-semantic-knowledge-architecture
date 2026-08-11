@@ -20,7 +20,7 @@ TARGET_CAPABILITY = "urn:eska:example:pizza:validation:PizzaValidationCapability
 SHACL_REPORT = "http://www.w3.org/ns/shacl#ValidationReport"
 SHACL_CONFORMS = "http://www.w3.org/ns/shacl#conforms"
 
-ESKA = Namespace("urn:eska:core:")
+ESKA = Namespace("https://w3id.org/eska#")
 VAL = Namespace("urn:eska:example:pizza:validation:")
 VALAGENT = Namespace("urn:eska:example:pizza:validation-agent:")
 RUN = Namespace("urn:eska:example:pizza:validation-agent-run:")

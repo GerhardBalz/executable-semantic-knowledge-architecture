@@ -13,7 +13,7 @@ https://w3id.org/eska#
 The current namespace remains authoritative until activation:
 
 ```text
-urn:eska:core:
+https://w3id.org/eska#
 ```
 
 This is intentional. A resolvable-looking identifier must not be introduced before it resolves.
@@ -188,7 +188,7 @@ The migration must be one deliberate, reviewable change rather than gradual mixe
 Current state after this issue:
 
 ```text
-terms:     urn:eska:core:*
+terms:     https://w3id.org/eska#*
 modules:   urn:eska:model:*
 strategy:  target https://w3id.org/eska#
 status:    planned-not-active
@@ -215,7 +215,7 @@ Only after Stage B is live:
 1. migrate every defined term one-to-one by local name:
 
    ```text
-   urn:eska:core:Execution
+   https://w3id.org/eska#Execution
        →
    https://w3id.org/eska#Execution
    ```

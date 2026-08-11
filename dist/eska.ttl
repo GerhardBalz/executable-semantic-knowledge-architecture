@@ -4,13 +4,13 @@
 # This pre-activation distribution intentionally preserves the current URN namespace.
 
 @prefix dcterms: <http://purl.org/dc/terms/> .
-@prefix eska: <urn:eska:core:> .
+@prefix eska: <https://w3id.org/eska#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix prov: <http://www.w3.org/ns/prov#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 
-<urn:eska:model:core>
+<https://w3id.org/eska/model/core>
     a owl:Ontology ;
     dcterms:title "ESKA core model"@en ;
     dcterms:description "A deliberately small, provisional core model containing concepts demonstrated across more than one executable-semantic mode."@en ;
@@ -111,11 +111,11 @@ eska:verifiesResult
 
 # capability extension
 
-<urn:eska:model:capability>
+<https://w3id.org/eska/model/capability>
     a owl:Ontology ;
     dcterms:title "ESKA capability extension"@en ;
     dcterms:description "Provisional capability-specific terms that are useful for examples but have not yet been promoted into the ESKA core model."@en ;
-    dcterms:requires <urn:eska:model:core> ;
+    dcterms:requires <https://w3id.org/eska/model/core> ;
     owl:versionInfo "0.2-provisional" .
 
 eska:exampleInput a owl:ObjectProperty ; rdfs:label "example input"@en .
@@ -123,11 +123,11 @@ eska:exampleOutput a owl:ObjectProperty ; rdfs:label "example output"@en .
 
 # service extension
 
-<urn:eska:model:service>
+<https://w3id.org/eska/model/service>
     a owl:Ontology ;
     dcterms:title "ESKA service model"@en ;
     dcterms:description "A deliberately small, provisional extension containing stable Knowledge Service semantics plus separate access-binding terms."@en ;
-    dcterms:requires <urn:eska:model:core> ;
+    dcterms:requires <https://w3id.org/eska/model/core> ;
     owl:versionInfo "0.4-provisional" .
 
 eska:KnowledgeService
@@ -197,11 +197,11 @@ eska:capabilityField
 
 # agent extension
 
-<urn:eska:model:agent>
+<https://w3id.org/eska/model/agent>
     a owl:Ontology ;
     dcterms:title "ESKA agent model"@en ;
     dcterms:description "A deliberately small, provisional extension containing terms needed to describe and test Knowledge Agents, semantic service discovery, and semantically typed invocation adaptation."@en ;
-    dcterms:requires <urn:eska:model:core> ;
+    dcterms:requires <https://w3id.org/eska/model/core> ;
     owl:versionInfo "0.3-provisional" .
 
 eska:KnowledgeAgent
@@ -244,11 +244,11 @@ eska:supportsRelation
 
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-<urn:eska:model:deployment>
+<https://w3id.org/eska/model/deployment>
     a owl:Ontology ;
     dcterms:title "ESKA deployment binding model"@en ;
     dcterms:description "A deliberately small, provisional extension for binding a stable Knowledge Service contract to concrete runtime deployments without embedding environment-specific locations in semantic Service or Capability contracts."@en ;
-    dcterms:requires <urn:eska:model:service> ;
+    dcterms:requires <https://w3id.org/eska/model/service> ;
     owl:versionInfo "0.1-provisional" .
 
 eska:ServiceDeployment

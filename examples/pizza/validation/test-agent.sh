@@ -89,7 +89,7 @@ expected = {
     "valid": (True, 0),
     "invalid": (False, 1),
 }
-ESKA = Namespace("urn:eska:core:")
+ESKA = Namespace("https://w3id.org/eska#")
 SH = Namespace("http://www.w3.org/ns/shacl#")
 RUN = Namespace("urn:eska:example:pizza:validation-agent-run:")
 VAL = Namespace("urn:eska:example:pizza:validation:")

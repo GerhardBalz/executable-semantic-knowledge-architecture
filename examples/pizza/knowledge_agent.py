@@ -31,7 +31,7 @@ AGENT_IRI = "urn:eska:example:pizza:general-agent:PizzaGeneralizedKnowledgeAgent
 IRI_LIST_ADAPTER = "iri-list"
 SHACL_REPORT_ADAPTER = "rdf-jsonld-shacl-report"
 
-ESKA = Namespace("urn:eska:core:")
+ESKA = Namespace("https://w3id.org/eska#")
 PROV = Namespace("http://www.w3.org/ns/prov#")
 DCTERMS = Namespace("http://purl.org/dc/terms/")
 SH = Namespace("http://www.w3.org/ns/shacl#")

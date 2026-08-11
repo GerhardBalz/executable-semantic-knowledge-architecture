@@ -275,7 +275,7 @@ See [Provenance, Evidence, and Result Lineage](docs/provenance-evidence-lineage.
 The current authoritative ESKA term namespace remains:
 
 ```text
-urn:eska:core:
+https://w3id.org/eska#
 ```
 
 The adopted permanent target is:

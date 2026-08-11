@@ -1,7 +1,7 @@
 @prefix agent: <urn:eska:example:pizza:agent:> .
 @prefix cap: <urn:eska:example:pizza:capability:> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
-@prefix eska: <urn:eska:core:> .
+@prefix eska: <https://w3id.org/eska#> .
 @prefix prov: <http://www.w3.org/ns/prov#> .
 
 agent:PizzaKnowledgeAgent

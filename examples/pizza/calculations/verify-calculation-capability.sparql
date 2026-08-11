@@ -1,4 +1,4 @@
-PREFIX eska: <urn:eska:core:>
+PREFIX eska: <https://w3id.org/eska#>
 PREFIX cal: <urn:eska:example:pizza:calculation:>
 PREFIX calc: <urn:pizza-ontology:calculation:>
 PREFIX pizza: <http://www.co-ode.org/ontologies/pizza/pizza.owl#>

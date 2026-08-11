@@ -1,6 +1,6 @@
 @prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix dep: <urn:eska:example:pizza:deployment:> .
-@prefix eska: <urn:eska:core:> .
+@prefix eska: <https://w3id.org/eska#> .
 @prefix prov: <http://www.w3.org/ns/prov#> .
 @prefix svc: <urn:eska:example:pizza:service:> .
 @prefix valsvc: <urn:eska:example:pizza:validation-service:> .

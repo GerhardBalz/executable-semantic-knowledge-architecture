@@ -1,4 +1,4 @@
-PREFIX eska: <urn:eska:core:>
+PREFIX eska: <https://w3id.org/eska#>
 PREFIX cap: <urn:eska:example:pizza:capability:>
 PREFIX run: <urn:eska:example:pizza:>
 PREFIX val: <urn:eska:example:pizza:validation:>
