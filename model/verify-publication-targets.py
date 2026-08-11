@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify pre-activation ESKA publication targets and generated RDF distribution."""
+"""Verify ESKA publication targets while the W3ID resolver is live and source IRIs remain provisional."""
 
 from __future__ import annotations
 
@@ -36,8 +36,8 @@ def main() -> None:
     targets = json.loads(TARGETS_PATH.read_text(encoding="utf-8"))
 
     require(
-        contract["termNamespace"]["activationStatus"] == "planned-not-active",
-        "publication-target preparation must not activate the permanent namespace",
+        contract["termNamespace"]["activationStatus"] == "resolver-active-source-provisional",
+        "publication contract must record a live resolver while source IRIs remain provisional",
     )
     current_ns = str(contract["termNamespace"]["current"])
     target_ns = str(contract["termNamespace"]["target"])
@@ -61,16 +61,19 @@ def main() -> None:
     )
     require(
         graph_contains_namespace(distribution, current_ns),
-        "pre-activation distribution no longer contains the authoritative provisional namespace",
+        "resolver-active distribution no longer contains the authoritative provisional namespace before migration",
     )
     require(
         not graph_contains_namespace(distribution, target_ns),
-        "permanent W3ID terms leaked into the publication distribution before activation",
+        "permanent W3ID semantic terms leaked into the distribution before atomic migration",
     )
 
-    require(targets.get("status") == "prepared-not-w3id-active", "unexpected backend target status")
+    require(
+        targets.get("status") == "w3id-resolver-active-source-provisional",
+        "backend target status does not reflect the verified live resolver",
+    )
     require(targets.get("repository") == contract.get("repository"), "backend repository differs from publication contract")
-    require(targets.get("branch") == "main", "initial publication backend must track the governed main branch")
+    require(targets.get("branch") == "main", "publication backend must track the governed main branch")
 
     target_modules = targets.get("modules")
     require(isinstance(target_modules, dict), "backend module targets must be an object")
@@ -98,8 +101,8 @@ def main() -> None:
         )
 
     htaccess = W3ID_PATH.read_text(encoding="utf-8")
-    require("Point of contact: Gerhard Balz" in htaccess, "prepared W3ID payload lacks contact information")
-    require("RewriteEngine On" in htaccess or "RewriteEngine on" in htaccess, "prepared W3ID payload lacks RewriteEngine")
+    require("Point of contact: Gerhard Balz" in htaccess, "W3ID routing payload lacks contact information")
+    require("RewriteEngine On" in htaccess or "RewriteEngine on" in htaccess, "W3ID routing payload lacks RewriteEngine")
     for expected in (
         "dist/eska\\.ttl",
         "model/core",
@@ -109,20 +112,20 @@ def main() -> None:
         "model/deployment",
         "raw.githubusercontent.com/GerhardBalz/executable-semantic-knowledge-architecture/main/dist/eska.ttl",
     ):
-        require(expected in htaccess, f"prepared W3ID payload is missing routing contract: {expected}")
+        require(expected in htaccess, f"W3ID routing payload is missing contract: {expected}")
 
-    # Versioned W3ID routes must remain absent until immutable release targets exist.
+    # Versioned W3ID routes remain absent until immutable release targets exist.
     for module in modules:
         version = str(module["firstPublishedVersion"])
         forbidden = f"model/{module['name']}/{version}"
         require(forbidden not in htaccess, f"premature versioned W3ID route configured: {forbidden}")
 
-    print("SUCCESS: ESKA publication backends are prepared without activating the permanent namespace.")
+    print("SUCCESS: W3ID publication routes are active while ESKA semantic source identity remains deliberately provisional.")
     print(f"Combined distribution triples: {len(distribution)}")
     print(f"Authoritative modules:          {len(modules)}")
     print(f"Current term namespace:         {current_ns}")
-    print(f"Target term namespace:          {target_ns} (not active)")
-    print("W3ID contribution payload:      publication/w3id/eska/")
+    print(f"Target term namespace:          {target_ns} (resolver active; source provisional)")
+    print("W3ID routing source:            publication/w3id/eska/")
 
 
 if __name__ == "__main__":
