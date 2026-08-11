@@ -1,5 +1,5 @@
 {
-  "status": "prepared-not-w3id-active",
+  "status": "w3id-resolver-active-source-provisional",
   "repository": "GerhardBalz/executable-semantic-knowledge-architecture",
   "branch": "main",
   "humanDocumentation": "https://github.com/GerhardBalz/executable-semantic-knowledge-architecture",
@@ -28,5 +28,5 @@
     }
   },
   "w3idPayload": "publication/w3id/eska",
-  "note": "Backend URLs are publication locations, not ESKA semantic identifiers. Consumers should use W3ID after activation."
+  "note": "W3ID publication routes are live and externally verified. The semantic source still uses provisional urn:eska:* identifiers until the atomic namespace migration. Backend URLs remain publication locations, not ESKA semantic identifiers."
 }

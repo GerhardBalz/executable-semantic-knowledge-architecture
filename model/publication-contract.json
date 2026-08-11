@@ -5,7 +5,7 @@
   "termNamespace": {
     "current": "urn:eska:core:",
     "target": "https://w3id.org/eska#",
-    "activationStatus": "planned-not-active",
+    "activationStatus": "resolver-active-source-provisional",
     "activationPrerequisites": [
       "The W3ID redirect namespace has been accepted and resolves successfully.",
       "Human-readable and RDF publication targets are deployed and verified.",

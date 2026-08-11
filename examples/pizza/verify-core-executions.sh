@@ -61,3 +61,6 @@ python3 "${ROOT_DIR}/model/verify-publication-contract.py"
 
 printf '\nVerifying prepared publication backend targets and W3ID payload...\n'
 python3 "${ROOT_DIR}/model/verify-publication-targets.py"
+
+printf '\nVerifying live W3ID resolver and publication routes...\n'
+python3 "${ROOT_DIR}/model/verify-live-w3id.py"
