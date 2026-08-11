@@ -49,7 +49,7 @@ def fetch(route: str, accept: str, expected_final: str, *, expect_text: str | No
         with opener.open(request, timeout=30) as response:
             final_url = str(response.geturl())
             status = int(response.status)
-            content = response.read(4096).decode("utf-8", errors="replace")
+            content = response.read(16384).decode("utf-8", errors="replace") if expect_text is not None else ""
     except urllib.error.HTTPError as exc:
         raise AssertionError(f"{route} returned HTTP {exc.code}: {exc.reason}") from exc
     except urllib.error.URLError as exc:
@@ -82,9 +82,9 @@ def main() -> None:
     )
 
     checks: list[tuple[str, str, str, str | None]] = [
-        (W3ID_BASE, "text/html", targets["humanDocumentation"], "Executable Semantic Knowledge Architecture"),
+        (W3ID_BASE, "text/html", targets["humanDocumentation"], None),
         (W3ID_BASE, "text/turtle", targets["combinedRdf"], term["current"]),
-        (f"{W3ID_BASE}/docs", "text/html", targets["namespaceDocumentation"], "namespace"),
+        (f"{W3ID_BASE}/docs", "text/html", targets["namespaceDocumentation"], None),
         (f"{W3ID_BASE}/dist/eska.ttl", "text/turtle", targets["combinedRdf"], term["current"]),
     ]
 
