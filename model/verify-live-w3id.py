@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import json
-import os
 from pathlib import Path
 import urllib.error
 import urllib.request
@@ -71,39 +70,33 @@ def main() -> None:
     require(term["predecessor"] == "urn:eska:core:", "unexpected predecessor ESKA namespace")
     require(term["activationStatus"] == "active", "live resolver verifier is running in an unexpected activation state")
 
-    # W3ID intentionally redirects to the governed main branch. During a pull request
-    # that performs the atomic migration, the live backend still contains predecessor
-    # IRIs until the PR merges. On main, CI must require the permanent W3ID source.
-    pull_request_run = os.environ.get("GITHUB_EVENT_NAME") == "pull_request"
-    live_term_marker = term["predecessor"] if pull_request_run else term["current"]
-
+    # The atomic migration is now merged. W3ID points to governed main, so every
+    # CI context must observe the permanent namespace from the live backend.
     checks: list[tuple[str, str, str, str | None]] = [
         (W3ID_BASE, "text/html", targets["humanDocumentation"], None),
-        (W3ID_BASE, "text/turtle", targets["combinedRdf"], live_term_marker),
+        (W3ID_BASE, "text/turtle", targets["combinedRdf"], term["current"]),
         (f"{W3ID_BASE}/docs", "text/html", targets["namespaceDocumentation"], None),
-        (f"{W3ID_BASE}/dist/eska.ttl", "text/turtle", targets["combinedRdf"], live_term_marker),
+        (f"{W3ID_BASE}/dist/eska.ttl", "text/turtle", targets["combinedRdf"], term["current"]),
     ]
 
     for module in contract["modules"]:
         name = str(module["name"])
         target = targets["modules"][name]
-        live_module_marker = str(module["predecessorOntologyIri"] if pull_request_run else module["ontologyIri"])
         checks.append((f"{W3ID_BASE}/model/{name}", "text/html", target["human"], None))
-        checks.append((f"{W3ID_BASE}/model/{name}", "text/turtle", target["rdf"], live_module_marker))
+        checks.append((f"{W3ID_BASE}/model/{name}", "text/turtle", target["rdf"], str(module["ontologyIri"])))
 
-    mode = "pre-merge migration PR" if pull_request_run else "post-merge main"
-    print(f"Verifying live W3ID routes from the GitHub-hosted runner ({mode})...")
+    print("Verifying live W3ID routes from the GitHub-hosted runner (active permanent namespace)...")
     for route, accept, expected_final, marker in checks:
         chain = fetch(route, accept, expected_final, expect_text=marker)
         rendered = " -> ".join(f"{code} {url}" for code, url in chain)
         print(f"PASS {route} [{accept}] -> {expected_final}")
         print(f"     redirects: {rendered}")
 
-    print("SUCCESS: live W3ID resolver routes are externally reachable and match the expected publication phase.")
+    print("SUCCESS: live W3ID resolver routes expose the active permanent ESKA namespace.")
     print(f"Routes checked:       {len(checks)}")
     print(f"Permanent namespace:  {term['current']}")
     print(f"Predecessor namespace:{term['predecessor']}")
-    print(f"Verification phase:   {mode}")
+    print("Verification phase:   active permanent namespace")
 
 
 if __name__ == "__main__":
