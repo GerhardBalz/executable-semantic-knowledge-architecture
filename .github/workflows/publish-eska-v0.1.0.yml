@@ -1,0 +1,79 @@
+name: Publish ESKA v0.1.0
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - publication/releases/eska-v0.1.0.json
+      - docs/releases/eska-v0.1.0.md
+      - .github/workflows/publish-eska-v0.1.0.yml
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Verify governed release inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          manifest = json.loads(Path('publication/releases/eska-v0.1.0.json').read_text(encoding='utf-8'))
+          assert manifest['release'] == 'eska-v0.1.0'
+          assert manifest['repositoryVersion'] == '0.1.0'
+          assert manifest['permanentNamespace'] == 'https://w3id.org/eska#'
+          assert manifest['verification']['declaredTerms'] == 53
+          assert manifest['modules'] == {
+              'core': '0.1.0',
+              'capability': '0.2.0',
+              'service': '0.4.0',
+              'agent': '0.3.0',
+              'deployment': '0.1.0',
+          }
+          for path in manifest['bundle']:
+              assert Path(path).is_file(), path
+          print('SUCCESS: governed ESKA v0.1.0 release inputs are complete.')
+          PY
+
+      - name: Create immutable tag and GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: eska-v0.1.0
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            tag_sha="$(gh api "repos/$GH_REPO/git/ref/tags/$TAG" --jq '.object.sha')"
+            if [ "$tag_sha" != "$GITHUB_SHA" ]; then
+              echo "Existing $TAG points to $tag_sha, expected $GITHUB_SHA" >&2
+              exit 1
+            fi
+            echo "$TAG already exists at the governed release commit; leaving it unchanged."
+            exit 0
+          fi
+
+          gh release create "$TAG" \
+            --target "$GITHUB_SHA" \
+            --title "ESKA v0.1.0" \
+            --notes-file docs/releases/eska-v0.1.0.md \
+            dist/eska.ttl \
+            model/eska-core.ttl \
+            model/eska-capability.ttl \
+            model/eska-service.ttl \
+            model/eska-agent.ttl \
+            model/eska-deployment.ttl \
+            model/publication-contract.json \
+            model/namespace-migration.json
+
+          tag_sha="$(gh api "repos/$GH_REPO/git/ref/tags/$TAG" --jq '.object.sha')"
+          test "$tag_sha" = "$GITHUB_SHA"
+          echo "SUCCESS: $TAG and GitHub Release point to $GITHUB_SHA."
