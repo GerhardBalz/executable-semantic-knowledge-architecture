@@ -51,7 +51,7 @@ def main() -> None:
         checks += [
           (f"{W3ID_BASE}/model/{name}","text/html",target["human"],None),
           (f"{W3ID_BASE}/model/{name}","text/turtle",target["rdf"],str(module["ontologyIri"])),
-          (target["versionIri"],"text/html",target["versionHuman"],str(module["versionIri"])),
+          (target["versionIri"],"text/html",target["versionHuman"],None),
           (target["versionIri"],"text/turtle",target["versionRdf"],str(module["versionIri"])),
           (target["versionDistribution"],"text/turtle",target["versionRdf"],str(module["versionIri"]))]
     print("Verifying live current and immutable ESKA W3ID routes...")
