@@ -1,0 +1,286 @@
+name: Apply Stage 3 governance
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: write
+
+jobs:
+  govern:
+    if: github.head_ref == 'agent/migrate-eska-to-w3id'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+      - name: Apply published namespace and version governance
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import json
+          import re
+
+          root = Path('.')
+          modules = [
+              ('core', 'model/eska-core.ttl', '0.1-provisional', '0.1.0', 'urn:eska:model:core'),
+              ('capability', 'model/eska-capability.ttl', '0.2-provisional', '0.2.0', 'urn:eska:model:capability'),
+              ('service', 'model/eska-service.ttl', '0.4-provisional', '0.4.0', 'urn:eska:model:service'),
+              ('agent', 'model/eska-agent.ttl', '0.3-provisional', '0.3.0', 'urn:eska:model:agent'),
+              ('deployment', 'model/eska-deployment.ttl', '0.1-provisional', '0.1.0', 'urn:eska:model:deployment'),
+          ]
+
+          contract_modules = []
+          term_names = []
+          term_re = re.compile(r'^eska:([A-Za-z][A-Za-z0-9_-]*)\s*\n\s+a owl:(?:Class|ObjectProperty|DatatypeProperty)\s*;', re.MULTILINE)
+          for name, path_s, old_version, version, predecessor_iri in modules:
+              path = root / path_s
+              text = path.read_text(encoding='utf-8')
+              ontology_iri = f'https://w3id.org/eska/model/{name}'
+              version_iri = f'{ontology_iri}/{version}'
+              old = f'    owl:versionInfo "{old_version}" .'
+              new = f'    owl:versionIRI <{version_iri}> ;\n    owl:versionInfo "{version}" .'
+              if old in text:
+                  text = text.replace(old, new, 1)
+              elif f'owl:versionInfo "{version}"' not in text:
+                  raise SystemExit(f'{path}: expected version marker not found')
+              text = text.replace('deliberately small, provisional core model', 'deliberately small core model')
+              text = text.replace('deliberately small, provisional extension', 'deliberately small extension')
+              text = text.replace('Provisional capability-specific terms', 'Capability-specific terms')
+              path.write_text(text, encoding='utf-8')
+              term_names.extend(term_re.findall(text))
+              contract_modules.append({
+                  'name': name,
+                  'path': path_s,
+                  'ontologyIri': ontology_iri,
+                  'versionIri': version_iri,
+                  'version': version,
+                  'predecessorOntologyIri': predecessor_iri,
+                  'predecessorVersion': old_version,
+              })
+
+          if len(term_names) != 53 or len(set(term_names)) != 53:
+              raise SystemExit(f'expected 53 unique ESKA terms, found {len(term_names)} / {len(set(term_names))} unique')
+
+          contract = {
+              'contractVersion': '1.1',
+              'status': 'permanent-namespace-active',
+              'repository': 'GerhardBalz/executable-semantic-knowledge-architecture',
+              'termNamespace': {
+                  'current': 'https://w3id.org/eska#',
+                  'predecessor': 'urn:eska:core:',
+                  'activationStatus': 'active',
+                  'resolver': 'https://w3id.org/eska',
+                  'resolverContribution': 'https://github.com/perma-id/w3id.org/pull/6530',
+                  'migrationMap': 'model/namespace-migration.json',
+              },
+              'publicationRoutes': {
+                  'vocabulary': 'https://w3id.org/eska',
+                  'combinedRdf': 'https://w3id.org/eska/dist/eska.ttl',
+                  'combinedDocumentation': 'https://w3id.org/eska/docs',
+                  'modulePattern': 'https://w3id.org/eska/model/{module}',
+                  'moduleVersionPattern': 'https://w3id.org/eska/model/{module}/{version}',
+                  'moduleDistributionPattern': 'https://w3id.org/eska/dist/{version}/eska-{module}.ttl',
+              },
+              'releaseVersioning': {
+                  'repositoryTagPattern': 'eska-v{version}',
+                  'initialRepositoryVersion': '0.1.0',
+                  'semanticModuleVersionsIndependent': True,
+                  'repositoryReleaseMeaning': 'A governed repository snapshot and publication bundle. It is not a semantic version assertion for every contained ontology module.',
+              },
+              'compatibility': {
+                  'moduleVersioning': 'semver',
+                  'patch': 'Documentation, annotations, metadata, or corrections that do not change the intended machine-interpretable contract.',
+                  'minor': 'Backward-compatible additive semantic changes, including new terms or axioms that preserve existing intended use.',
+                  'major': 'Breaking semantic contract changes. Materially incompatible term meaning should be deprecated and replaced rather than silently redefined.',
+                  'termIrisUnversioned': True,
+                  'namespaceMigration': 'The provisional URN identifiers are historical predecessors of the permanent W3ID identifiers. They are not asserted owl:sameAs.',
+              },
+              'modules': contract_modules,
+          }
+          (root / 'model/publication-contract.json').write_text(json.dumps(contract, indent=2) + '\n', encoding='utf-8')
+
+          migration = {
+              'migration': 'urn-to-w3id-2026-08-11',
+              'predecessorTermNamespace': 'urn:eska:core:',
+              'successorTermNamespace': 'https://w3id.org/eska#',
+              'relation': 'historical-predecessor-to-successor',
+              'owlSameAsUsed': False,
+              'ontologyIris': [
+                  {'predecessor': m['predecessorOntologyIri'], 'successor': m['ontologyIri']}
+                  for m in contract_modules
+              ],
+              'terms': sorted(term_names),
+          }
+          (root / 'model/namespace-migration.json').write_text(json.dumps(migration, indent=2) + '\n', encoding='utf-8')
+
+          # Regenerate the combined RDF publication distribution from the five authoritative modules.
+          parts = [
+              '# GENERATED PUBLICATION DISTRIBUTION — DO NOT EDIT AS A SEMANTIC SOURCE.\n',
+              '# Source of truth: the five model/eska-*.ttl ontology modules.\n',
+              '# Permanent W3ID namespace activated after perma-id/w3id.org#6530.\n\n',
+          ]
+          for _, path_s, _, _, _ in modules:
+              parts.append((root / path_s).read_text(encoding='utf-8').rstrip() + '\n\n')
+          (root / 'dist/eska.ttl').write_text(''.join(parts), encoding='utf-8')
+
+          backend_path = root / 'publication/backend-targets.json'
+          backend = json.loads(backend_path.read_text(encoding='utf-8'))
+          backend['status'] = 'w3id-active'
+          backend['persistentVocabulary'] = 'https://w3id.org/eska'
+          backend['persistentCombinedRdf'] = 'https://w3id.org/eska/dist/eska.ttl'
+          backend['w3idPullRequest'] = 'https://github.com/perma-id/w3id.org/pull/6530'
+          backend['note'] = 'W3ID IRIs are the persistent semantic/publication identifiers. GitHub URLs remain replaceable backend locations.'
+          for module in contract_modules:
+              backend['modules'][module['name']]['iri'] = module['ontologyIri']
+          backend_path.write_text(json.dumps(backend, indent=2) + '\n', encoding='utf-8')
+          PY
+
+          cat > model/verify-publication-contract.py <<'PY'
+          #!/usr/bin/env python3
+          """Verify the active ESKA namespace/publication/versioning contract."""
+          from __future__ import annotations
+          import json, re
+          from pathlib import Path
+
+          ROOT = Path(__file__).resolve().parents[1]
+          CONTRACT = ROOT / 'model/publication-contract.json'
+          MIGRATION = ROOT / 'model/namespace-migration.json'
+          ONTOLOGY_RE = re.compile(r'<([^>]+)>\s*\n\s*a owl:Ontology\s*;', re.MULTILINE)
+          VERSION_IRI_RE = re.compile(r'owl:versionIRI\s+<([^>]+)>')
+          VERSION_RE = re.compile(r'owl:versionInfo\s+"([^"]+)"')
+          TERM_DECL_RE = re.compile(r'^eska:([A-Za-z][A-Za-z0-9_-]*)\s*\n\s+a owl:(?:Class|ObjectProperty|DatatypeProperty)\s*;', re.MULTILINE)
+          SEMVER_RE = re.compile(r'^(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)$')
+
+          def require(condition: bool, message: str) -> None:
+              if not condition: raise AssertionError(message)
+
+          def main() -> None:
+              contract = json.loads(CONTRACT.read_text(encoding='utf-8'))
+              migration = json.loads(MIGRATION.read_text(encoding='utf-8'))
+              require(contract['contractVersion'] == '1.1', 'unexpected publication contract version')
+              require(contract['status'] == 'permanent-namespace-active', 'permanent publication contract is not active')
+              term = contract['termNamespace']
+              require(term['current'] == 'https://w3id.org/eska#', 'unexpected active ESKA term namespace')
+              require(term['predecessor'] == 'urn:eska:core:', 'unexpected predecessor term namespace')
+              require(term['activationStatus'] == 'active', 'permanent namespace must be active')
+              modules = contract['modules']
+              require([m['name'] for m in modules] == ['core','capability','service','agent','deployment'], 'module identity/order changed')
+              declared = {}
+              ontology_pairs = set()
+              for module in modules:
+                  path = ROOT / module['path']; text = path.read_text(encoding='utf-8')
+                  require('@prefix eska: <https://w3id.org/eska#>' in text, f'{path}: active term namespace missing')
+                  require('urn:eska:core:' not in text, f'{path}: provisional term namespace remains')
+                  om = ONTOLOGY_RE.search(text); require(om and om.group(1) == module['ontologyIri'], f'{path}: ontology IRI mismatch')
+                  vim = VERSION_IRI_RE.search(text); require(vim and vim.group(1) == module['versionIri'], f'{path}: version IRI mismatch')
+                  vm = VERSION_RE.search(text); require(vm and vm.group(1) == module['version'], f'{path}: versionInfo mismatch')
+                  require(bool(SEMVER_RE.match(module['version'])), f'{path}: module version is not SemVer')
+                  ontology_pairs.add((module['predecessorOntologyIri'], module['ontologyIri']))
+                  for local in TERM_DECL_RE.findall(text):
+                      require(local not in declared, f'term {local} declared twice'); declared[local] = module['name']
+              require(len(declared) == 53, f'expected 53 ESKA terms, found {len(declared)}')
+              require(set(migration['terms']) == set(declared), 'migration term inventory differs from modules')
+              require(migration['predecessorTermNamespace'] == term['predecessor'], 'migration predecessor mismatch')
+              require(migration['successorTermNamespace'] == term['current'], 'migration successor mismatch')
+              require(migration['owlSameAsUsed'] is False, 'namespace migration must not use owl:sameAs')
+              mapped = {(x['predecessor'], x['successor']) for x in migration['ontologyIris']}
+              require(mapped == ontology_pairs, 'ontology predecessor mapping incomplete')
+              print('SUCCESS: ESKA permanent namespace and predecessor mapping are machine-verifiable.')
+              print(f"Active term namespace:      {term['current']}")
+              print(f"Predecessor term namespace: {term['predecessor']}")
+              print(f"Ontology modules:           {len(modules)}")
+              print(f"Declared ESKA terms:        {len(declared)}")
+              print(f"Next repository release:    eska-v{contract['releaseVersioning']['initialRepositoryVersion']}")
+          if __name__ == '__main__': main()
+          PY
+
+          cat > model/verify-publication-targets.py <<'PY'
+          #!/usr/bin/env python3
+          """Verify active ESKA W3ID publication targets and combined RDF distribution."""
+          from __future__ import annotations
+          import json
+          from pathlib import Path
+          from urllib.parse import urlparse
+          from rdflib import Graph, URIRef
+          from rdflib.compare import isomorphic
+
+          ROOT = Path(__file__).resolve().parents[1]
+          def require(c: bool, m: str) -> None:
+              if not c: raise AssertionError(m)
+          def contains(g: Graph, ns: str) -> bool:
+              return any(isinstance(t, URIRef) and str(t).startswith(ns) for triple in g for t in triple)
+          def main() -> None:
+              contract = json.loads((ROOT/'model/publication-contract.json').read_text())
+              targets = json.loads((ROOT/'publication/backend-targets.json').read_text())
+              term = contract['termNamespace']; require(term['activationStatus'] == 'active', 'namespace not active')
+              authoritative = Graph()
+              for module in contract['modules']: authoritative.parse(ROOT/module['path'], format='turtle')
+              distribution = Graph().parse(ROOT/'dist/eska.ttl', format='turtle')
+              require(isomorphic(authoritative, distribution), 'combined distribution differs from authoritative modules')
+              require(contains(distribution, term['current']), 'combined distribution lacks active W3ID terms')
+              require(not contains(distribution, term['predecessor']), 'combined distribution contains provisional term IRIs')
+              require(targets.get('status') == 'w3id-active', 'backend status does not reflect active W3ID')
+              require(targets.get('persistentVocabulary') == 'https://w3id.org/eska', 'persistent vocabulary route mismatch')
+              allowed = {'github.com','raw.githubusercontent.com'}
+              urls = [targets['humanDocumentation'], targets['namespaceDocumentation'], targets['combinedRdf']]
+              for module in targets['modules'].values(): urls += [module['rdf'], module['human']]
+              for url in urls:
+                  p=urlparse(str(url)); require(p.scheme=='https' and p.netloc in allowed, f'unexpected backend URL: {url}')
+              for module in contract['modules']:
+                  require(targets['modules'][module['name']]['iri'] == module['ontologyIri'], f"{module['name']}: module IRI mismatch")
+              print('SUCCESS: active ESKA W3ID publication targets and distribution are consistent.')
+              print(f'Combined distribution triples: {len(distribution)}')
+              print(f"Active term namespace:          {term['current']}")
+          if __name__ == '__main__': main()
+          PY
+
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('model/verify-live-w3id.py')
+          text=p.read_text(encoding='utf-8')
+          text=text.replace("term[\"target\"] == \"https://w3id.org/eska#\"", "term[\"current\"] == \"https://w3id.org/eska#\"")
+          text=text.replace("term[\"activationStatus\"] in {\"planned-not-active\", \"resolver-active-source-provisional\"}", "term[\"activationStatus\"] == \"active\"")
+          text=text.replace("str(module[\"currentOntologyIri\"])", "str(module[\"ontologyIri\"])")
+          text=text.replace("term['target']", "term['current']")
+          text=text.replace("term['current']", "term['current']")
+          text=text.replace('Semantic migration:   not performed by this verifier', 'Semantic migration:   active permanent W3ID source')
+          p.write_text(text, encoding='utf-8')
+          PY
+
+          cat > docs/w3id-namespace-migration.md <<'EOF'
+          # ESKA permanent W3ID namespace migration
+
+          On 11 August 2026, upstream W3ID pull request `perma-id/w3id.org#6530` was merged and the live resolver was externally verified before semantic source migration.
+
+          ESKA then performs one deliberate migration from the provisional term namespace to the permanent W3ID namespace:
+
+          ```text
+          urn:eska:core:<local-name>
+              →
+          https://w3id.org/eska#<local-name>
+          ```
+
+          The five ontology document identities migrate from `urn:eska:model:<module>` to `https://w3id.org/eska/model/<module>`. Their first published semantic versions use explicit `owl:versionIRI` values.
+
+          `model/namespace-migration.json` is the machine-readable predecessor inventory for all 53 declared terms and all five ontology IRIs. Namespace migration deliberately does not use `owl:sameAs`.
+
+          The repository release `eska-v0.1.0` remains the separate Stage-4 publication step after this migration commit and the complete executable reference suite are verified.
+          EOF
+      - name: Commit Stage 3 governance when needed
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet; then
+            echo 'Stage 3 governance already applied.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'Activate ESKA permanent W3ID governance'
+          git push origin HEAD:${{ github.head_ref }}
