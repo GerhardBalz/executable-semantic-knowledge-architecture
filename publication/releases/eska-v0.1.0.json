@@ -1,0 +1,34 @@
+{
+  "release": "eska-v0.1.0",
+  "repositoryVersion": "0.1.0",
+  "status": "governed-release",
+  "permanentNamespace": "https://w3id.org/eska#",
+  "persistentVocabulary": "https://w3id.org/eska",
+  "sourceBranch": "main",
+  "releaseTag": "eska-v0.1.0",
+  "modules": {
+    "core": "0.1.0",
+    "capability": "0.2.0",
+    "service": "0.4.0",
+    "agent": "0.3.0",
+    "deployment": "0.1.0"
+  },
+  "bundle": [
+    "dist/eska.ttl",
+    "model/eska-core.ttl",
+    "model/eska-capability.ttl",
+    "model/eska-service.ttl",
+    "model/eska-agent.ttl",
+    "model/eska-deployment.ttl",
+    "model/publication-contract.json",
+    "model/namespace-migration.json"
+  ],
+  "verification": {
+    "declaredTerms": 53,
+    "semanticExecutionModes": 7,
+    "semanticExecutions": 16,
+    "operationalInvocationLineages": 5,
+    "liveW3idRoutes": 14
+  },
+  "notes": "Repository release version is independent from the semantic versions of the contained ontology modules. The release tag identifies the immutable governed repository snapshot."
+}
