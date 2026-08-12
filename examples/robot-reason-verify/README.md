@@ -48,7 +48,7 @@ and a positive path:
 
 ```text
 source ontology
-    ↓ ROBOT reason / ELK / include indirect
+    ↓ ROBOT reason / ELK / include indirect / retain redundant subclass axioms
 reasoned ontology
     ↓ same ROBOT verify rule
 no violation
@@ -56,6 +56,19 @@ no violation
 ```
 
 The CI job succeeds only when both observations hold.
+
+### Why redundant subclass retention is explicit
+
+The first executable run established an important ROBOT behavior boundary. The negative control failed correctly, but the post-reasoning verification also failed because ROBOT removes redundant subclass axioms by default.
+
+`LeafClass rdfs:subClassOf RootClass` is entailed by the two asserted subclass steps and is therefore logically redundant. The experiment needs that indirect inference to be observable in the serialized Result ontology, so `run.sh` explicitly combines:
+
+```text
+--include-indirect true
+--remove-redundant-subclass-axioms false
+```
+
+This changes result serialization, not the semantic hypothesis or verification target.
 
 ## ESKA mapping
 
@@ -93,9 +106,24 @@ bash examples/robot-reason-verify/run.sh
 
 The script writes runtime artifacts beneath `examples/robot-reason-verify/build/`, including the reasoned ontology and an `evidence.json` summary. The build directory is ignored by Git.
 
+## Observed evidence
+
+GitHub Actions executed the experiment with ROBOT v1.9.10 and observed:
+
+```json
+{
+  "negativeControl": "failed-as-expected",
+  "reasoning": "completed",
+  "reasonedVerification": "passed",
+  "expectedInference": "LeafClass rdfs:subClassOf RootClass"
+}
+```
+
+The positive verification reported zero violations. The hypothesis therefore survives this proving ground: the expected semantic relation was absent from the source serialization, produced by the configured reasoning Execution, and accepted by the same verification rule afterward.
+
 ## Architectural boundary
 
-A successful run supports a deliberately narrow conclusion:
+The observed result supports a deliberately narrow conclusion:
 
 ```text
 ESKA SemanticCapability
