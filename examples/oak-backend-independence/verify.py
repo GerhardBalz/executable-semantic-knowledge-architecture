@@ -19,7 +19,10 @@ EXPECTED = {
     "parents": [f"{NAMESPACE}Root"],
 }
 SELECTORS = {
-    "rdf-sparql": f"sparql:{BASE / 'fixture.ttl'}",
+    # For local RDF, omit an explicit scheme. OAK v0.7.4 dispatches the
+    # .ttl suffix to its local SPARQL/RDF implementation; `sparql:` itself
+    # denotes a SPARQL endpoint and therefore must not prefix a local path.
+    "rdf-local": str(BASE / "fixture.ttl"),
     "obo-pronto": f"pronto:{BASE / 'fixture.obo'}",
 }
 
