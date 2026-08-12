@@ -1,0 +1,11 @@
+@prefix food: <http://www.w3.org/TR/2004/REC-owl-guide-20040210/food#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+<https://example.invalid/not-the-w3c-food-ontology>
+    a owl:Ontology .
+
+food:ConsumableThing a owl:Class .
+food:PotableLiquid
+    a owl:Class ;
+    rdfs:subClassOf food:ConsumableThing .

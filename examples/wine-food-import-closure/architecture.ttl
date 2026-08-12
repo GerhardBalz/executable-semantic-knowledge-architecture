@@ -1,0 +1,60 @@
+@prefix demo: <https://w3id.org/eska/example/wine-food-import-closure#> .
+@prefix eska: <https://w3id.org/eska#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+<http://www.w3.org/TR/2004/REC-owl-guide-20040210/wine>
+    a eska:SemanticModel , prov:Entity ;
+    rdfs:label "W3C OWL Guide Wine semantic identity represented by the local test slice"@en .
+
+<http://www.w3.org/TR/2004/REC-owl-guide-20040210/food>
+    a eska:SemanticModel , prov:Entity ;
+    rdfs:label "W3C OWL Guide Food semantic identity represented by the local test slice"@en .
+
+demo:ImportAwareSubclassCapability
+    a eska:SemanticCapability ;
+    rdfs:label "Resolve Wine/Food import closure and return the tested transitive subclass result"@en .
+
+demo:BackendALoader , demo:BackendBLoader
+    a eska:ExecutableSemanticKnowledgeArtifact ;
+    eska:usesSemanticModel
+        <http://www.w3.org/TR/2004/REC-owl-guide-20040210/wine> ,
+        <http://www.w3.org/TR/2004/REC-owl-guide-20040210/food> .
+
+demo:BackendAExecution
+    a eska:Execution ;
+    eska:executesCapability demo:ImportAwareSubclassCapability ;
+    eska:usesSemanticModel
+        <http://www.w3.org/TR/2004/REC-owl-guide-20040210/wine> ,
+        <http://www.w3.org/TR/2004/REC-owl-guide-20040210/food> ;
+    eska:usesExecutableArtifact demo:BackendALoader ;
+    eska:generatesResult demo:BackendAResult ;
+    prov:used
+        <http://www.w3.org/TR/2004/REC-owl-guide-20040210/wine> ,
+        <http://www.w3.org/TR/2004/REC-owl-guide-20040210/food> .
+
+demo:BackendBExecution
+    a eska:Execution ;
+    eska:executesCapability demo:ImportAwareSubclassCapability ;
+    eska:usesSemanticModel
+        <http://www.w3.org/TR/2004/REC-owl-guide-20040210/wine> ,
+        <http://www.w3.org/TR/2004/REC-owl-guide-20040210/food> ;
+    eska:usesExecutableArtifact demo:BackendBLoader ;
+    eska:generatesResult demo:BackendBResult ;
+    prov:used
+        <http://www.w3.org/TR/2004/REC-owl-guide-20040210/wine> ,
+        <http://www.w3.org/TR/2004/REC-owl-guide-20040210/food> .
+
+demo:BackendAResult , demo:BackendBResult
+    a eska:Result , prov:Entity ;
+    rdfs:label "Normalized Wine→ConsumableThing subclass result"@en ;
+    prov:wasDerivedFrom
+        <http://www.w3.org/TR/2004/REC-owl-guide-20040210/wine> ,
+        <http://www.w3.org/TR/2004/REC-owl-guide-20040210/food> .
+
+demo:BackendInvariantVerification
+    a eska:Verification ;
+    rdfs:label "Verify that both physical Food mappings yield the same normalized semantic result"@en ;
+    eska:verifiesExecution demo:BackendAExecution , demo:BackendBExecution ;
+    eska:verifiesResult demo:BackendAResult , demo:BackendBResult ;
+    prov:used demo:BackendAResult , demo:BackendBResult .
