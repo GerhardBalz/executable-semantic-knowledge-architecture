@@ -73,6 +73,21 @@ The run fails if:
 
 This makes backend independence a falsifiable property rather than a documentation claim.
 
+## Observed evidence
+
+The corrected CI run with OAK v0.7.4 passed.
+
+It instantiated:
+
+- `SparqlImplementation` for the scheme-less local Turtle fixture;
+- `ProntoImplementation` for the explicit Pronto/OBO fixture.
+
+Both implementations returned the same normalized result for `Child`: the same absolute entity IRI, the label `Child concept`, and the same direct parent IRI `Root`.
+
+The hypothesis therefore survived this first two-adapter proving ground: implementation/backend selection changed while the capability-level semantic operation and normalized result meaning remained invariant.
+
+This is evidence for backend independence at the tested OAK interface surface, not a claim that every OAK interface is uniformly supported by every adapter. Future experiments should treat adapter capability differences as falsifiable boundaries rather than assume universal interchangeability.
+
 ## Run
 
 From the repository root:
@@ -99,7 +114,7 @@ OAK is an implementation dependency of this example only. ESKA does not require 
 
 ## Architectural conclusion tested
 
-If the test passes, it provides concrete evidence for this boundary:
+The passing test provides concrete evidence for this boundary:
 
 ```text
 SemanticCapability
