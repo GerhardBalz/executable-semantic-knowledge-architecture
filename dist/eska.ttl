@@ -8,16 +8,19 @@
 @prefix prov: <http://www.w3.org/ns/prov#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix smo: <https://w3id.org/smo#> .
 
 <https://w3id.org/eska/model/core>
     a owl:Ontology ;
     dcterms:title "ESKA core model"@en ;
     dcterms:description "A deliberately small core model containing concepts demonstrated across more than one executable-semantic mode."@en ;
-    owl:versionIRI <https://w3id.org/eska/model/core/0.1.0> ;
-    owl:versionInfo "0.1.0" .
+    dcterms:requires <https://w3id.org/smo/0.1.0> ;
+    owl:versionIRI <https://w3id.org/eska/model/core/0.2.0> ;
+    owl:versionInfo "0.2.0" .
 
 eska:SemanticModel
     a owl:Class ;
+    owl:equivalentClass smo:SemanticModel ;
     rdfs:label "Semantic Model"@en ;
     skos:definition "A formal representation that gives knowledge explicit machine-interpretable meaning through concepts, relationships, constraints, axioms, or equivalent semantic structures."@en .
 
@@ -370,4 +373,3 @@ eska:baseURL
     skos:definition "Runtime HTTP base URL for a concrete deployment. Contract-relative operation paths remain in the HTTP Access Binding."@en ;
     rdfs:domain eska:HTTPDeploymentBinding ;
     rdfs:range xsd:anyURI .
-
