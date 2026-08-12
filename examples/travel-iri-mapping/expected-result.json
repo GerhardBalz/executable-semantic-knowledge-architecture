@@ -1,0 +1,7 @@
+{
+  "semanticIdentity": "http://www.owl-ontologies.com/travel.owl",
+  "selectedClasses": [
+    "http://www.owl-ontologies.com/travel.owl#Activity",
+    "http://www.owl-ontologies.com/travel.owl#Destination"
+  ]
+}

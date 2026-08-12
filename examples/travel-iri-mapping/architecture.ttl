@@ -1,0 +1,54 @@
+@prefix eska: <https://w3id.org/eska#> .
+@prefix ex: <https://w3id.org/eska/example/travel-iri-mapping#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+ex:TravelSemanticModel
+    a eska:SemanticModel, prov:Entity ;
+    rdfs:label "Historical Travel semantic model identity"@en ;
+    rdfs:comment "Represents the historical ontology identity http://www.owl-ontologies.com/travel.owl. The local fixtures are non-authoritative clean-room test slices."@en .
+
+ex:IdentityAwareAccess
+    a eska:SemanticCapability ;
+    rdfs:label "Identity-aware semantic access"@en .
+
+ex:CatalogA,
+ex:CatalogB
+    a eska:ExecutableSemanticKnowledgeArtifact, prov:Entity .
+
+ex:BackendA,
+ex:BackendB
+    a prov:Entity ;
+    rdfs:comment "A concrete physical representation used at runtime; it is not the semantic identity of the Travel ontology."@en .
+
+ex:ExecutionA
+    a eska:Execution ;
+    eska:executesCapability ex:IdentityAwareAccess ;
+    eska:usesSemanticModel ex:TravelSemanticModel ;
+    eska:usesExecutableArtifact ex:CatalogA ;
+    prov:used ex:BackendA ;
+    eska:generatesResult ex:ResultA .
+
+ex:ExecutionB
+    a eska:Execution ;
+    eska:executesCapability ex:IdentityAwareAccess ;
+    eska:usesSemanticModel ex:TravelSemanticModel ;
+    eska:usesExecutableArtifact ex:CatalogB ;
+    prov:used ex:BackendB ;
+    eska:generatesResult ex:ResultB .
+
+ex:ResultA
+    a eska:Result ;
+    prov:wasGeneratedBy ex:ExecutionA ;
+    prov:wasDerivedFrom ex:BackendA .
+
+ex:ResultB
+    a eska:Result ;
+    prov:wasGeneratedBy ex:ExecutionB ;
+    prov:wasDerivedFrom ex:BackendB .
+
+ex:BackendInvariantVerification
+    a eska:Verification ;
+    eska:verifiesExecution ex:ExecutionA, ex:ExecutionB ;
+    eska:verifiesResult ex:ResultA, ex:ResultB ;
+    rdfs:comment "Verifies that two different physical backends declaring the same Travel ontology identity yield the same selected normalized semantic result, while unmapped or identity-mismatched backends fail."@en .
