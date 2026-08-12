@@ -24,12 +24,20 @@ The same Python function calls the same OAK interface-level operations for both 
 
 Only the selector changes:
 
-1. `sparql:fixture.ttl` — RDF/Turtle accessed through OAK's SPARQL/RDFLib-oriented adapter path;
+1. the plain local path `fixture.ttl` — OAK infers a local RDF/Turtle implementation from the `.ttl` suffix;
 2. `pronto:fixture.obo` — OBO Format accessed through OAK's Pronto adapter path.
 
 The fixture is represented in both formats with the same semantic identities and hierarchy.
 
 The verifier also checks that OAK instantiated two different adapter classes, so a configuration-only alias of one implementation does not satisfy the experiment accidentally.
+
+### Selector boundary discovered by the experiment
+
+The first CI run intentionally exposed a useful implementation boundary in OAK v0.7.4: an explicit `sparql:` selector denotes a SPARQL endpoint. Prefixing a local Turtle path with `sparql:` therefore caused the adapter to send a SPARQL request to that filesystem path.
+
+OAK's selector implementation separately supports scheme-less file paths and dispatches `.ttl` files to its local RDF/SPARQL implementation. The experiment now uses that supported local-file form rather than hiding the distinction with backend-specific application code.
+
+This correction changes only implementation selection. The semantic capability, interface calls, fixture meaning, expected result, and equivalence criterion remain unchanged.
 
 ## ESKA mapping
 
@@ -101,7 +109,7 @@ SemanticCapability
      interface-level access
         /             \
        v               v
- OAK SPARQL         OAK Pronto
+ OAK local RDF      OAK Pronto
  adapter             adapter
        \               /
         v             v
