@@ -1,0 +1,12 @@
+format-version: 1.4
+ontology: eska-oak-backend-independence
+idspace: ESKAOAK https://w3id.org/eska/example/oak-backend-independence# "ESKA OAK backend-independence fixture"
+
+[Term]
+id: ESKAOAK:Root
+name: Root concept
+
+[Term]
+id: ESKAOAK:Child
+name: Child concept
+is_a: ESKAOAK:Root ! Root concept

@@ -1,0 +1,55 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix eska: <https://w3id.org/eska#> .
+@prefix oakdemo: <urn:eska:example:oak-backend-independence:> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+<urn:eska:example:oak-backend-independence>
+    a owl:Ontology ;
+    dcterms:title "OAK backend-independence ESKA example"@en ;
+    dcterms:description "Example-local evidence that one ESKA Semantic Capability can be implemented through different OAK adapters without changing semantic capability identity."@en .
+
+oakdemo:FixtureSemanticModel
+    a eska:SemanticModel ;
+    rdfs:label "OAK backend-independence fixture semantic model"@en .
+
+oakdemo:LookupCapability
+    a eska:SemanticCapability ;
+    rdfs:label "Ontology label and parent lookup capability"@en ;
+    eska:usesSemanticModel oakdemo:FixtureSemanticModel ;
+    eska:inputType owl:Class ;
+    eska:outputType oakdemo:NormalizedLookupResult .
+
+oakdemo:NormalizedLookupResult
+    a owl:Class ;
+    rdfs:label "Normalized ontology lookup result"@en .
+
+oakdemo:SparqlAdapterArtifact,
+    oakdemo:ProntoAdapterArtifact
+    a eska:ExecutableSemanticKnowledgeArtifact ;
+    eska:usesSemanticModel oakdemo:FixtureSemanticModel .
+
+oakdemo:SparqlExecution
+    a eska:Execution ;
+    eska:executesCapability oakdemo:LookupCapability ;
+    eska:usesSemanticModel oakdemo:FixtureSemanticModel ;
+    eska:usesExecutableArtifact oakdemo:SparqlAdapterArtifact ;
+    eska:generatesResult oakdemo:SparqlResult .
+
+oakdemo:ProntoExecution
+    a eska:Execution ;
+    eska:executesCapability oakdemo:LookupCapability ;
+    eska:usesSemanticModel oakdemo:FixtureSemanticModel ;
+    eska:usesExecutableArtifact oakdemo:ProntoAdapterArtifact ;
+    eska:generatesResult oakdemo:ProntoResult .
+
+oakdemo:SparqlResult,
+    oakdemo:ProntoResult
+    a eska:Result, oakdemo:NormalizedLookupResult .
+
+oakdemo:BackendEquivalenceVerification
+    a eska:Verification ;
+    rdfs:label "OAK backend-equivalence verification"@en ;
+    eska:verifiesResult oakdemo:SparqlResult, oakdemo:ProntoResult .

@@ -1,0 +1,29 @@
+name: OAK backend independence
+
+on:
+  push:
+    paths:
+      - "examples/oak-backend-independence/**"
+      - ".github/workflows/oak-backend-independence.yml"
+  pull_request:
+    paths:
+      - "examples/oak-backend-independence/**"
+      - ".github/workflows/oak-backend-independence.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-oak-backend-independence:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Install pinned OAK dependency
+        run: python -m pip install -r examples/oak-backend-independence/requirements.txt
+
+      - name: Verify one semantic capability across OAK adapters
+        run: python examples/oak-backend-independence/verify.py
