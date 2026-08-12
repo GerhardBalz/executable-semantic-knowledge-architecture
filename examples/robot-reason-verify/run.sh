@@ -55,6 +55,7 @@ echo "PASS: negative control fails before reasoning, as expected"
 java -jar "$ROBOT_JAR" reason \
   --reasoner ELK \
   --include-indirect true \
+  --remove-redundant-subclass-axioms false \
   --input "$FIXTURE" \
   --output "$REASONED"
 
