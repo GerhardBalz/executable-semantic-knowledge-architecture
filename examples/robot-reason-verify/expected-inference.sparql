@@ -1,0 +1,10 @@
+PREFIX ex: <https://w3id.org/eska/example/robot-reason-verify#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?violation
+WHERE {
+  BIND(ex:LeafClass AS ?violation)
+  FILTER NOT EXISTS {
+    ex:LeafClass rdfs:subClassOf ex:RootClass .
+  }
+}
