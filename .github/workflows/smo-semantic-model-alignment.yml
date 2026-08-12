@@ -1,0 +1,45 @@
+name: ESKA SMO SemanticModel alignment
+
+on:
+  push:
+    paths:
+      - "model/**"
+      - "dist/eska.ttl"
+      - "publication/backend-targets.json"
+      - "publication/w3id/eska/**"
+      - "docs/namespace-publication-versioning.md"
+      - ".github/workflows/smo-semantic-model-alignment.yml"
+  pull_request:
+    paths:
+      - "model/**"
+      - "dist/eska.ttl"
+      - "publication/backend-targets.json"
+      - "publication/w3id/eska/**"
+      - "docs/namespace-publication-versioning.md"
+      - ".github/workflows/smo-semantic-model-alignment.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install RDF verifier dependency
+        run: python -m pip install rdflib
+
+      - name: Verify core 0.2.0 compatibility contract
+        run: python model/verify-publication-contract.py
+
+      - name: Verify publication and immutable-route staging
+        run: python model/verify-publication-targets.py
