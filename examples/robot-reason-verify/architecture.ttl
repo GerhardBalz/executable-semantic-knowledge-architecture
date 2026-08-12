@@ -1,0 +1,54 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix eska: <https://w3id.org/eska#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix robotdemo: <urn:eska:example:robot-reason-verify:> .
+
+<urn:eska:example:robot-reason-verify>
+    a owl:Ontology ;
+    dcterms:title "ROBOT reason/verify ESKA example"@en ;
+    dcterms:description "Example-local evidence that ROBOT reasoning and verification can implement the existing ESKA Execution, Result, and Verification pattern without tool-specific ESKA vocabulary."@en .
+
+robotdemo:SourceSemanticModel
+    a eska:SemanticModel, prov:Entity ;
+    rdfs:label "ROBOT reasoning source semantic model"@en .
+
+robotdemo:ClassificationCapability
+    a eska:SemanticCapability ;
+    rdfs:label "Ontology classification capability"@en ;
+    eska:usesSemanticModel robotdemo:SourceSemanticModel ;
+    eska:inputType owl:Ontology ;
+    eska:outputType robotdemo:ReasonedOntologyResult .
+
+robotdemo:ReasonedOntologyResult
+    a owl:Class ;
+    rdfs:label "Reasoned ontology result"@en .
+
+robotdemo:ReasonArtifact
+    a eska:ExecutableSemanticKnowledgeArtifact ;
+    rdfs:label "Configured ROBOT reason executable artifact"@en ;
+    eska:usesSemanticModel robotdemo:SourceSemanticModel .
+
+robotdemo:VerifyArtifact
+    a eska:ExecutableSemanticKnowledgeArtifact ;
+    rdfs:label "Configured ROBOT verify executable artifact"@en .
+
+robotdemo:ReasonExecution
+    a eska:Execution ;
+    eska:executesCapability robotdemo:ClassificationCapability ;
+    eska:usesSemanticModel robotdemo:SourceSemanticModel ;
+    eska:usesExecutableArtifact robotdemo:ReasonArtifact ;
+    eska:generatesResult robotdemo:ReasonedOntology .
+
+robotdemo:ReasonedOntology
+    a eska:Result, robotdemo:ReasonedOntologyResult ;
+    rdfs:label "ROBOT reasoned ontology"@en ;
+    prov:wasDerivedFrom robotdemo:SourceSemanticModel .
+
+robotdemo:InferenceVerification
+    a eska:Verification ;
+    rdfs:label "Expected inference verification"@en ;
+    eska:usesExecutableArtifact robotdemo:VerifyArtifact ;
+    eska:verifiesExecution robotdemo:ReasonExecution ;
+    eska:verifiesResult robotdemo:ReasonedOntology .

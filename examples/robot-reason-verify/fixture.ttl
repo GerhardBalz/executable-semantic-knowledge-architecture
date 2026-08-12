@@ -1,0 +1,21 @@
+@prefix ex: <https://w3id.org/eska/example/robot-reason-verify#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+<https://w3id.org/eska/example/robot-reason-verify>
+    a owl:Ontology ;
+    rdfs:label "ESKA ROBOT reason/verify fixture"@en .
+
+ex:RootClass
+    a owl:Class ;
+    rdfs:label "Root class"@en .
+
+ex:IntermediateClass
+    a owl:Class ;
+    rdfs:subClassOf ex:RootClass ;
+    rdfs:label "Intermediate class"@en .
+
+ex:LeafClass
+    a owl:Class ;
+    rdfs:subClassOf ex:IntermediateClass ;
+    rdfs:label "Leaf class"@en .
