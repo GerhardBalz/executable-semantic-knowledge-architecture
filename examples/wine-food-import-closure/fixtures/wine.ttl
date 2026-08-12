@@ -1,0 +1,13 @@
+@prefix wine: <http://www.w3.org/TR/2004/REC-owl-guide-20040210/wine#> .
+@prefix food: <http://www.w3.org/TR/2004/REC-owl-guide-20040210/food#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+<http://www.w3.org/TR/2004/REC-owl-guide-20040210/wine>
+    a owl:Ontology ;
+    owl:imports <http://www.w3.org/TR/2004/REC-owl-guide-20040210/food> ;
+    rdfs:comment "Clean-room minimal test slice preserving only the W3C Guide identities and import structure needed for the ESKA experiment; not the authoritative W3C Wine ontology."@en .
+
+wine:Wine
+    a owl:Class ;
+    rdfs:subClassOf food:PotableLiquid .

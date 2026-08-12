@@ -1,0 +1,12 @@
+@prefix food: <http://www.w3.org/TR/2004/REC-owl-guide-20040210/food#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+<http://www.w3.org/TR/2004/REC-owl-guide-20040210/food>
+    a owl:Ontology ;
+    rdfs:comment "Clean-room minimal test slice preserving only the W3C Guide Food identities needed for the ESKA experiment; not the authoritative W3C Food ontology."@en .
+
+food:ConsumableThing a owl:Class .
+food:PotableLiquid
+    a owl:Class ;
+    rdfs:subClassOf food:ConsumableThing .
