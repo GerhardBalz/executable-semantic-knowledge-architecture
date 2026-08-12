@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<!-- Clean-room minimal test slice for ESKA #79.
+     This is not an authoritative copy of the historical Protégé Travel ontology. -->
+<rdf:RDF
+  xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+  xmlns:owl="http://www.w3.org/2002/07/owl#">
+
+  <owl:Ontology rdf:about="http://www.owl-ontologies.com/travel.owl"/>
+
+  <owl:Class rdf:about="http://www.owl-ontologies.com/travel.owl#Destination"/>
+  <owl:Class rdf:about="http://www.owl-ontologies.com/travel.owl#Activity"/>
+</rdf:RDF>

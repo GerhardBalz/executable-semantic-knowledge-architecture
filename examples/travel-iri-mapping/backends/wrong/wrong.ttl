@@ -1,0 +1,8 @@
+# Deliberately wrong ontology identity for the negative control.
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix travel: <http://www.owl-ontologies.com/travel.owl#> .
+
+<https://example.invalid/not-the-travel-ontology> a owl:Ontology .
+
+travel:Activity a owl:Class .
+travel:Destination a owl:Class .

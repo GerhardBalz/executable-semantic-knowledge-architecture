@@ -1,0 +1,9 @@
+# Clean-room minimal test slice for ESKA #79.
+# This is not an authoritative copy of the historical Protégé Travel ontology.
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix travel: <http://www.owl-ontologies.com/travel.owl#> .
+
+<http://www.owl-ontologies.com/travel.owl> a owl:Ontology .
+
+travel:Activity a owl:Class .
+travel:Destination a owl:Class .

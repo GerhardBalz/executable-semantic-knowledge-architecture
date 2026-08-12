@@ -1,0 +1,8 @@
+{
+  "mappings": {
+    "http://www.owl-ontologies.com/travel.owl": {
+      "path": "backends/b/nested/reference.rdf",
+      "format": "xml"
+    }
+  }
+}
