@@ -1,6 +1,6 @@
 # ESKA permanent identifier configuration
 
-This directory is the prepared upstream contribution payload for:
+This directory mirrors the governed W3ID routing configuration for:
 
 ```text
 https://w3id.org/eska
@@ -14,45 +14,47 @@ Project:
 
 ## Status
 
-**Prepared, not active.**
+The permanent namespace is active.
 
-The authoritative ESKA ontology source still uses the provisional term namespace:
+Current routes were established through `perma-id/w3id.org#6530`. The first immutable module-version routes were added through `perma-id/w3id.org#6535` and target only the governed `eska-v0.1.0` release.
 
-```text
-https://w3id.org/eska#
-```
-
-The adopted permanent target namespace is:
+The stable term namespace is:
 
 ```text
 https://w3id.org/eska#
 ```
 
-The `.htaccess` file in this directory must be submitted to the upstream `perma-id/w3id.org` repository under `eska/.htaccess` and merged before ESKA source ontology IRIs are migrated.
+## Current routing
 
-## Initial redirects
+Unversioned routes represent current governed `main`:
 
-The prepared routing package provides:
+- vocabulary/documentation: `https://w3id.org/eska`;
+- combined Turtle: `https://w3id.org/eska/dist/eska.ttl`;
+- stable module routes under `https://w3id.org/eska/model/{module}`.
 
-- vocabulary base / hash-namespace document;
-- human-readable namespace/publication documentation;
-- combined Turtle distribution;
-- stable unversioned module routes for `core`, `capability`, `service`, `agent`, and `deployment`;
-- content negotiation for `text/turtle` on the vocabulary base and module routes.
+The active immutable routes for module versions first published in `eska-v0.1.0` remain bound to that tag, including core `0.1.0`, capability `0.2.0`, service `0.4.0`, agent `0.3.0`, and deployment `0.1.0`.
 
-Versioned module routes are intentionally **not** configured yet. They will be added only when immutable governed release targets exist.
+## Core 0.2.0 staging boundary
 
-## Activation order
+ESKA core `0.2.0` introduces the reviewed compatibility bridge to the published SMO `SemanticModel` class.
+
+The planned immutable identities are:
 
 ```text
-1. Merge ESKA backend publication targets
-2. Verify public GitHub HTML/RDF backend URLs
-3. Fork perma-id/w3id.org
-4. Copy this directory to w3id.org/eska/
-5. Submit W3ID PR
-6. Wait for upstream merge
-7. Verify https://w3id.org/eska externally
-8. Only then migrate ESKA terms/ontology IRIs atomically
+https://w3id.org/eska/model/core/0.2.0
+https://w3id.org/eska/dist/0.2.0/eska-core.ttl
 ```
 
-This ordering prevents the repository from claiming persistent semantic identifiers before the redirect infrastructure actually exists.
+They are **not routed yet**.
+
+The required order is:
+
+1. merge and verify the core `0.2.0` semantic source on `main`;
+2. publish governed repository release `eska-v0.2.0`;
+3. verify the tagged core backend;
+4. add the core `0.2.0` W3ID routes targeting only `eska-v0.2.0`;
+5. verify the new immutable routes externally.
+
+No immutable version route may target mutable `main`.
+
+GitHub URLs are publication backends only; ESKA semantic identity remains in the W3ID namespace.
