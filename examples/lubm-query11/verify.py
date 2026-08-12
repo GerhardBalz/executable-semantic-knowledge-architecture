@@ -14,7 +14,6 @@ ROOT = Path(__file__).resolve().parent
 UB = "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#"
 RESEARCH_GROUP = URIRef(UB + "ResearchGroup")
 SUB_ORGANIZATION_OF = URIRef(UB + "subOrganizationOf")
-UNIVERSITY_0 = URIRef("http://www.University0.edu")
 EXPECTED_QUERY_SHA256 = "8c1e6567896f19fbf5a179994ebd09285cd74aacaa3829e60b7d0193be3ff54c"
 EXPECTED_GENERATOR_COMMIT = "48686cd616f564c8fc360dc5abbcc294678655c4"
 EXPECTED_ANSWERS = 224
@@ -117,7 +116,7 @@ def verify_contract() -> tuple[dict[str, object], str]:
         "threads": 1,
         "ontology": "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl",
     }, "LUBM(1,0) generation contract changed")
-    require(contract["serializations"] == ["NTRIPLES", "TURTLE"], "serialization contract changed")
+    require(contract["serializations"] == ["OWL", "TURTLE"], "serialization contract changed")
 
     actual_hash = hashlib.sha256(query_bytes).hexdigest()
     require(actual_hash == EXPECTED_QUERY_SHA256, f"Query 11 text changed: {actual_hash}")
@@ -127,31 +126,32 @@ def verify_contract() -> tuple[dict[str, object], str]:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--ntriples", type=Path, required=True)
+    parser.add_argument("--owl", type=Path, required=True)
     parser.add_argument("--turtle", type=Path, required=True)
     args = parser.parse_args()
 
     contract, query_text = verify_contract()
-    ntriples = verify_backend("NTRIPLES", args.ntriples, "nt", query_text)
+    owl = verify_backend("OWL/RDFXML", args.owl, "xml", query_text)
     turtle = verify_backend("TURTLE", args.turtle, "turtle", query_text)
 
-    nt_answers = set(ntriples.pop("answers"))
+    owl_answers = set(owl.pop("answers"))
     ttl_answers = set(turtle.pop("answers"))
-    require(nt_answers == ttl_answers, "normalized Query 11 answer sets differ across serializations")
-    require(len(nt_answers) == EXPECTED_ANSWERS, "normalized answer set no longer matches Lehigh oracle")
+    require(owl_answers == ttl_answers, "normalized Query 11 answer sets differ across serializations")
+    require(len(owl_answers) == EXPECTED_ANSWERS, "normalized answer set no longer matches Lehigh oracle")
 
     evidence = {
         "benchmark": contract["benchmark"],
         "query": contract["query"]["id"],
         "externalOracle": EXPECTED_ANSWERS,
         "generatorBackend": contract["implementationBackend"],
-        "ntriples": ntriples,
+        "observedBackendLimitations": contract["observedBackendLimitations"],
+        "owl": owl,
         "turtle": turtle,
         "serializationInvariant": True,
-        "normalizedAnswerCount": len(nt_answers),
+        "normalizedAnswerCount": len(owl_answers),
     }
     print(json.dumps(evidence, indent=2, sort_keys=True))
-    print("PASS: LUBM Query 11 matches Lehigh's 224-answer oracle across N-Triples and Turtle")
+    print("PASS: LUBM Query 11 matches Lehigh's 224-answer oracle across OWL/RDFXML and Turtle")
     return 0
 
 

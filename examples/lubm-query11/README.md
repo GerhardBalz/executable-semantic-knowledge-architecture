@@ -64,11 +64,28 @@ The pinned GitHub repository is **not LUBM semantic authority**. It is a replace
 
 See `THIRD-PARTY-NOTICE.md` for provenance and licensing boundaries.
 
+## Observed N-Triples backend limitation
+
+The first CI run intentionally attempted N-Triples plus Turtle. Generation succeeded, but the generated N-Triples file was rejected by RDFLib's standards-compliant N-Triples parser.
+
+Inspection of the pinned generator shows why:
+
+1. the shared flat writer creates its ontology-document declaration with an empty subject;
+2. the N-Triples writer serializes that subject as `<>`;
+3. N-Triples does not provide Turtle-style base-IRI resolution for an empty relative IRI.
+
+ESKA does **not** silently repair that third-party output. The machine contract records N-Triples as an observed pinned-backend limitation, and the semantic invariance test uses two generator formats that parse as RDF without repair:
+
+- OWL/RDF/XML;
+- Turtle.
+
+This is itself useful evidence that **execution infrastructure can fail at the serialization boundary without changing semantic identity or justifying new ontology vocabulary**.
+
 ## Executable test
 
 CI builds the pinned UBA implementation and generates the same LUBM(1,0) dataset twice:
 
-1. N-Triples;
+1. OWL/RDF/XML;
 2. Turtle.
 
 The verifier then:
@@ -105,8 +122,8 @@ It also tests physical-representation independence:
 ```text
 same benchmark parameters
     ↓
-N-Triples → 224 answers
-Turtle    → 224 answers
+OWL/RDFXML → 224 answers
+Turtle     → 224 answers
     ↓
 same normalized answer set
 ```
@@ -149,5 +166,5 @@ For the local verifier after generation:
 
 ```text
 python -m pip install -r examples/lubm-query11/requirements.txt
-python examples/lubm-query11/verify.py --ntriples <ntriples-dir> --turtle <turtle-dir>
+python examples/lubm-query11/verify.py --owl <owl-dir> --turtle <turtle-dir>
 ```

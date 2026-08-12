@@ -30,7 +30,14 @@
     "licenseEvidence": "Original Lehigh generator source declares GPL-2.0-or-later; this ESKA example does not vendor generator source."
   },
   "serializations": [
-    "NTRIPLES",
+    "OWL",
     "TURTLE"
+  ],
+  "observedBackendLimitations": [
+    {
+      "serialization": "NTRIPLES",
+      "status": "excluded-from-semantic-invariance-test",
+      "evidence": "The pinned backend emits an empty ontology-document IRI as <>; the first CI run showed that output is rejected by a standards-compliant N-Triples parser. ESKA does not patch third-party output silently."
+    }
   ]
 }
