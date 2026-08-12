@@ -1,6 +1,6 @@
 {
-  "contractVersion": "1.1",
-  "status": "permanent-namespace-active",
+  "contractVersion": "1.2",
+  "status": "core-0.2.0-release-pending",
   "repository": "GerhardBalz/executable-semantic-knowledge-architecture",
   "termNamespace": {
     "current": "https://w3id.org/eska#",
@@ -21,6 +21,9 @@
   "releaseVersioning": {
     "repositoryTagPattern": "eska-v{version}",
     "initialRepositoryVersion": "0.1.0",
+    "currentPublishedRepositoryVersion": "0.1.0",
+    "nextRepositoryVersion": "0.2.0",
+    "nextRepositoryReleaseStatus": "pending",
     "semanticModuleVersionsIndependent": true,
     "repositoryReleaseMeaning": "A governed repository snapshot and publication bundle. It is not a semantic version assertion for every contained ontology module."
   },
@@ -30,15 +33,22 @@
     "minor": "Backward-compatible additive semantic changes, including new terms or axioms that preserve existing intended use.",
     "major": "Breaking semantic contract changes. Materially incompatible term meaning should be deprecated and replaced rather than silently redefined.",
     "termIrisUnversioned": true,
-    "namespaceMigration": "The provisional URN identifiers are historical predecessors of the permanent W3ID identifiers. They are not asserted owl:sameAs."
+    "namespaceMigration": "The provisional URN identifiers are historical predecessors of the permanent W3ID identifiers. They are not asserted owl:sameAs.",
+    "semanticModelAlignment": {
+      "canonicalClass": "https://w3id.org/smo#SemanticModel",
+      "compatibilityClass": "https://w3id.org/eska#SemanticModel",
+      "relation": "http://www.w3.org/2002/07/owl#equivalentClass",
+      "dependency": "https://w3id.org/smo/0.1.0",
+      "compatibilityClassDeprecated": false
+    }
   },
   "modules": [
     {
       "name": "core",
       "path": "model/eska-core.ttl",
       "ontologyIri": "https://w3id.org/eska/model/core",
-      "versionIri": "https://w3id.org/eska/model/core/0.1.0",
-      "version": "0.1.0",
+      "versionIri": "https://w3id.org/eska/model/core/0.2.0",
+      "version": "0.2.0",
       "predecessorOntologyIri": "urn:eska:model:core",
       "predecessorVersion": "0.1-provisional"
     },
