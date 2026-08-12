@@ -8,15 +8,18 @@ ESKA uses the permanent term namespace:
 https://w3id.org/eska#
 ```
 
-The W3ID resolver was established by `perma-id/w3id.org#6530` and externally verified before the semantic source was migrated. The five authoritative ontology modules now use stable W3ID ontology IRIs and explicit published `owl:versionIRI` values.
+The W3ID resolver was established through `perma-id/w3id.org#6530`. The first immutable module-version routes were established through `perma-id/w3id.org#6535` and remain bound to the governed `eska-v0.1.0` release.
 
-The machine-readable publication contract is [`model/publication-contract.json`](../model/publication-contract.json), and the explicit provisional→permanent predecessor inventory is [`model/namespace-migration.json`](../model/namespace-migration.json).
+The current semantic source is advancing the core module to `0.2.0` for the reviewed compatibility bridge between `eska:SemanticModel` and the published SMO `smo:SemanticModel` class.
+
+Machine-readable state is governed by [`model/publication-contract.json`](../model/publication-contract.json) and [`publication/backend-targets.json`](../publication/backend-targets.json).
 
 ## Term namespace
 
-ESKA terms share one stable, unversioned hash namespace:
+ESKA terms keep stable, unversioned IRIs such as:
 
 ```text
+https://w3id.org/eska#SemanticModel
 https://w3id.org/eska#Execution
 https://w3id.org/eska#SemanticCapability
 https://w3id.org/eska#KnowledgeService
@@ -24,23 +27,54 @@ https://w3id.org/eska#KnowledgeAgent
 https://w3id.org/eska#ServiceDeployment
 ```
 
-Dereferencing a term removes the fragment and resolves the shared vocabulary resource at `https://w3id.org/eska`. The resolver is deliberately independent of the current GitHub publication backend so that hosting can move without changing semantic identifiers.
+The move to SMO conceptual ownership does **not** create a second namespace migration. `eska:SemanticModel` remains a published compatibility class.
 
-## Ontology modules and versions
+## SemanticModel compatibility in core 0.2.0
+
+The reviewed SKE cross-repository decision established that the published SMO and ESKA definitions of `SemanticModel` are semantically identical and that ESKA's seven execution modes provide no evidence for an ESKA-specific narrowing.
+
+Core `0.2.0` therefore adds:
+
+```turtle
+eska:SemanticModel owl:equivalentClass smo:SemanticModel .
+```
+
+The core ontology also records an explicit dependency on the immutable SMO release identity:
+
+```turtle
+<https://w3id.org/eska/model/core>
+    dcterms:requires <https://w3id.org/smo/0.1.0> .
+```
+
+This first bridge deliberately does not:
+
+- deprecate `eska:SemanticModel`;
+- change `eska:usesSemanticModel`;
+- add `owl:imports` merely by symmetry;
+- move ESKA-specific execution, capability, result, verification, service, agent, or deployment concepts into SMO;
+- modify immutable `eska-v0.1.0` or `smo-v0.1.0`.
+
+## Ontology modules and current versions
 
 The vocabulary remains split into independently governed ontology documents:
 
-| Module | Stable ontology IRI | First published version IRI |
-|---|---|---|
-| core | `https://w3id.org/eska/model/core` | `https://w3id.org/eska/model/core/0.1.0` |
-| capability | `https://w3id.org/eska/model/capability` | `https://w3id.org/eska/model/capability/0.2.0` |
-| service | `https://w3id.org/eska/model/service` | `https://w3id.org/eska/model/service/0.4.0` |
-| agent | `https://w3id.org/eska/model/agent` | `https://w3id.org/eska/model/agent/0.3.0` |
-| deployment | `https://w3id.org/eska/model/deployment` | `https://w3id.org/eska/model/deployment/0.1.0` |
+| Module | Stable ontology IRI | Current version IRI | Publication state |
+|---|---|---|---|
+| core | `https://w3id.org/eska/model/core` | `https://w3id.org/eska/model/core/0.2.0` | current on `main`; immutable release pending |
+| capability | `https://w3id.org/eska/model/capability` | `https://w3id.org/eska/model/capability/0.2.0` | immutable route active via `eska-v0.1.0` |
+| service | `https://w3id.org/eska/model/service` | `https://w3id.org/eska/model/service/0.4.0` | immutable route active via `eska-v0.1.0` |
+| agent | `https://w3id.org/eska/model/agent` | `https://w3id.org/eska/model/agent/0.3.0` | immutable route active via `eska-v0.1.0` |
+| deployment | `https://w3id.org/eska/model/deployment` | `https://w3id.org/eska/model/deployment/0.1.0` | immutable route active via `eska-v0.1.0` |
 
-The different version numbers intentionally preserve the demonstrated evolution of each module rather than flattening all modules to one semantic version.
+The former core `0.1.0` version remains immutable and continues to resolve through its existing W3ID route to `eska-v0.1.0`.
 
-A combined RDF distribution at `https://w3id.org/eska/dist/eska.ttl` is a publication convenience and does not replace the five module identities.
+A combined current RDF distribution is published at:
+
+```text
+https://w3id.org/eska/dist/eska.ttl
+```
+
+It represents the current governed module set and does not replace the individual module identities.
 
 ## Repository release versioning
 
@@ -50,7 +84,35 @@ Repository releases use:
 eska-v<major>.<minor>.<patch>
 ```
 
-The first governed publication bundle is planned as `eska-v0.1.0`. Repository release versioning is independent from ontology-module semantic versions: a repository release snapshots the architecture, examples, documentation, tooling, and ontology modules together.
+The first governed snapshot is `eska-v0.1.0`. The next planned governed snapshot is:
+
+```text
+eska-v0.2.0
+```
+
+Repository release versions remain independent from module versions. `eska-v0.2.0` will snapshot the repository state in which core is `0.2.0`; unchanged modules keep their own existing semantic versions.
+
+## Core 0.2.0 immutable publication gate
+
+The planned immutable core identities are:
+
+```text
+https://w3id.org/eska/model/core/0.2.0
+https://w3id.org/eska/dist/0.2.0/eska-core.ttl
+```
+
+They are intentionally **not active yet**.
+
+Governed order:
+
+1. merge and verify core `0.2.0` on current `main`;
+2. publish `eska-v0.2.0` at the exact governed merge commit;
+3. verify the tagged `model/eska-core.ttl` backend;
+4. add a narrow W3ID increment for the core `0.2.0` ontology/version distribution routes;
+5. require those new immutable routes to target only `eska-v0.2.0`, never mutable `main`;
+6. externally verify the new routes before declaring the version publication complete.
+
+The repository-owned W3ID payload mirrors the currently active upstream routes and explicitly omits core `0.2.0` until the release exists.
 
 ## Semantic versioning policy
 
@@ -60,51 +122,53 @@ Module versions follow a SemVer-style compatibility policy:
 - **minor** — backward-compatible additive semantics such as new terms, optional relationships, or compatible axioms;
 - **major** — breaking semantic contract changes.
 
-Published term IRIs are not silently repurposed. Materially incompatible meanings should be deprecated and replaced explicitly rather than changing the meaning behind an existing IRI.
+The SMO `owl:equivalentClass` bridge is treated as a backward-compatible additive semantic change, so core advances from `0.1.0` to `0.2.0`.
+
+Published term IRIs are never silently repurposed. Materially incompatible meanings should be deprecated and replaced explicitly rather than changing meaning behind an existing IRI.
+
+## Module dependencies
+
+Resolvable ontology IRIs do not by themselves require `owl:imports`.
+
+ESKA represents architectural/module dependencies using `dcterms:requires`, and executable references merge required model artifacts deliberately. The core-to-SMO alignment follows the same rule by depending on immutable `https://w3id.org/smo/0.1.0` without introducing network import closure.
 
 ## Publication and dereferencing
 
-The intended public behavior is:
+Current public behavior remains:
 
 ```text
 https://w3id.org/eska#Execution
         │ fragment removed by HTTP client
         ▼
 https://w3id.org/eska
-        │ W3ID 303 redirect / content negotiation
-        ├── human-readable project/vocabulary documentation
-        └── machine-readable RDF distribution
+        │ W3ID redirect / content negotiation
+        ├── human-readable project documentation
+        └── current machine-readable RDF distribution
 ```
 
-Stable module routes provide module-specific RDF/documentation. Versioned module/distribution routes are reserved for immutable governed publication artifacts.
-
-## Module dependencies
-
-Resolvable ontology IRIs do not by themselves require `owl:imports`. ESKA currently represents module dependencies explicitly with `dcterms:requires` and the executable reference merges the required model artifacts deliberately. `owl:imports` should be introduced only if a future executable use case demonstrates a useful formal import closure without unwanted network/runtime coupling.
+Stable unversioned module routes follow governed current source. Immutable version routes are added only after their release-backed target exists.
 
 ## Namespace migration history
 
 The permanent namespace was activated in explicit stages:
 
-1. **Publication strategy** — the provisional source namespace and target W3ID namespace were machine-described.
-2. **Resolver activation** — W3ID PR #6530 was merged and live HTML/RDF/module routes were externally verified while source IRIs remained provisional.
-3. **Atomic semantic migration** — every declared ESKA term was migrated one-to-one by local name, the five ontology IRIs were migrated, first published module `owl:versionIRI` values were added, and all examples, queries, provenance fixtures, distributions, and verification logic were updated together.
-4. **Governed repository release** — `eska-v0.1.0` is a separate publication step after the migration commit is verified.
+1. publication strategy and machine-described predecessor/target identities;
+2. current W3ID resolver activation through #6530;
+3. atomic semantic migration to `https://w3id.org/eska#`;
+4. governed `eska-v0.1.0` repository release;
+5. immutable first-version routes through #6535.
 
-The predecessor relation is recorded explicitly in `model/namespace-migration.json`. ESKA does **not** use `owl:sameAs` merely as a namespace-migration shortcut.
+The predecessor relation remains recorded in `model/namespace-migration.json`. ESKA does not use `owl:sameAs` as a namespace-migration shortcut.
 
-## Compatibility and deprecation
+## Compatibility and authority boundary
 
 With the permanent namespace active:
 
 - published term IRIs are never silently repurposed;
-- removed terms remain resolvable and are marked deprecated;
-- replacement terms are linked explicitly;
+- `eska:SemanticModel` remains resolvable and non-deprecated in the first SMO alignment;
 - compatible additions do not require namespace changes;
 - published versioned ontology IRIs remain immutable;
-- persistent W3ID routes may change their backend redirect target without changing semantic identity.
-
-## Authority boundary
+- persistent W3ID routes may change backend locations without changing semantic identity.
 
 ```text
 GerhardBalz/executable-semantic-knowledge-architecture
@@ -117,15 +181,4 @@ HTML / RDF publication backend
     replaceable distribution location
 ```
 
-W3ID provides persistent public identity and redirects; the repository governs ESKA source. The backend location is deliberately replaceable.
-
-## Boundaries
-
-The namespace/publication model does not:
-
-- collapse the five ontology modules into one ontology identity;
-- make repository SemVer identical to module SemVer;
-- add `owl:imports` by symmetry;
-- introduce a separate ESKA publication/governance ontology;
-- use `owl:sameAs` for predecessor migration;
-- publish the `eska-v0.1.0` repository release as part of the Stage-3 migration itself.
+GitHub locations are publication backends, never ESKA semantic identities.
