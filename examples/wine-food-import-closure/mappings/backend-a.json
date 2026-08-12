@@ -1,0 +1,5 @@
+{
+  "imports": {
+    "http://www.w3.org/TR/2004/REC-owl-guide-20040210/food": "../backends/a/food.ttl"
+  }
+}
