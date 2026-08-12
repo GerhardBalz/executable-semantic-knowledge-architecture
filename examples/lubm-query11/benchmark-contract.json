@@ -1,0 +1,36 @@
+{
+  "benchmark": "LUBM(1,0)",
+  "benchmarkAuthority": {
+    "organization": "Lehigh University SWAT Lab",
+    "homepage": "https://swat.cse.lehigh.edu/projects/lubm/",
+    "ontology": "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl",
+    "queryWorkload": "https://swat.cse.lehigh.edu/projects/lubm/queries-sparql.txt",
+    "referenceAnswerIndex": "https://swat.cse.lehigh.edu/projects/lubm/answers.htm",
+    "publishedEvaluation": "https://swat.cse.lehigh.edu/pubs/guo05a.pdf"
+  },
+  "datasetGeneration": {
+    "universities": 1,
+    "startingIndex": 0,
+    "seed": 0,
+    "threads": 1,
+    "ontology": "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl"
+  },
+  "query": {
+    "id": 11,
+    "file": "query11.sparql",
+    "sha256": "8c1e6567896f19fbf5a179994ebd09285cd74aacaa3829e60b7d0193be3ff54c",
+    "requires": "transitive ub:subOrganizationOf reasoning",
+    "expectedAnswerCount": 224
+  },
+  "implementationBackend": {
+    "repository": "rvesse/lubm-uba",
+    "commit": "48686cd616f564c8fc360dc5abbcc294678655c4",
+    "role": "replaceable data-generator implementation backend",
+    "authority": false,
+    "licenseEvidence": "Original Lehigh generator source declares GPL-2.0-or-later; this ESKA example does not vendor generator source."
+  },
+  "serializations": [
+    "NTRIPLES",
+    "TURTLE"
+  ]
+}

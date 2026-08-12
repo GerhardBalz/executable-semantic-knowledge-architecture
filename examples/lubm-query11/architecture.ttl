@@ -1,0 +1,44 @@
+@prefix demo: <https://w3id.org/eska/example/lubm-query11#> .
+@prefix eska: <https://w3id.org/eska#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+<http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl>
+    a eska:SemanticModel , prov:Entity ;
+    rdfs:label "LUBM Univ-Bench semantic model"@en .
+
+demo:Query11TransitiveReasoning
+    a eska:SemanticCapability ;
+    rdfs:label "Evaluate LUBM Query 11 with the required subOrganizationOf transitive closure"@en .
+
+demo:PinnedUBAImplementation , demo:Query11Verifier
+    a eska:ExecutableSemanticKnowledgeArtifact ;
+    eska:usesSemanticModel <http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl> .
+
+demo:NTriplesExecution
+    a eska:Execution ;
+    eska:executesCapability demo:Query11TransitiveReasoning ;
+    eska:usesSemanticModel <http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl> ;
+    eska:usesExecutableArtifact demo:PinnedUBAImplementation , demo:Query11Verifier ;
+    eska:generatesResult demo:NTriplesResult ;
+    prov:used <http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl> .
+
+demo:TurtleExecution
+    a eska:Execution ;
+    eska:executesCapability demo:Query11TransitiveReasoning ;
+    eska:usesSemanticModel <http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl> ;
+    eska:usesExecutableArtifact demo:PinnedUBAImplementation , demo:Query11Verifier ;
+    eska:generatesResult demo:TurtleResult ;
+    prov:used <http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl> .
+
+demo:NTriplesResult , demo:TurtleResult
+    a eska:Result , prov:Entity ;
+    rdfs:label "Normalized LUBM Query 11 answer set"@en ;
+    prov:wasDerivedFrom <http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl> .
+
+demo:LehighOracleVerification
+    a eska:Verification ;
+    rdfs:label "Verify both generated serializations against Lehigh's 224-answer Query 11 oracle"@en ;
+    eska:verifiesExecution demo:NTriplesExecution , demo:TurtleExecution ;
+    eska:verifiesResult demo:NTriplesResult , demo:TurtleResult ;
+    prov:used demo:NTriplesResult , demo:TurtleResult .

@@ -1,0 +1,79 @@
+name: LUBM Query 11 external oracle
+
+on:
+  pull_request:
+    paths:
+      - "examples/lubm-query11/**"
+      - ".github/workflows/lubm-query11.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out ESKA
+        uses: actions/checkout@v5
+
+      - name: Check out pinned UBA implementation backend
+        uses: actions/checkout@v5
+        with:
+          repository: rvesse/lubm-uba
+          ref: 48686cd616f564c8fc360dc5abbcc294678655c4
+          path: .cache/lubm-uba
+          persist-credentials: false
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "8"
+          cache: maven
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build pinned UBA implementation
+        run: mvn -q -f .cache/lubm-uba/pom.xml package -DskipTests
+
+      - name: Generate LUBM(1,0) in two serializations
+        shell: bash
+        run: |
+          set -euo pipefail
+          root="$RUNNER_TEMP/lubm-query11"
+          mkdir -p "$root/ntriples" "$root/turtle"
+
+          common=(
+            --univ 1
+            --index 0
+            --seed 0
+            --threads 1
+            --ontology http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl
+            --consolidate Maximal
+            --quiet
+          )
+
+          java -jar .cache/lubm-uba/target/lubm-uba.jar \
+            "${common[@]}" \
+            --format NTRIPLES \
+            --output "$root/ntriples" \
+            --log "$root/ntriples.log"
+
+          java -jar .cache/lubm-uba/target/lubm-uba.jar \
+            "${common[@]}" \
+            --format TURTLE \
+            --output "$root/turtle" \
+            --log "$root/turtle.log"
+
+      - name: Install verifier dependency
+        run: python -m pip install -r examples/lubm-query11/requirements.txt
+
+      - name: Verify Query 11 against Lehigh oracle
+        run: |
+          python examples/lubm-query11/verify.py \
+            --ntriples "$RUNNER_TEMP/lubm-query11/ntriples" \
+            --turtle "$RUNNER_TEMP/lubm-query11/turtle"

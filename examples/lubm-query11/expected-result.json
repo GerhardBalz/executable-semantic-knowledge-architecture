@@ -1,0 +1,8 @@
+{
+  "benchmark": "LUBM(1,0)",
+  "query": 11,
+  "expectedAnswerCount": 224,
+  "oracleAuthority": "Lehigh University SWAT Lab",
+  "negativeControl": "unmaterialized direct answers must not satisfy the 224-answer oracle",
+  "serializationInvariant": true
+}
