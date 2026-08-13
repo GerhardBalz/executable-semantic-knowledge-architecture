@@ -1,5 +1,5 @@
 {
-  "status": "w3id-active-versioned-core-0.2.0-release-published-route-pending",
+  "status": "w3id-active-versioned-core-0.2.0",
   "repository": "GerhardBalz/executable-semantic-knowledge-architecture",
   "branch": "main",
   "releaseTag": "eska-v0.2.0",
@@ -17,14 +17,17 @@
       "iri": "https://w3id.org/eska/model/core",
       "version": "0.2.0",
       "versionIri": "https://w3id.org/eska/model/core/0.2.0",
-      "versionStatus": "release-published-route-pending",
+      "versionStatus": "active",
       "releaseTag": "eska-v0.2.0",
       "releaseCommit": "a6ce0b9e795d271dce8a2b7be93d44932e8448d4",
       "versionRdf": "https://raw.githubusercontent.com/GerhardBalz/executable-semantic-knowledge-architecture/eska-v0.2.0/model/eska-core.ttl",
       "versionHuman": "https://github.com/GerhardBalz/executable-semantic-knowledge-architecture/blob/eska-v0.2.0/model/eska-core.ttl",
       "versionDistribution": "https://w3id.org/eska/dist/0.2.0/eska-core.ttl",
       "versionBackendVerified": true,
-      "versionRouteActive": false,
+      "versionRouteActive": true,
+      "versionRoutePullRequest": "https://github.com/perma-id/w3id.org/pull/6543",
+      "versionRouteMergeCommit": "1230ac37c2100f752e2071606103b81f445d5d5c",
+      "versionRouteVerificationRun": "https://github.com/GerhardBalz/executable-semantic-knowledge-architecture/actions/runs/31694481671",
       "previousPublishedVersion": {
         "version": "0.1.0",
         "versionIri": "https://w3id.org/eska/model/core/0.1.0",
@@ -80,10 +83,13 @@
     }
   },
   "w3idPayload": "publication/w3id/eska",
-  "note": "Unversioned W3ID routes represent current governed main. The governed eska-v0.2.0 release and tagged core 0.2.0 backend are verified, but the core 0.2.0 immutable W3ID routes remain inactive until the dedicated upstream route contribution is merged and externally verified.",
+  "note": "Unversioned W3ID routes represent current governed main. Core 0.2.0 immutable routes are active and externally verified against the immutable eska-v0.2.0 release; existing immutable module routes remain unchanged.",
   "persistentVocabulary": "https://w3id.org/eska",
   "persistentCombinedRdf": "https://w3id.org/eska/dist/eska.ttl",
   "w3idActivationPullRequest": "https://github.com/perma-id/w3id.org/pull/6530",
   "w3idVersionRoutesPullRequest": "https://github.com/perma-id/w3id.org/pull/6535",
-  "w3idVersionRoutesMergeCommit": "bf72939d8d6a15d78f2be16a87eaca494e72882b"
+  "w3idVersionRoutesMergeCommit": "bf72939d8d6a15d78f2be16a87eaca494e72882b",
+  "w3idCore020RoutesPullRequest": "https://github.com/perma-id/w3id.org/pull/6543",
+  "w3idCore020RoutesMergeCommit": "1230ac37c2100f752e2071606103b81f445d5d5c",
+  "w3idCore020VerificationRun": "https://github.com/GerhardBalz/executable-semantic-knowledge-architecture/actions/runs/31694481671"
 }
