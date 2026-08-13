@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify the active ESKA namespace, core-0.2.0 compatibility, and release evidence."""
+"""Verify the active ESKA namespace, core-0.2.0 compatibility, release, and W3ID evidence."""
 from __future__ import annotations
 
 import json
@@ -28,6 +28,9 @@ RELEASE_TAG = "eska-v0.2.0"
 RELEASE_COMMIT = "a6ce0b9e795d271dce8a2b7be93d44932e8448d4"
 RELEASE_URL = "https://github.com/GerhardBalz/executable-semantic-knowledge-architecture/releases/tag/eska-v0.2.0"
 RELEASE_RUN = "https://github.com/GerhardBalz/executable-semantic-knowledge-architecture/actions/runs/31675254397"
+W3ID_PR = "https://github.com/perma-id/w3id.org/pull/6543"
+W3ID_MERGE = "1230ac37c2100f752e2071606103b81f445d5d5c"
+W3ID_VERIFY_RUN = "https://github.com/GerhardBalz/executable-semantic-knowledge-architecture/actions/runs/31694481671"
 SEMANTIC_MODEL_DEFINITION = (
     "A formal representation that gives knowledge explicit machine-interpretable meaning "
     "through concepts, relationships, constraints, axioms, or equivalent semantic structures."
@@ -44,10 +47,7 @@ def main() -> None:
     migration = json.loads(MIGRATION.read_text(encoding="utf-8"))
 
     require(contract["contractVersion"] == "1.2", "unexpected publication contract version")
-    require(
-        contract["status"] == "core-0.2.0-release-published-route-pending",
-        "unexpected publication state",
-    )
+    require(contract["status"] == "core-0.2.0-w3id-active", "unexpected publication state")
 
     term = contract["termNamespace"]
     require(term["current"] == "https://w3id.org/eska#", "unexpected active ESKA term namespace")
@@ -61,6 +61,12 @@ def main() -> None:
     require(release["currentPublishedReleaseCommit"] == RELEASE_COMMIT, "release commit evidence mismatch")
     require(release["currentPublishedReleaseUrl"] == RELEASE_URL, "release URL evidence mismatch")
     require(release["currentPublishedReleaseWorkflowRun"] == RELEASE_RUN, "release workflow evidence mismatch")
+
+    publication = contract["publicationEvidence"]
+    require(publication["core020RouteActive"] is True, "core 0.2.0 W3ID route must be active")
+    require(publication["core020RoutePullRequest"] == W3ID_PR, "core 0.2.0 W3ID PR evidence mismatch")
+    require(publication["core020RouteMergeCommit"] == W3ID_MERGE, "core 0.2.0 W3ID merge evidence mismatch")
+    require(publication["core020RouteVerificationRun"] == W3ID_VERIFY_RUN, "core 0.2.0 W3ID verification evidence mismatch")
 
     alignment = contract["compatibility"]["semanticModelAlignment"]
     require(
@@ -134,14 +140,14 @@ def main() -> None:
         "usesSemanticModel compatibility surface changed",
     )
 
-    print("SUCCESS: ESKA core 0.2.0, SMO compatibility, and v0.2.0 release evidence are machine-verifiable.")
+    print("SUCCESS: ESKA core 0.2.0, SMO compatibility, release, and active W3ID evidence are machine-verifiable.")
     print(f"Active term namespace:       {term['current']}")
     print("Core module version:         0.2.0")
     print("SemanticModel bridge:        owl:equivalentClass smo:SemanticModel")
     print(f"Immutable SMO dependency:    {SMO_VERSION}")
     print("ESKA SemanticModel deprecated: no")
     print(f"Published repository release: {RELEASE_TAG} @ {RELEASE_COMMIT}")
-    print("Core 0.2.0 W3ID route:       pending upstream activation")
+    print("Core 0.2.0 W3ID route:       active and externally verified")
 
 
 if __name__ == "__main__":

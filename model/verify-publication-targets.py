@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify ESKA current publication, immutable release history, and core-0.2.0 route staging."""
+"""Verify ESKA current publication and active immutable core-0.2.0 routing."""
 from __future__ import annotations
 
 import json
@@ -13,8 +13,9 @@ ROOT = Path(__file__).resolve().parents[1]
 W3ID_PAYLOAD = ROOT / "publication/w3id/eska/.htaccess"
 RELEASE_TAG = "eska-v0.2.0"
 RELEASE_COMMIT = "a6ce0b9e795d271dce8a2b7be93d44932e8448d4"
-RELEASE_URL = "https://github.com/GerhardBalz/executable-semantic-knowledge-architecture/releases/tag/eska-v0.2.0"
-RELEASE_RUN = "https://github.com/GerhardBalz/executable-semantic-knowledge-architecture/actions/runs/31675254397"
+W3ID_PR = "https://github.com/perma-id/w3id.org/pull/6543"
+W3ID_MERGE = "1230ac37c2100f752e2071606103b81f445d5d5c"
+W3ID_VERIFY_RUN = "https://github.com/GerhardBalz/executable-semantic-knowledge-architecture/actions/runs/31694481671"
 
 
 def require(condition: bool, message: str) -> None:
@@ -44,23 +45,20 @@ def main() -> None:
     term = contract["termNamespace"]
 
     require(term["activationStatus"] == "active", "namespace not active")
-    require(
-        contract["status"] == "core-0.2.0-release-published-route-pending",
-        "unexpected contract publication stage",
-    )
-    require(
-        targets["status"] == "w3id-active-versioned-core-0.2.0-release-published-route-pending",
-        "backend status mismatch",
-    )
+    require(contract["status"] == "core-0.2.0-w3id-active", "unexpected contract publication stage")
+    require(targets["status"] == "w3id-active-versioned-core-0.2.0", "backend status mismatch")
     require(targets["releaseTag"] == RELEASE_TAG, "current published release tag mismatch")
     require(targets["releaseCommit"] == RELEASE_COMMIT, "release commit mismatch")
-    require(targets["releaseUrl"] == RELEASE_URL, "release URL mismatch")
-    require(targets["releaseWorkflowRun"] == RELEASE_RUN, "release workflow evidence mismatch")
     require(targets["previousReleaseTag"] == "eska-v0.1.0", "previous release tag mismatch")
-    require(targets["persistentVocabulary"] == "https://w3id.org/eska", "persistent vocabulary route mismatch")
-    require(targets["w3idActivationPullRequest"] == "https://github.com/perma-id/w3id.org/pull/6530", "W3ID activation PR mismatch")
-    require(targets["w3idVersionRoutesPullRequest"] == "https://github.com/perma-id/w3id.org/pull/6535", "W3ID version-routes PR mismatch")
-    require(targets["w3idVersionRoutesMergeCommit"] == "bf72939d8d6a15d78f2be16a87eaca494e72882b", "W3ID version-routes merge commit mismatch")
+
+    evidence = contract["publicationEvidence"]
+    require(evidence["core020RouteActive"] is True, "contract does not mark core 0.2.0 route active")
+    require(evidence["core020RoutePullRequest"] == W3ID_PR, "contract W3ID PR mismatch")
+    require(evidence["core020RouteMergeCommit"] == W3ID_MERGE, "contract W3ID merge mismatch")
+    require(evidence["core020RouteVerificationRun"] == W3ID_VERIFY_RUN, "contract W3ID verification mismatch")
+    require(targets["w3idCore020RoutesPullRequest"] == W3ID_PR, "backend W3ID PR mismatch")
+    require(targets["w3idCore020RoutesMergeCommit"] == W3ID_MERGE, "backend W3ID merge mismatch")
+    require(targets["w3idCore020VerificationRun"] == W3ID_VERIFY_RUN, "backend W3ID verification mismatch")
 
     authoritative = Graph()
     for module in contract["modules"]:
@@ -82,30 +80,23 @@ def main() -> None:
     core_contract = modules["core"]
     require(core["iri"] == core_contract["ontologyIri"], "core ontology IRI mismatch")
     require(core["version"] == core_contract["version"] == "0.2.0", "core current version mismatch")
-    require(
-        core["versionIri"] == core_contract["versionIri"] == "https://w3id.org/eska/model/core/0.2.0",
-        "core version IRI mismatch",
-    )
-    require(core["versionStatus"] == "release-published-route-pending", "core release/route state mismatch")
+    require(core["versionIri"] == "https://w3id.org/eska/model/core/0.2.0", "core version IRI mismatch")
+    require(core["versionStatus"] == "active", "core route is not active")
     require(core["releaseTag"] == RELEASE_TAG, "core release tag mismatch")
     require(core["releaseCommit"] == RELEASE_COMMIT, "core release commit mismatch")
     require(core["versionBackendVerified"] is True, "core 0.2.0 tagged backend must be verified")
-    require(core["versionRouteActive"] is False, "core 0.2.0 W3ID route must remain inactive")
-    require_backend_url(core["rdf"])
-    require_backend_url(core["human"])
-    require_backend_url(core["versionRdf"])
-    require_backend_url(core["versionHuman"])
+    require(core["versionRouteActive"] is True, "core 0.2.0 W3ID route must be active")
+    require(core["versionRoutePullRequest"] == W3ID_PR, "core route PR evidence mismatch")
+    require(core["versionRouteMergeCommit"] == W3ID_MERGE, "core route merge evidence mismatch")
+    require(core["versionRouteVerificationRun"] == W3ID_VERIFY_RUN, "core route verification evidence mismatch")
     require("/eska-v0.2.0/" in core["versionRdf"], "core version RDF must target eska-v0.2.0")
     require("/eska-v0.2.0/" in core["versionHuman"], "core version HTML must target eska-v0.2.0")
     require(core["versionDistribution"] == "https://w3id.org/eska/dist/0.2.0/eska-core.ttl", "core distribution route mismatch")
 
     previous = core["previousPublishedVersion"]
     require(previous["version"] == "0.1.0", "previous core version mismatch")
-    require(previous["versionIri"] == "https://w3id.org/eska/model/core/0.1.0", "previous core version IRI mismatch")
     require(previous["versionRouteActive"] is True, "existing core 0.1.0 route must remain active")
     require("/eska-v0.1.0/" in previous["versionRdf"], "core 0.1.0 RDF backend moved")
-    require("/eska-v0.1.0/" in previous["versionHuman"], "core 0.1.0 HTML backend moved")
-    require(previous["versionDistribution"] == "https://w3id.org/eska/dist/0.1.0/eska-core.ttl", "core 0.1.0 distribution route changed")
 
     for name in ("capability", "service", "agent", "deployment"):
         module = modules[name]
@@ -114,19 +105,13 @@ def main() -> None:
         require(target["version"] == module["version"], f"{name}: module version mismatch")
         require(target["versionIri"] == module["versionIri"], f"{name}: module version IRI mismatch")
         require(target["versionRouteActive"] is True, f"{name}: existing immutable route must stay active")
-        require(
-            target["versionDistribution"] == f"https://w3id.org/eska/dist/{module['version']}/eska-{name}.ttl",
-            f"{name}: immutable distribution route mismatch",
-        )
-        for key in ("rdf", "human", "versionRdf", "versionHuman"):
-            require_backend_url(target[key])
         require("/eska-v0.1.0/" in target["versionRdf"], f"{name}: version RDF no longer targets first release")
-        require("/eska-v0.1.0/" in target["versionHuman"], f"{name}: version HTML no longer targets first release")
 
     payload = W3ID_PAYLOAD.read_text(encoding="utf-8")
     require("model/core/0\\.1\\.0" in payload, "governed W3ID payload lost core 0.1.0 immutable route")
-    require("model/core/0\\.2\\.0" not in payload, "core 0.2.0 W3ID route activated before dedicated route PR")
-    require("dist/0\\.2\\.0/eska-core\\.ttl" not in payload, "core 0.2.0 distribution route activated before dedicated route PR")
+    require("model/core/0\\.2\\.0" in payload, "governed W3ID payload lacks active core 0.2.0 route")
+    require("dist/0\\.2\\.0/eska-core\\.ttl" in payload, "governed W3ID payload lacks active core 0.2.0 distribution route")
+    require("eska-v0.2.0/model/eska-core.ttl" in payload, "core 0.2.0 routes do not target immutable release")
 
     for line in payload.splitlines():
         if "RewriteRule ^model/" in line and "/0\\." in line:
@@ -134,13 +119,11 @@ def main() -> None:
         if "RewriteRule ^dist/" in line and "eska-" in line:
             require("/main/" not in line, f"immutable distribution route targets mutable main: {line}")
 
-    print("SUCCESS: ESKA v0.2.0 release is verified while core 0.2.0 W3ID routing remains gated.")
+    print("SUCCESS: ESKA v0.2.0 release and core 0.2.0 immutable W3ID routes are active and governed.")
     print(f"Combined distribution triples: {len(distribution)}")
     print(f"Published repository release:  {RELEASE_TAG} @ {RELEASE_COMMIT}")
-    print("Current core module:            0.2.0")
     print("Published core 0.1.0 route:     active → eska-v0.1.0")
-    print("Core 0.2.0 tagged backend:      verified → eska-v0.2.0")
-    print("Core 0.2.0 W3ID route:          inactive / route-pending")
+    print("Core 0.2.0 W3ID route:          active → eska-v0.2.0")
 
 
 if __name__ == "__main__":

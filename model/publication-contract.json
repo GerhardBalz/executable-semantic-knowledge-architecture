@@ -1,6 +1,6 @@
 {
   "contractVersion": "1.2",
-  "status": "core-0.2.0-release-published-route-pending",
+  "status": "core-0.2.0-w3id-active",
   "repository": "GerhardBalz/executable-semantic-knowledge-architecture",
   "termNamespace": {
     "current": "https://w3id.org/eska#",
@@ -29,6 +29,12 @@
     "currentPublishedReleaseWorkflowRun": "https://github.com/GerhardBalz/executable-semantic-knowledge-architecture/actions/runs/31675254397",
     "semanticModuleVersionsIndependent": true,
     "repositoryReleaseMeaning": "A governed repository snapshot and publication bundle. It is not a semantic version assertion for every contained ontology module."
+  },
+  "publicationEvidence": {
+    "core020RouteActive": true,
+    "core020RoutePullRequest": "https://github.com/perma-id/w3id.org/pull/6543",
+    "core020RouteMergeCommit": "1230ac37c2100f752e2071606103b81f445d5d5c",
+    "core020RouteVerificationRun": "https://github.com/GerhardBalz/executable-semantic-knowledge-architecture/actions/runs/31694481671"
   },
   "compatibility": {
     "moduleVersioning": "semver",
