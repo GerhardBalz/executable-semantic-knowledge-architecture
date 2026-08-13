@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Verify live current and immutable ESKA W3ID routes from external CI.
+"""Verify live ESKA W3ID states and the release-backed core 0.2.0 publication boundary.
 
-Current module routes must always be live. Immutable module-version routes are
-verified only after publication metadata marks them active. A release-pending
-version must remain unpublished while the previously published immutable route
-continues to resolve from its governed release tag.
+Current module routes must always be live. Active immutable module-version routes
+must resolve to their governed release backends. A release-published but
+route-pending version must have a verified immutable backend while its W3ID route
+remains unpublished.
 """
 from __future__ import annotations
 
@@ -17,7 +17,7 @@ ROOT = Path(__file__).resolve().parents[1]
 CONTRACT_PATH = ROOT / "model" / "publication-contract.json"
 TARGETS_PATH = ROOT / "publication" / "backend-targets.json"
 W3ID_BASE = "https://w3id.org/eska"
-USER_AGENT = "ESKA-W3ID-verifier/1.2"
+USER_AGENT = "ESKA-W3ID-verifier/1.3"
 
 
 class RecordingRedirectHandler(urllib.request.HTTPRedirectHandler):
@@ -57,18 +57,14 @@ def fetch(
             final_url = str(response.geturl())
             status = int(response.status)
             content = (
-                response.read(32768).decode("utf-8", errors="replace")
+                response.read(65536).decode("utf-8", errors="replace")
                 if expect_text is not None
                 else ""
             )
     except urllib.error.HTTPError as exc:
-        raise AssertionError(
-            f"{route} returned HTTP {exc.code}: {exc.reason}"
-        ) from exc
+        raise AssertionError(f"{route} returned HTTP {exc.code}: {exc.reason}") from exc
     except urllib.error.URLError as exc:
-        raise AssertionError(
-            f"{route} could not be resolved/fetched: {exc.reason}"
-        ) from exc
+        raise AssertionError(f"{route} could not be resolved/fetched: {exc.reason}") from exc
 
     require(status == 200, f"{route}: final response was HTTP {status}, expected 200")
     require(
@@ -88,13 +84,29 @@ def fetch(
     return handler.chain
 
 
-def require_unpublished(route: str, accept: str) -> list[tuple[int, str]]:
-    """Require a staged immutable W3ID route to remain inactive.
+def fetch_backend(url: str, markers: list[str]) -> None:
+    request = urllib.request.Request(
+        url,
+        headers={"Accept": "text/turtle", "User-Agent": USER_AGENT},
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=30) as response:
+            status = int(response.status)
+            final_url = str(response.geturl())
+            content = response.read(65536).decode("utf-8", errors="replace")
+    except urllib.error.HTTPError as exc:
+        raise AssertionError(f"{url} returned HTTP {exc.code}: {exc.reason}") from exc
+    except urllib.error.URLError as exc:
+        raise AssertionError(f"{url} could not be resolved/fetched: {exc.reason}") from exc
 
-    Internal W3ID canonicalization (for example a 301 adding a slash) is allowed,
-    but an external 303 backend redirect is not. The terminal response must be a
-    not-found/gone response rather than a successfully published representation.
-    """
+    require(status == 200, f"{url}: tagged backend was HTTP {status}, expected 200")
+    require(normalize(final_url) == normalize(url), f"{url}: tagged backend unexpectedly resolved to {final_url}")
+    for marker in markers:
+        require(marker in content, f"{url}: tagged backend lacks expected marker {marker!r}")
+
+
+def require_unpublished(route: str, accept: str) -> list[tuple[int, str]]:
+    """Require a route-pending immutable W3ID identifier to remain inactive."""
     handler = RecordingRedirectHandler()
     opener = urllib.request.build_opener(handler)
     request = urllib.request.Request(
@@ -112,7 +124,7 @@ def require_unpublished(route: str, accept: str) -> list[tuple[int, str]]:
         )
         require(
             not any(code == 303 for code, _ in handler.chain),
-            f"{route}: release-pending route unexpectedly has a 303 backend redirect: {handler.chain}",
+            f"{route}: route-pending identifier unexpectedly has a 303 backend redirect: {handler.chain}",
         )
         return handler.chain
     except urllib.error.URLError as exc:
@@ -121,7 +133,7 @@ def require_unpublished(route: str, accept: str) -> list[tuple[int, str]]:
         ) from exc
 
     raise AssertionError(
-        f"{route}: release-pending immutable route unexpectedly resolved "
+        f"{route}: route-pending immutable identifier unexpectedly resolved "
         f"with HTTP {status} to {final_url}; expected it to remain unpublished"
     )
 
@@ -150,7 +162,11 @@ def main() -> None:
 
     require(term["current"] == "https://w3id.org/eska#", "unexpected permanent ESKA namespace")
     require(term["activationStatus"] == "active", "unexpected activation state")
-    require(targets["releaseTag"] == "eska-v0.1.0", "unexpected published repository release tag")
+    require(targets["releaseTag"] == "eska-v0.2.0", "unexpected published repository release tag")
+    require(
+        targets["releaseCommit"] == "a6ce0b9e795d271dce8a2b7be93d44932e8448d4",
+        "unexpected v0.2.0 release commit",
+    )
 
     checks: list[tuple[str, str, str, str | None]] = [
         (W3ID_BASE, "text/html", targets["humanDocumentation"], None),
@@ -159,6 +175,7 @@ def main() -> None:
         (f"{W3ID_BASE}/dist/eska.ttl", "text/turtle", targets["combinedRdf"], term["current"]),
     ]
     unpublished_checks: list[tuple[str, str]] = []
+    backend_checks: list[tuple[str, list[str]]] = []
 
     for module in contract["modules"]:
         name = str(module["name"])
@@ -173,7 +190,6 @@ def main() -> None:
             f"{name}: backend current version IRI differs from publication contract",
         )
 
-        # Current module routes always represent governed main.
         checks.extend(
             [
                 (f"{W3ID_BASE}/model/{name}", "text/html", target["human"], None),
@@ -198,24 +214,21 @@ def main() -> None:
             )
             continue
 
-        # A current semantic version may exist on main before its immutable
-        # repository release and W3ID route are published.
         require(
-            target.get("versionStatus") == "release-pending",
-            f"{name}: inactive immutable route is not explicitly release-pending",
+            target.get("versionStatus") == "release-published-route-pending",
+            f"{name}: inactive immutable route is not explicitly release-published/route-pending",
         )
+        require(target.get("releaseTag") == targets["releaseTag"], f"{name}: route-pending release tag mismatch")
+        require(target.get("releaseCommit") == targets["releaseCommit"], f"{name}: route-pending release commit mismatch")
+        require(target.get("versionBackendVerified") is True, f"{name}: immutable backend is not marked verified")
         require(
-            target.get("plannedReleaseTag") == targets.get("nextReleaseTag"),
-            f"{name}: planned release tag differs from repository nextReleaseTag",
-        )
-        require(
-            target.get("plannedVersionDistribution")
+            target.get("versionDistribution")
             == f"https://w3id.org/eska/dist/{module['version']}/eska-{name}.ttl",
-            f"{name}: planned immutable distribution route mismatch",
+            f"{name}: immutable distribution route mismatch",
         )
 
         previous = target.get("previousPublishedVersion")
-        require(previous is not None, f"{name}: release-pending version lacks previous published version evidence")
+        require(previous is not None, f"{name}: route-pending version lacks previous published version evidence")
         require(
             previous.get("versionRouteActive") is True,
             f"{name}: previous published immutable version is not marked active",
@@ -228,34 +241,47 @@ def main() -> None:
             version_distribution=previous["versionDistribution"],
         )
 
+        backend_checks.append(
+            (
+                target["versionRdf"],
+                [
+                    str(module["versionIri"]),
+                    "owl:equivalentClass smo:SemanticModel",
+                    "dcterms:requires <https://w3id.org/smo/0.1.0>",
+                ],
+            )
+        )
         unpublished_checks.extend(
             [
                 (target["versionIri"], "text/html"),
                 (target["versionIri"], "text/turtle"),
-                (target["plannedVersionDistribution"], "text/turtle"),
+                (target["versionDistribution"], "text/turtle"),
             ]
         )
 
-    print("Verifying live current and published immutable ESKA W3ID routes...")
+    print("Verifying release-backed tagged backend for route-pending core version...")
+    for url, markers in backend_checks:
+        fetch_backend(url, markers)
+        print(f"PASS tagged backend {url}")
+
+    print("Verifying live current and active immutable ESKA W3ID routes...")
     for route, accept, expected, marker in checks:
         chain = fetch(route, accept, expected, expect_text=marker)
         print(f"PASS {route} [{accept}] -> {expected}")
         print("     redirects: " + " -> ".join(f"{code} {url}" for code, url in chain))
 
-    print("Verifying release-pending immutable routes remain unpublished...")
+    print("Verifying release-published but route-pending identifiers remain unpublished...")
     for route, accept in unpublished_checks:
         chain = require_unpublished(route, accept)
         print(f"PASS unpublished {route} [{accept}]")
         if chain:
             print("     internal redirects: " + " -> ".join(f"{code} {url}" for code, url in chain))
 
-    print("SUCCESS: current, published immutable, and release-pending W3ID states are publication-consistent.")
+    print("SUCCESS: ESKA release-backed and W3ID route states are publication-consistent.")
     print(f"Published route checks: {len(checks)}")
-    print(f"Unpublished route checks: {len(unpublished_checks)}")
+    print(f"Route-pending checks: {len(unpublished_checks)}")
     print(f"Permanent namespace: {term['current']}")
-    print(f"Published repository release: {targets['releaseTag']}")
-    if targets.get("nextReleaseTag"):
-        print(f"Next repository release: {targets['nextReleaseTag']} (pending)")
+    print(f"Published repository release: {targets['releaseTag']} @ {targets['releaseCommit']}")
 
 
 if __name__ == "__main__":
