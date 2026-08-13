@@ -1,0 +1,170 @@
+name: Publish ESKA v0.2.0
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - publication/releases/eska-v0.2.0.json
+      - docs/releases/eska-v0.2.0.md
+      - .github/workflows/publish-eska-v0.2.0.yml
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out governed release commit
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install RDF verifier dependency
+        run: python -m pip install rdflib
+
+      - name: Verify governed release inputs and release-pending state
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          manifest = json.loads(Path('publication/releases/eska-v0.2.0.json').read_text(encoding='utf-8'))
+          contract = json.loads(Path('model/publication-contract.json').read_text(encoding='utf-8'))
+          targets = json.loads(Path('publication/backend-targets.json').read_text(encoding='utf-8'))
+
+          expected_modules = {
+              'core': '0.2.0',
+              'capability': '0.2.0',
+              'service': '0.4.0',
+              'agent': '0.3.0',
+              'deployment': '0.1.0',
+          }
+
+          assert manifest['release'] == 'eska-v0.2.0'
+          assert manifest['repositoryVersion'] == '0.2.0'
+          assert manifest['releaseTag'] == 'eska-v0.2.0'
+          assert manifest['previousReleaseTag'] == 'eska-v0.1.0'
+          assert manifest['permanentNamespace'] == 'https://w3id.org/eska#'
+          assert manifest['modules'] == expected_modules
+          assert manifest['verification']['declaredTerms'] == 53
+          assert manifest['verification']['semanticExecutionModes'] == 7
+          assert manifest['verification']['semanticExecutions'] == 16
+          assert manifest['publicationBoundary']['createsImmutableRepositoryRelease'] is True
+          assert manifest['publicationBoundary']['activatesCore020W3idRoute'] is False
+          assert manifest['publicationBoundary']['immutableRoutesMustNeverTargetMain'] is True
+
+          alignment = manifest['semanticModelAlignment']
+          assert alignment == {
+              'canonicalClass': 'https://w3id.org/smo#SemanticModel',
+              'compatibilityClass': 'https://w3id.org/eska#SemanticModel',
+              'relation': 'http://www.w3.org/2002/07/owl#equivalentClass',
+              'dependency': 'https://w3id.org/smo/0.1.0',
+              'compatibilityClassDeprecated': False,
+          }
+
+          assert contract['contractVersion'] == '1.2'
+          assert contract['status'] == 'core-0.2.0-release-pending'
+          assert contract['releaseVersioning']['currentPublishedRepositoryVersion'] == '0.1.0'
+          assert contract['releaseVersioning']['nextRepositoryVersion'] == '0.2.0'
+          assert contract['releaseVersioning']['nextRepositoryReleaseStatus'] == 'pending'
+          assert {m['name']: m['version'] for m in contract['modules']} == expected_modules
+          assert contract['compatibility']['semanticModelAlignment'] == alignment
+
+          assert targets['releaseTag'] == 'eska-v0.1.0'
+          assert targets['nextReleaseTag'] == 'eska-v0.2.0'
+          assert targets['modules']['core']['version'] == '0.2.0'
+          assert targets['modules']['core']['versionStatus'] == 'release-pending'
+          assert targets['modules']['core']['versionRouteActive'] is False
+          assert targets['modules']['core']['plannedReleaseTag'] == 'eska-v0.2.0'
+
+          for path in manifest['bundle']:
+              assert Path(path).is_file(), path
+
+          print('SUCCESS: governed ESKA v0.2.0 release inputs and release-pending boundary are complete.')
+          PY
+
+      - name: Verify core 0.2.0 and SMO compatibility contract
+        run: python model/verify-publication-contract.py
+
+      - name: Verify publication and immutable-route staging
+        run: python model/verify-publication-targets.py
+
+      - name: Verify current, published immutable, and release-pending W3ID states
+        run: python model/verify-live-w3id.py
+
+      - name: Verify previous governed release remains available
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh release view eska-v0.1.0 --repo "$GH_REPO" >/dev/null
+          gh api "repos/$GH_REPO/git/ref/tags/eska-v0.1.0" --jq '.object.sha' >/dev/null
+          echo "SUCCESS: existing eska-v0.1.0 release/tag remains available."
+
+      - name: Create immutable tag and GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: eska-v0.2.0
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if gh release view "$TAG" --repo "$GH_REPO" >/dev/null 2>&1; then
+            tag_sha="$(gh api "repos/$GH_REPO/git/ref/tags/$TAG" --jq '.object.sha')"
+            if [ "$tag_sha" != "$GITHUB_SHA" ]; then
+              echo "Existing $TAG points to $tag_sha, expected governed commit $GITHUB_SHA" >&2
+              exit 1
+            fi
+            echo "$TAG already exists at the governed release commit; leaving it unchanged."
+          else
+            gh release create "$TAG" \
+              --repo "$GH_REPO" \
+              --target "$GITHUB_SHA" \
+              --title "ESKA v0.2.0" \
+              --notes-file docs/releases/eska-v0.2.0.md \
+              dist/eska.ttl \
+              model/eska-core.ttl \
+              model/eska-capability.ttl \
+              model/eska-service.ttl \
+              model/eska-agent.ttl \
+              model/eska-deployment.ttl \
+              model/publication-contract.json \
+              model/namespace-migration.json \
+              publication/backend-targets.json
+          fi
+
+          tag_sha="$(gh api "repos/$GH_REPO/git/ref/tags/$TAG" --jq '.object.sha')"
+          test "$tag_sha" = "$GITHUB_SHA"
+          echo "SUCCESS: $TAG points exactly to $GITHUB_SHA."
+
+      - name: Verify release asset inventory
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: eska-v0.2.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          actual="$(gh release view "$TAG" --repo "$GH_REPO" --json assets --jq '.assets[].name' | sort)"
+          expected="$(printf '%s\n' \
+            backend-targets.json \
+            eska-agent.ttl \
+            eska-capability.ttl \
+            eska-core.ttl \
+            eska-deployment.ttl \
+            eska-service.ttl \
+            eska.ttl \
+            namespace-migration.json \
+            publication-contract.json | sort)"
+          test "$actual" = "$expected"
+          echo "SUCCESS: $TAG release asset inventory is exact."
