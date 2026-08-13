@@ -1,0 +1,49 @@
+{
+  "release": "eska-v0.2.0",
+  "repositoryVersion": "0.2.0",
+  "status": "governed-release-ready",
+  "permanentNamespace": "https://w3id.org/eska#",
+  "persistentVocabulary": "https://w3id.org/eska",
+  "sourceBranch": "main",
+  "releaseTag": "eska-v0.2.0",
+  "previousReleaseTag": "eska-v0.1.0",
+  "modules": {
+    "core": "0.2.0",
+    "capability": "0.2.0",
+    "service": "0.4.0",
+    "agent": "0.3.0",
+    "deployment": "0.1.0"
+  },
+  "semanticModelAlignment": {
+    "canonicalClass": "https://w3id.org/smo#SemanticModel",
+    "compatibilityClass": "https://w3id.org/eska#SemanticModel",
+    "relation": "http://www.w3.org/2002/07/owl#equivalentClass",
+    "dependency": "https://w3id.org/smo/0.1.0",
+    "compatibilityClassDeprecated": false
+  },
+  "bundle": [
+    "dist/eska.ttl",
+    "model/eska-core.ttl",
+    "model/eska-capability.ttl",
+    "model/eska-service.ttl",
+    "model/eska-agent.ttl",
+    "model/eska-deployment.ttl",
+    "model/publication-contract.json",
+    "model/namespace-migration.json",
+    "publication/backend-targets.json"
+  ],
+  "verification": {
+    "declaredTerms": 53,
+    "semanticExecutionModes": 7,
+    "semanticExecutions": 16,
+    "operationalInvocationLineages": 5,
+    "coreVersion": "0.2.0",
+    "coreVersionRouteActiveBeforeRelease": false
+  },
+  "publicationBoundary": {
+    "createsImmutableRepositoryRelease": true,
+    "activatesCore020W3idRoute": false,
+    "immutableRoutesMustNeverTargetMain": true
+  },
+  "notes": "Repository release version is independent from ontology-module versions. This snapshot publishes the reviewed ESKA core 0.2.0 SMO compatibility bridge. Core 0.2.0 W3ID version routes remain inactive until the tagged backend is verified and a separate upstream W3ID contribution is merged."
+}
