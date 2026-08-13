@@ -7,6 +7,12 @@ on:
       - publication/releases/eska-v0.2.0.json
       - docs/releases/eska-v0.2.0.md
       - .github/workflows/publish-eska-v0.2.0.yml
+  pull_request:
+    branches: [main]
+    paths:
+      - publication/releases/eska-v0.2.0.json
+      - docs/releases/eska-v0.2.0.md
+      - .github/workflows/publish-eska-v0.2.0.yml
 
 permissions:
   contents: write
@@ -111,6 +117,7 @@ jobs:
           echo "SUCCESS: existing eska-v0.1.0 release/tag remains available."
 
       - name: Create immutable tag and GitHub Release
+        if: github.event_name == 'push'
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
@@ -148,6 +155,7 @@ jobs:
           echo "SUCCESS: $TAG points exactly to $GITHUB_SHA."
 
       - name: Verify release asset inventory
+        if: github.event_name == 'push'
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
