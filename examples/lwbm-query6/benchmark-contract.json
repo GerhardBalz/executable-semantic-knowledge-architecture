@@ -1,0 +1,42 @@
+{
+  "benchmark": "LWBM",
+  "authority": "Lehigh SWAT",
+  "case": "4k-query6",
+  "sources": {
+    "ontology": {"url": "http://swat.cse.lehigh.edu/onto/wine.owl", "sha256": "30da3cd5f8c3df59c83cbc309750292ed83e990157028f044be347b5240d1775"},
+    "data": {"url": "http://swat.cse.lehigh.edu/data/wine-data.owl", "sha256": "df22414d20d97937b84bce63665df791720025276350a64fa97e7b37db723b71"},
+    "queryPage": {"url": "http://swat.cse.lehigh.edu/projects/benchmarks/lwbm/query-spq.html", "sha256": "f981639d0257a7a96c2e475902969322b0943ddf0a4b3d5405aeb6eacb9f1428", "queryStartMarker": "[query6]", "queryEndMarker": "[query7]"},
+    "oracle": {
+      "url": "http://swat.cse.lehigh.edu/projects/benchmarks/lwbm/tkde-4t.gif",
+      "sha256": "7496ef4db76e91228dac73314227817f10345402a5f55305fa38ce303b520c11",
+      "expectedDistinctResultCount": 23,
+      "publishedObservations": [
+        {"system": "OWLim", "resultCount": 23, "completeness": 100},
+        {"system": "Jena", "resultCount": 23, "completeness": 100},
+        {"system": "Pellet", "resultCount": 23, "completeness": 100}
+      ]
+    }
+  },
+  "historicalQuery6": {
+    "requiredPatterns": ["(?X, rdf:type, wine:Wine)", "(?X, wine:locatedIn, wine:CaliforniaRegion)"],
+    "syntax": "historical tuple-style pre-SPARQL-1.0 WHERE syntax"
+  },
+  "executableProjection": {
+    "path": "query6-executable.sparql",
+    "sha256": "1520b919c259fb6f9526375518aee8dd7ed7d1af2779b75a17ba5e506df8711f",
+    "transformation": "Mechanical syntax projection to SPARQL 1.1 preserving exactly the two historical Query 6 triple patterns."
+  },
+  "semanticSurface": {
+    "implementation": "query6-minimal-owl-closure-v1",
+    "rdflibVersion": "7.6.0",
+    "soundRules": [
+      "rdfs:subClassOf transitivity for named classes",
+      "named operands of owl:intersectionOf are superclasses of the described named class",
+      "named owl:equivalentClass pairs contribute superclass edges in both directions",
+      "rdf:type propagates to named superclasses",
+      "owl:TransitiveProperty assertions are closed transitively"
+    ],
+    "scope": "Only the OWL/RDFS entailment surface needed by historical LWBM Query 6; not a complete OWL reasoner."
+  },
+  "verification": {"rawExpectedDistinctCount": 0, "reasonedExpectedDistinctCount": 23}
+}

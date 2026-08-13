@@ -1,0 +1,57 @@
+@prefix demo: <https://w3id.org/eska/example/lwbm-query6#> .
+@prefix eska: <https://w3id.org/eska#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+<http://swat.cse.lehigh.edu/onto/wine.owl>
+    a eska:SemanticModel , prov:Entity ;
+    rdfs:label "Lehigh Wine Benchmark ontology"@en .
+
+<http://swat.cse.lehigh.edu/data/wine-data.owl>
+    a prov:Entity ;
+    rdfs:label "Lehigh Wine Benchmark 4k data"@en .
+
+<http://swat.cse.lehigh.edu/projects/benchmarks/lwbm/query-spq.html>
+    a prov:Entity ;
+    rdfs:label "Lehigh LWBM historical SPARQL workload"@en .
+
+<http://swat.cse.lehigh.edu/projects/benchmarks/lwbm/tkde-4t.gif>
+    a prov:Entity ;
+    rdfs:label "Lehigh LWBM 4k published result evidence"@en .
+
+demo:Query6Capability
+    a eska:SemanticCapability ;
+    rdfs:label "Evaluate LWBM Query 6 after sufficient OWL materialization"@en .
+
+demo:Query6Pipeline
+    a eska:ExecutableSemanticKnowledgeArtifact ;
+    eska:usesSemanticModel <http://swat.cse.lehigh.edu/onto/wine.owl> ;
+    rdfs:label "Hash-gated fetch, historical-query projection, scoped OWL materialization and Query 6 verification pipeline"@en .
+
+demo:Query6Execution
+    a eska:Execution ;
+    eska:executesCapability demo:Query6Capability ;
+    eska:usesSemanticModel <http://swat.cse.lehigh.edu/onto/wine.owl> ;
+    eska:usesExecutableArtifact demo:Query6Pipeline ;
+    eska:generatesResult demo:Query6Result ;
+    prov:used
+        <http://swat.cse.lehigh.edu/onto/wine.owl> ,
+        <http://swat.cse.lehigh.edu/data/wine-data.owl> ,
+        <http://swat.cse.lehigh.edu/projects/benchmarks/lwbm/query-spq.html> .
+
+demo:Query6Result
+    a eska:Result , prov:Entity ;
+    rdfs:label "Normalized LWBM Query 6 answer set"@en ;
+    prov:wasDerivedFrom
+        <http://swat.cse.lehigh.edu/onto/wine.owl> ,
+        <http://swat.cse.lehigh.edu/data/wine-data.owl> ,
+        <http://swat.cse.lehigh.edu/projects/benchmarks/lwbm/query-spq.html> .
+
+demo:LehighOracleVerification
+    a eska:Verification ;
+    rdfs:label "Verify Query 6 result count against Lehigh's published 4k oracle"@en ;
+    eska:verifiesExecution demo:Query6Execution ;
+    eska:verifiesResult demo:Query6Result ;
+    prov:used
+        demo:Query6Result ,
+        <http://swat.cse.lehigh.edu/projects/benchmarks/lwbm/tkde-4t.gif> .

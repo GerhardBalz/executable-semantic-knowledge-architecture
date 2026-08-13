@@ -1,0 +1,29 @@
+name: LWBM Query 6 external oracle
+
+on:
+  pull_request:
+    paths:
+      - "examples/lwbm-query6/**"
+      - ".github/workflows/lwbm-query6-external-oracle.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out ESKA
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install verifier dependency
+        run: python -m pip install -r examples/lwbm-query6/requirements.txt
+
+      - name: Verify LWBM Query 6 against Lehigh oracle
+        run: bash examples/lwbm-query6/run.sh
