@@ -1,0 +1,60 @@
+name: Verify ESKA core 0.2.0 W3ID
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "publication/w3id/eska/.htaccess"
+      - ".github/workflows/verify-core-0.2.0-w3id.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify immutable core 0.2.0 live routes
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          check_route() {
+            url="$1"
+            accept="$2"
+            expected="$3"
+            marker="$4"
+            headers="$(mktemp)"
+            body="$(mktemp)"
+            final="$(curl --fail --silent --show-error --location \
+              --header "Accept: $accept" \
+              --dump-header "$headers" \
+              --output "$body" \
+              --write-out '%{url_effective}' \
+              "$url")"
+            test "$final" = "$expected"
+            grep -Eq '^HTTP/.* 303' "$headers"
+            grep -Fq "$marker" "$body"
+            echo "PASS $url [$accept] -> $final"
+          }
+
+          check_route \
+            "https://w3id.org/eska/model/core/0.2.0" \
+            "text/turtle" \
+            "https://raw.githubusercontent.com/GerhardBalz/executable-semantic-knowledge-architecture/eska-v0.2.0/model/eska-core.ttl" \
+            "https://w3id.org/eska/model/core/0.2.0"
+
+          check_route \
+            "https://w3id.org/eska/model/core/0.2.0" \
+            "text/html" \
+            "https://github.com/GerhardBalz/executable-semantic-knowledge-architecture/blob/eska-v0.2.0/model/eska-core.ttl" \
+            "SemanticModel"
+
+          check_route \
+            "https://w3id.org/eska/dist/0.2.0/eska-core.ttl" \
+            "text/turtle" \
+            "https://raw.githubusercontent.com/GerhardBalz/executable-semantic-knowledge-architecture/eska-v0.2.0/model/eska-core.ttl" \
+            "https://w3id.org/eska/model/core/0.2.0"
+
+          echo "SUCCESS: immutable ESKA core 0.2.0 W3ID routes resolve to eska-v0.2.0."
