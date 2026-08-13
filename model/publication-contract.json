@@ -1,6 +1,6 @@
 {
   "contractVersion": "1.2",
-  "status": "core-0.2.0-release-pending",
+  "status": "core-0.2.0-release-published-route-pending",
   "repository": "GerhardBalz/executable-semantic-knowledge-architecture",
   "termNamespace": {
     "current": "https://w3id.org/eska#",
@@ -21,9 +21,12 @@
   "releaseVersioning": {
     "repositoryTagPattern": "eska-v{version}",
     "initialRepositoryVersion": "0.1.0",
-    "currentPublishedRepositoryVersion": "0.1.0",
-    "nextRepositoryVersion": "0.2.0",
-    "nextRepositoryReleaseStatus": "pending",
+    "previousPublishedRepositoryVersion": "0.1.0",
+    "currentPublishedRepositoryVersion": "0.2.0",
+    "currentPublishedReleaseTag": "eska-v0.2.0",
+    "currentPublishedReleaseCommit": "a6ce0b9e795d271dce8a2b7be93d44932e8448d4",
+    "currentPublishedReleaseUrl": "https://github.com/GerhardBalz/executable-semantic-knowledge-architecture/releases/tag/eska-v0.2.0",
+    "currentPublishedReleaseWorkflowRun": "https://github.com/GerhardBalz/executable-semantic-knowledge-architecture/actions/runs/31675254397",
     "semanticModuleVersionsIndependent": true,
     "repositoryReleaseMeaning": "A governed repository snapshot and publication bundle. It is not a semantic version assertion for every contained ontology module."
   },
