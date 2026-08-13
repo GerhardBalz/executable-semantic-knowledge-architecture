@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify the active ESKA namespace and core-0.2.0 compatibility contract."""
+"""Verify the active ESKA namespace, core-0.2.0 compatibility, and release evidence."""
 from __future__ import annotations
 
 import json
@@ -24,6 +24,10 @@ SMO_CLASS = "https://w3id.org/smo#SemanticModel"
 SMO_VERSION = "https://w3id.org/smo/0.1.0"
 ESKA_CLASS = "https://w3id.org/eska#SemanticModel"
 EQUIVALENT_CLASS = "http://www.w3.org/2002/07/owl#equivalentClass"
+RELEASE_TAG = "eska-v0.2.0"
+RELEASE_COMMIT = "a6ce0b9e795d271dce8a2b7be93d44932e8448d4"
+RELEASE_URL = "https://github.com/GerhardBalz/executable-semantic-knowledge-architecture/releases/tag/eska-v0.2.0"
+RELEASE_RUN = "https://github.com/GerhardBalz/executable-semantic-knowledge-architecture/actions/runs/31675254397"
 SEMANTIC_MODEL_DEFINITION = (
     "A formal representation that gives knowledge explicit machine-interpretable meaning "
     "through concepts, relationships, constraints, axioms, or equivalent semantic structures."
@@ -40,7 +44,10 @@ def main() -> None:
     migration = json.loads(MIGRATION.read_text(encoding="utf-8"))
 
     require(contract["contractVersion"] == "1.2", "unexpected publication contract version")
-    require(contract["status"] == "core-0.2.0-release-pending", "unexpected publication state")
+    require(
+        contract["status"] == "core-0.2.0-release-published-route-pending",
+        "unexpected publication state",
+    )
 
     term = contract["termNamespace"]
     require(term["current"] == "https://w3id.org/eska#", "unexpected active ESKA term namespace")
@@ -48,21 +55,31 @@ def main() -> None:
     require(term["activationStatus"] == "active", "permanent namespace must be active")
 
     release = contract["releaseVersioning"]
-    require(release["currentPublishedRepositoryVersion"] == "0.1.0", "published repository release changed unexpectedly")
-    require(release["nextRepositoryVersion"] == "0.2.0", "next repository release must be 0.2.0")
-    require(release["nextRepositoryReleaseStatus"] == "pending", "0.2.0 release must remain pending in this stage")
+    require(release["previousPublishedRepositoryVersion"] == "0.1.0", "previous release changed unexpectedly")
+    require(release["currentPublishedRepositoryVersion"] == "0.2.0", "current repository release must be 0.2.0")
+    require(release["currentPublishedReleaseTag"] == RELEASE_TAG, "release tag evidence mismatch")
+    require(release["currentPublishedReleaseCommit"] == RELEASE_COMMIT, "release commit evidence mismatch")
+    require(release["currentPublishedReleaseUrl"] == RELEASE_URL, "release URL evidence mismatch")
+    require(release["currentPublishedReleaseWorkflowRun"] == RELEASE_RUN, "release workflow evidence mismatch")
 
     alignment = contract["compatibility"]["semanticModelAlignment"]
-    require(alignment == {
-        "canonicalClass": SMO_CLASS,
-        "compatibilityClass": ESKA_CLASS,
-        "relation": EQUIVALENT_CLASS,
-        "dependency": SMO_VERSION,
-        "compatibilityClassDeprecated": False,
-    }, "SemanticModel alignment contract mismatch")
+    require(
+        alignment
+        == {
+            "canonicalClass": SMO_CLASS,
+            "compatibilityClass": ESKA_CLASS,
+            "relation": EQUIVALENT_CLASS,
+            "dependency": SMO_VERSION,
+            "compatibilityClassDeprecated": False,
+        },
+        "SemanticModel alignment contract mismatch",
+    )
 
     modules = contract["modules"]
-    require([m["name"] for m in modules] == ["core", "capability", "service", "agent", "deployment"], "module identity/order changed")
+    require(
+        [m["name"] for m in modules] == ["core", "capability", "service", "agent", "deployment"],
+        "module identity/order changed",
+    )
     expected_versions = {
         "core": "0.2.0",
         "capability": "0.2.0",
@@ -105,18 +122,26 @@ def main() -> None:
     require("@prefix smo: <https://w3id.org/smo#>" in core, "core 0.2.0 must declare the SMO namespace")
     require(f"dcterms:requires <{SMO_VERSION}>" in core, "core must depend explicitly on immutable SMO v0.1.0")
     require("owl:imports" not in core, "SMO alignment must not introduce owl:imports by symmetry")
-    require("eska:SemanticModel\n    a owl:Class ;\n    owl:equivalentClass smo:SemanticModel ;" in core, "SemanticModel equivalentClass bridge missing")
+    require(
+        "eska:SemanticModel\n    a owl:Class ;\n    owl:equivalentClass smo:SemanticModel ;" in core,
+        "SemanticModel equivalentClass bridge missing",
+    )
     require("owl:deprecated" not in core, "eska:SemanticModel must not be deprecated in the first SMO bridge")
     require(f'skos:definition "{SEMANTIC_MODEL_DEFINITION}"@en' in core, "ESKA SemanticModel definition changed")
-    require("eska:usesSemanticModel\n    a owl:ObjectProperty ;\n    rdfs:label \"uses semantic model\"@en ;\n    rdfs:range eska:SemanticModel ." in core, "usesSemanticModel compatibility surface changed")
+    require(
+        "eska:usesSemanticModel\n    a owl:ObjectProperty ;\n    rdfs:label \"uses semantic model\"@en ;\n    rdfs:range eska:SemanticModel ."
+        in core,
+        "usesSemanticModel compatibility surface changed",
+    )
 
-    print("SUCCESS: ESKA core 0.2.0 and SMO SemanticModel compatibility are machine-verifiable.")
+    print("SUCCESS: ESKA core 0.2.0, SMO compatibility, and v0.2.0 release evidence are machine-verifiable.")
     print(f"Active term namespace:       {term['current']}")
     print("Core module version:         0.2.0")
     print("SemanticModel bridge:        owl:equivalentClass smo:SemanticModel")
     print(f"Immutable SMO dependency:    {SMO_VERSION}")
     print("ESKA SemanticModel deprecated: no")
-    print("Next repository release:     eska-v0.2.0 (pending)")
+    print(f"Published repository release: {RELEASE_TAG} @ {RELEASE_COMMIT}")
+    print("Core 0.2.0 W3ID route:       pending upstream activation")
 
 
 if __name__ == "__main__":
