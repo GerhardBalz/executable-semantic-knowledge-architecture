@@ -51,11 +51,13 @@ Capability      → invoke
 
 ## ESKA core
 
-The cross-mode core lives in [`model/eska-core.ttl`](model/eska-core.ttl), published as module version **0.1.0** under the permanent ESKA namespace:
+The cross-mode core lives in [`model/eska-core.ttl`](model/eska-core.ttl), currently published as module version **0.2.0** under the permanent ESKA namespace:
 
 ```text
 https://w3id.org/eska#
 ```
+
+Core 0.2.0 aligns the ESKA compatibility class `eska:SemanticModel` with the canonical [`smo:SemanticModel`](https://w3id.org/smo#SemanticModel) using `owl:equivalentClass` and declares a dependency on immutable SMO 0.1.0. The ESKA compatibility IRI remains available; semantic authority for the reusable modeling concept stays with SMO.
 
 ```text
 SemanticModel
@@ -85,7 +87,7 @@ ESKA reuses PROV-O rather than defining a parallel provenance model:
 - `Verification` specializes `prov:Activity`;
 - `Result` specializes `prov:Entity`.
 
-Seven materially different execution modes have been used as falsification tests, and none required a change to `model/eska-core.ttl`.
+Seven materially different execution modes have been used as falsification tests, and none required a mode-driven change to `model/eska-core.ttl`.
 
 ## Architectural extensions
 
@@ -296,17 +298,17 @@ Module
     https://w3id.org/eska/model/core
 
 Versioned module
-    https://w3id.org/eska/model/core/0.1.0
+    https://w3id.org/eska/model/core/0.2.0
 
 Repository release
-    eska-v0.1.0
+    eska-v0.2.0
 ```
 
-The first publication preserves the existing module evolution rather than flattening every module to the repository release version.
+Module versions remain independent of the repository release version. The current governed publication state is `core-0.2.0-w3id-active`: repository release [`eska-v0.2.0`](https://github.com/GerhardBalz/executable-semantic-knowledge-architecture/releases/tag/eska-v0.2.0) is published, the permanent W3ID namespace is active, and the immutable core 0.2.0 W3ID route is active and live-verified. The earlier `eska-v0.1.0` release remains an immutable historical baseline.
 
-`model/publication-contract.json`, `model/namespace-migration.json`, and the publication verifiers cover **5 modules and 53 declared ESKA terms**. During this migration PR, the live resolver still serves the predecessor representation from `main`; after merge, the same verifier requires the permanent W3ID representation from `main`.
+`model/publication-contract.json`, `model/namespace-migration.json`, and the publication verifiers govern five independently versioned modules and the stable ESKA term namespace.
 
-See [Namespace, Publication, and Versioning](docs/namespace-publication-versioning.md). The namespace migration is tracked in **#53**; the repository tag/release `eska-v0.1.0` remains the separate governed publication step.
+See [Namespace, Publication, and Versioning](docs/namespace-publication-versioning.md) for the current publication contract and verification model.
 
 ## Pizza as the reference domain
 
@@ -343,7 +345,7 @@ See [Pizza executable reference](examples/pizza/README.md).
 
 The repository now demonstrates:
 
-- seven executable-semantic modes over one unchanged cross-mode core;
+- seven executable-semantic modes over one stable cross-mode core architecture;
 - sixteen verified semantic Executions, including composite Workflow child steps;
 - twenty-three source-owned Pizza semantic distributions consumed from an immutable commit;
 - generalized multi-capability Knowledge Service semantics;
@@ -351,7 +353,8 @@ The repository now demonstrates:
 - blue/green Service deployments resolved separately from semantic discovery;
 - five distinct operational Agent invocation lineages;
 - immutable source/result lineage through PROV-O without a parallel ESKA provenance ontology;
-- an active permanent W3ID namespace with a machine-verifiable predecessor map for five modules and 53 declared ESKA terms.
+- an active permanent W3ID namespace and immutable core 0.2.0 version route;
+- explicit alignment of ESKA `SemanticModel` compatibility semantics with governed SMO 0.1.0.
 
 The architecture intentionally does **not** claim that Service, Agent, Deployment, mode-specific role refinements, or technology-specific execution concepts belong in core.
 
@@ -367,11 +370,12 @@ Completed foundations:
 - [x] Deployment binding separated from semantic Service contracts with blue/green evidence.
 - [x] Cross-cutting provenance/evidence/Result lineage verification across 16 semantic + 5 operational Executions.
 - [x] Namespace/publication/versioning strategy and machine-readable governance contract.
-- [x] W3ID resolver established and permanent ESKA IRIs migrated in #53.
+- [x] W3ID resolver established and permanent ESKA IRIs migrated.
+- [x] Immutable `eska-v0.1.0` repository release published and verified.
+- [x] Core aligned with governed `smo:SemanticModel` semantics as module version 0.2.0.
+- [x] Immutable `eska-v0.2.0` repository release and core 0.2.0 W3ID route published and verified.
 
-Next governed publication step:
-
-- [ ] Create and verify the immutable repository tag/release `eska-v0.1.0` after the namespace migration is merged.
+There are currently **no open ESKA issues**. New reusable terms or architectural expansion should begin only when independent evidence demonstrates a requirement and established standards are first shown insufficient.
 
 The project intentionally does **not** begin as a general software framework, LLM-agent platform, or large meta-ontology.
 
